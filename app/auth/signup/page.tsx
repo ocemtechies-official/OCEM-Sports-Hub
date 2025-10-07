@@ -7,7 +7,7 @@ export default function SignupPage() {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-          <CardDescription>Join Sports Week and track all the action</CardDescription>
+          <CardDescription>Join OCEM Sports Hub and track all the action</CardDescription>
         </CardHeader>
         <CardContent>
           <SignupForm />

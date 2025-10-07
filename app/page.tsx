@@ -52,7 +52,7 @@ export default async function HomePage() {
               <span className="text-sm font-medium">Live Now</span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance">Sports Week 2025</h1>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance">OCEM Sports Hub 2025</h1>
 
             <p className="text-xl md:text-2xl text-blue-100 mb-8 text-pretty max-w-2xl mx-auto">
               Experience the ultimate multi-sport tournament with live scores, interactive quizzes, and competitive

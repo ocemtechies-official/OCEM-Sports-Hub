@@ -83,7 +83,7 @@ export default async function AdminPage() {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-slate-900 mb-2">Admin Dashboard</h1>
-          <p className="text-lg text-slate-600">Manage Sports Week event</p>
+          <p className="text-lg text-slate-600">Manage OCEM Sports Hub event</p>
         </div>
 
         {/* Stats Overview */}
