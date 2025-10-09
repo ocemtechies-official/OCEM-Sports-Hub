@@ -8,6 +8,7 @@ import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
 import { Toaster } from "@/components/ui/toaster"
 import { NotificationProvider } from "@/components/notifications/notification-provider"
+import { AuthProvider } from "@/components/auth/auth-provider"
 import { Suspense } from "react"
 import "./globals.css"
 
@@ -30,14 +31,16 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable} ${inter.variable}`}>
       <body className="font-sans">
-        <NotificationProvider>
-          <Suspense fallback={null}>
-            <Navbar />
-            {children}
-            <Footer />
-            <Toaster />
-          </Suspense>
-        </NotificationProvider>
+        <AuthProvider>
+          <NotificationProvider>
+            <Suspense fallback={null}>
+              <Navbar />
+              {children}
+              <Footer />
+              <Toaster />
+            </Suspense>
+          </NotificationProvider>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>
