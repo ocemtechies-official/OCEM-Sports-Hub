@@ -25,18 +25,16 @@ export default async function AdminUsersPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">User Management</h1>
-          <p className="text-gray-600">Manage user roles and permissions</p>
-        </div>
-        
-        <AdminUserManagement 
-          users={users || []}
-          onUpdateUserRole={updateUserRole}
-        />
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900">User Management</h1>
+        <p className="text-slate-600 mt-1">Manage user roles and permissions</p>
       </div>
+      
+      <AdminUserManagement 
+        users={users || []}
+        onUpdateUserRole={updateUserRole}
+      />
     </div>
   )
 }

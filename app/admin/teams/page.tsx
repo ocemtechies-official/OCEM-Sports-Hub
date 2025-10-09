@@ -19,37 +19,28 @@ export default async function AdminTeamsPage() {
   const { data: teams } = await supabase.from("teams").select("*, players(count)").order("name")
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <main className="container mx-auto px-4 py-8">
-        <Button variant="ghost" asChild className="mb-6">
-          <Link href="/admin">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Admin
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Teams Management</h1>
+          <p className="text-slate-600 mt-1">Manage teams and players</p>
+        </div>
+          <Button asChild>
+          <Link href="/admin/teams/create">
+            <Plus className="mr-2 h-4 w-4" />
+            Create Team
           </Link>
         </Button>
+      </div>
 
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-slate-900 mb-2">Teams Management</h1>
-            <p className="text-lg text-slate-600">Manage teams and players</p>
-          </div>
-          <Button asChild>
-            <Link href="/admin/teams/create">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Team
-            </Link>
-          </Button>
-        </div>
-
-        <Card>
+      <Card>
           <CardHeader>
             <CardTitle>All Teams</CardTitle>
           </CardHeader>
           <CardContent>
-            <TeamManagementTable teams={teams || []} />
-          </CardContent>
-        </Card>
-      </main>
+          <TeamManagementTable teams={teams || []} />
+        </CardContent>
+      </Card>
     </div>
   )
 }
