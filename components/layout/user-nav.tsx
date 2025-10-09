@@ -12,7 +12,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { User, Settings, LogOut, Shield } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { showToast as toast } from "@/components/ui/toast"
 import { useAuth } from "@/components/auth/auth-provider"
 
 interface UserNavProps {
@@ -27,12 +27,11 @@ interface UserNavProps {
 
 export function UserNav({ profile }: UserNavProps) {
   const router = useRouter()
-  const { toast } = useToast()
   const { signOut } = useAuth()
 
   const handleSignOut = async () => {
     await signOut()
-    toast({
+    toast.success({
       title: "Signed out",
       description: "You have been signed out successfully.",
     })

@@ -10,7 +10,9 @@ import {
   Brain, 
   Crown, 
   BarChart3, 
-  X
+  X,
+  Home,
+  Award
 } from "lucide-react"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu } from "lucide-react"
@@ -19,7 +21,9 @@ export function MobileNav({ profile }: { profile: any }) {
   const [isOpen, setIsOpen] = useState(false)
 
   const navItems = [
-    { href: "/", label: "Fixtures", icon: Calendar },
+    { href: "/", label: "Home", icon: Home },
+    { href: "/fixtures", label: "Fixtures", icon: Calendar },
+    { href: "/tournaments", label: "Tournaments", icon: Award },
     { href: "/teams", label: "Teams", icon: Users },
     { href: "/leaderboard", label: "Leaderboard", icon: BarChart3 },
     { href: "/quiz", label: "Quiz", icon: Brain },
