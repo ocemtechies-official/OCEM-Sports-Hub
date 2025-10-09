@@ -47,30 +47,22 @@ export default async function AdminTournamentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <main className="container mx-auto px-4 py-8">
-        <Button variant="ghost" asChild className="mb-6">
-          <Link href="/admin">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Admin
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Tournament Management</h1>
+          <p className="text-slate-600 mt-1">Create and manage tournament brackets</p>
+        </div>
+          <Button asChild>
+          <Link href="/admin/tournaments/create">
+            <Plus className="mr-2 h-4 w-4" />
+            Create Tournament
           </Link>
         </Button>
+      </div>
 
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-slate-900 mb-2">Tournament Management</h1>
-            <p className="text-lg text-slate-600">Create and manage tournament brackets</p>
-          </div>
-          <Button asChild>
-            <Link href="/admin/tournaments/create">
-              <Plus className="mr-2 h-4 w-4" />
-              Create Tournament
-            </Link>
-          </Button>
-        </div>
-
-        {/* Tournaments List */}
-        <div className="grid gap-6">
+      {/* Tournaments List */}
+      <div className="grid gap-6">
           {tournaments && tournaments.length > 0 ? (
             tournaments.map((tournament) => (
               <Card key={tournament.id} className="overflow-hidden">
@@ -184,9 +176,8 @@ export default async function AdminTournamentsPage() {
                 </Button>
               </CardContent>
             </Card>
-          )}
-        </div>
-      </main>
+        )}
+      </div>
     </div>
   )
 }
