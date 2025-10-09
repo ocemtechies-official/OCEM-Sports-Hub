@@ -6,9 +6,10 @@ import { cn } from "@/lib/utils"
 
 interface SportFilterProps {
   sports: Array<{ id: string; name: string; icon: string | null }>
+  basePath?: string
 }
 
-export function SportFilter({ sports }: SportFilterProps) {
+export function SportFilter({ sports, basePath = "/" }: SportFilterProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const selectedSport = searchParams.get("sport")
@@ -20,7 +21,7 @@ export function SportFilter({ sports }: SportFilterProps) {
     } else {
       params.delete("sport")
     }
-    router.push(`/?${params.toString()}`)
+    router.push(`${basePath}?${params.toString()}`)
   }
 
   return (
