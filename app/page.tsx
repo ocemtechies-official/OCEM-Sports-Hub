@@ -3,7 +3,7 @@ import { getCurrentProfile } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import SportsCarousel from "@/components/ui/SportsCarousel"
+import SportsCarousel from "@/components/ui/sportscarousel"
 import { 
   Trophy, 
   Calendar, 
