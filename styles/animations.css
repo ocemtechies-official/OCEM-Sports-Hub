@@ -211,7 +211,7 @@
 
 /* Hero section enhancements with new color theme */
 .hero-gradient-animated {
-  background: linear-gradient(45deg, #4338CA, #7C3AED, #06B6D4, #F97316);
+  background: linear-gradient(45deg, #0f172a, #1e3a8a, #312e81, #581c87);
   background-size: 400% 400%;
   animation: gradient-shift 8s ease infinite;
 }
@@ -240,9 +240,9 @@
 
 /* Button animations with accent color */
 .btn-glow:hover {
-  box-shadow: 0 0 20px rgba(249, 115, 22, 0.6),
-              0 0 40px rgba(249, 115, 22, 0.4),
-              0 0 60px rgba(249, 115, 22, 0.2);
+  box-shadow: 0 0 20px rgba(99, 102, 241, 0.6),
+              0 0 40px rgba(99, 102, 241, 0.4),
+              0 0 60px rgba(99, 102, 241, 0.2);
 }
 
 /* Text animations with highlight color */

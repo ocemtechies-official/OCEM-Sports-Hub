@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -160,7 +162,7 @@ const SportsCarousel = () => {
   const currentSport = sportsData?.[currentIndex];
 
   return (
-    <section className="py-16 bg-background">
+    <section className="py-16 bg-blue-50/30">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <motion.div
@@ -180,7 +182,7 @@ const SportsCarousel = () => {
 
         {/* Main Carousel */}
         <div className="relative max-w-6xl mx-auto">
-          <div className="relative overflow-hidden rounded-3xl sports-shadow-card">
+          <div className="relative overflow-hidden rounded-3xl shadow-2xl">
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentIndex}
@@ -288,15 +290,15 @@ const SportsCarousel = () => {
             {/* Navigation Arrows */}
             <button
               onClick={prevSlide}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 sports-transition"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all"
             >
-              <Icon name="ChevronLeft" size={24} />
+              <ChevronLeft size={24} />
             </button>
             <button
               onClick={nextSlide}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 sports-transition"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-all"
             >
-              <Icon name="ChevronRight" size={24} />
+              <ChevronRight size={24} />
             </button>
           </div>
 
@@ -318,9 +320,9 @@ const SportsCarousel = () => {
           <div className="flex justify-center mt-4">
             <button
               onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-              className="flex items-center space-x-2 px-4 py-2 bg-card rounded-full border border-border text-sm text-muted-foreground hover:text-foreground sports-transition"
+              className="flex items-center space-x-2 px-4 py-2 bg-card rounded-full border border-border text-sm text-muted-foreground hover:text-foreground transition-all"
             >
-              <Icon name={isAutoPlaying ? 'Pause' : 'Play'} size={16} />
+              {isAutoPlaying ? <Pause size={16} /> : <Play size={16} />}
               <span>{isAutoPlaying ? 'Pause' : 'Play'} Auto-scroll</span>
             </button>
           </div>
@@ -338,13 +340,13 @@ const SportsCarousel = () => {
             <button
               key={sport?.id}
               onClick={() => goToSlide(index)}
-              className={`p-4 rounded-xl border sports-transition ${
+              className={`p-4 rounded-xl border transition-all ${
                 index === currentIndex
-                  ? 'bg-primary text-white border-primary sports-shadow-primary'
+                  ? 'bg-primary text-white border-primary shadow-lg'
                   : 'bg-card text-muted-foreground border-border hover:border-primary/50 hover:text-foreground'
               }`}
             >
-              <Icon name={sport?.icon} size={24} className="mx-auto mb-2" />
+              <sport.icon size={24} className="mx-auto mb-2" />
               <div className="text-sm font-medium">{sport?.name}</div>
             </button>
           ))}
