@@ -1,18 +1,21 @@
+import { Suspense } from "react"
 import { LoginForm } from "@/components/auth/login-form"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { AuthSkeleton } from "@/components/auth/auth-skeleton"
+import { AuthLayout } from "@/components/auth/auth-layout"
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
-          <CardDescription>Sign in to access OCEM Sports Hub dashboard</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <LoginForm />
-        </CardContent>
-      </Card>
-    </div>
+    <Suspense fallback={<AuthSkeleton />}>
+      <AuthLayout
+        title="Welcome Back"
+        description="Sign in to access your OCEM Sports Hub dashboard"
+        gradientFrom="from-blue-600"
+        gradientTo="to-cyan-600"
+        darkGradientFrom="from-blue-400"
+        darkGradientTo="to-cyan-400"
+      >
+        <LoginForm />
+      </AuthLayout>
+    </Suspense>
   )
 }
