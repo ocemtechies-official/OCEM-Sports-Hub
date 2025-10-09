@@ -43,7 +43,7 @@ export default async function TeamDetailPage({ params }: { params: { id: string 
               </div>
               <div>
                 <h1 className="text-4xl font-bold text-slate-900 mb-2">{team.name}</h1>
-                <p className="text-slate-600">Competing in Sports Week 2025</p>
+                <p className="text-slate-600">Competing in OCEM Sports Hub 2025</p>
               </div>
             </div>
           </CardContent>

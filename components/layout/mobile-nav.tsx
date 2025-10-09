@@ -34,7 +34,7 @@ export function MobileNav({ profile }: { profile: any }) {
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="right" className="w-64 p-0">
+        <SheetContent side="right" className="w-64 p-0 bg-white">
           <div className="flex flex-col h-full">
             {/* Mobile Header */}
             <div className="flex items-center justify-between p-4 border-b">
@@ -47,7 +47,7 @@ export function MobileNav({ profile }: { profile: any }) {
                   <Trophy className="h-5 w-5 text-white" />
                 </div>
                 <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                  Sports Week
+                  OCEM Sports Hub
                 </span>
               </Link>
               <Button 
@@ -81,7 +81,7 @@ export function MobileNav({ profile }: { profile: any }) {
             {!profile && (
               <div className="p-4 border-t">
                 <div className="flex flex-col gap-2">
-                  <Button asChild className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800">
+                  <Button asChild className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
                     <Link href="/auth/signup" onClick={() => setIsOpen(false)}>
                       Sign Up
                     </Link>

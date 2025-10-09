@@ -33,17 +33,17 @@ export async function Navbar() {
               <Trophy className="h-6 w-6 text-white" />
             </div>
             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              Sports Week
+              OCEM Sports Hub
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-1">
+          {/* Desktop Navigation - Moved to right side */}
+          <div className="hidden md:flex items-center gap-1 ml-auto mr-6">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
               >
                 <item.icon className="h-4 w-4" />
                 {item.label}
@@ -51,7 +51,7 @@ export async function Navbar() {
             ))}
           </div>
 
-          {/* User Navigation */}
+          {/* User Navigation - Positioned on the far right */}
           <div className="flex items-center gap-2">
             {profile ? (
               <UserNav profile={profile} />
@@ -60,7 +60,7 @@ export async function Navbar() {
                 <Button variant="ghost" asChild>
                   <Link href="/auth/login">Sign In</Link>
                 </Button>
-                <Button asChild>
+                <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700">
                   <Link href="/auth/signup">Sign Up</Link>
                 </Button>
               </div>

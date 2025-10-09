@@ -7,33 +7,32 @@ export function Footer() {
   return (
     <footer className="bg-slate-900 text-slate-300 border-t border-slate-800">
       <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-2 rounded-lg">
-                <Trophy className="h-6 w-6 text-white" />
+          <div className="lg:col-span-1">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-3 rounded-xl">
+                <Trophy className="h-8 w-8 text-white" />
               </div>
-              <span className="text-xl font-bold text-white">Sports Week 2025</span>
+              <span className="text-2xl font-bold text-white">OCEM Sports Hub</span>
             </div>
-            <p className="text-slate-400 max-w-md mb-4">
-              The ultimate multi-sport tournament platform featuring live scores, interactive quizzes, and competitive
-              chess matches. Celebrating excellence in sports and academics.
+            <p className="text-slate-400 mb-6">
+              The ultimate multi-sport tournament platform featuring live scores, interactive quizzes, and competitive chess matches.
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-2 rounded-full transition-all">
+            <div className="flex gap-3">
+              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-3 rounded-full transition-all">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-2 rounded-full transition-all">
+              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-3 rounded-full transition-all">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-2 rounded-full transition-all">
+              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-3 rounded-full transition-all">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-2 rounded-full transition-all">
+              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-3 rounded-full transition-all">
                 <Youtube className="h-5 w-5" />
               </a>
-              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-2 rounded-full transition-all">
+              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-3 rounded-full transition-all">
                 <Github className="h-5 w-5" />
               </a>
             </div>
@@ -41,35 +40,30 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white font-semibold mb-4 text-lg">Quick Links</h3>
-            <ul className="space-y-3">
+            <h3 className="text-white font-semibold mb-6 text-lg">Quick Links</h3>
+            <ul className="space-y-4">
               <li>
-                <Link href="/teams" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                <Link href="/teams" className="hover:text-blue-400 transition-colors">
                   Teams
                 </Link>
               </li>
               <li>
-                <Link href="/leaderboard" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                <Link href="/leaderboard" className="hover:text-blue-400 transition-colors">
                   Leaderboard
                 </Link>
               </li>
               <li>
-                <Link href="/quiz" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                <Link href="/quiz" className="hover:text-blue-400 transition-colors">
                   Quizzes
                 </Link>
               </li>
               <li>
-                <Link href="/chess" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                <Link href="/chess" className="hover:text-blue-400 transition-colors">
                   Chess
                 </Link>
               </li>
               <li>
-                <Link href="/fixtures" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                <Link href="/fixtures" className="hover:text-blue-400 transition-colors">
                   Fixtures
                 </Link>
               </li>
@@ -78,85 +72,60 @@ export function Footer() {
 
           {/* Sports */}
           <div>
-            <h3 className="text-white font-semibold mb-4 text-lg">Sports</h3>
-            <ul className="space-y-3">
+            <h3 className="text-white font-semibold mb-6 text-lg">Sports</h3>
+            <ul className="space-y-4">
               <li>
-                <Link href="/teams?sport=cricket" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                <Link href="/teams?sport=cricket" className="hover:text-blue-400 transition-colors">
                   Cricket
                 </Link>
               </li>
               <li>
-                <Link href="/teams?sport=football" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                <Link href="/teams?sport=football" className="hover:text-blue-400 transition-colors">
                   Football
                 </Link>
               </li>
               <li>
-                <Link href="/teams?sport=basketball" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                <Link href="/teams?sport=basketball" className="hover:text-blue-400 transition-colors">
                   Basketball
                 </Link>
               </li>
               <li>
-                <Link href="/teams?sport=badminton" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                <Link href="/teams?sport=badminton" className="hover:text-blue-400 transition-colors">
                   Badminton
                 </Link>
               </li>
               <li>
-                <Link href="/teams?sport=table-tennis" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                <Link href="/teams?sport=table-tennis" className="hover:text-blue-400 transition-colors">
                   Table Tennis
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Admin */}
+          {/* Contact Info */}
           <div>
-            <h3 className="text-white font-semibold mb-4 text-lg">Admin</h3>
-            <ul className="space-y-3">
-              <li>
-                <Link href="/admin" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                  Dashboard
-                </Link>
+            <h3 className="text-white font-semibold mb-6 text-lg">Contact Us</h3>
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3">
+                <Mail className="h-5 w-5 text-blue-400 mt-0.5" />
+                <span>support@ocemsportshub.com</span>
               </li>
-              <li>
-                <Link href="/admin/fixtures" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                  Manage Fixtures
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin/teams" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                  Manage Teams
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin/quizzes" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                  Manage Quizzes
-                </Link>
-              </li>
-              <li>
-                <Link href="/admin/users" className="hover:text-blue-400 transition-colors flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                  Manage Users
-                </Link>
+              <li className="flex items-start gap-3">
+                <div className="h-5 w-5 text-blue-400 mt-0.5 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                </div>
+                <span>OCEM Sports Complex<br />Main Campus<br />City, State 12345</span>
               </li>
             </ul>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex flex-col sm:flex-row items-center gap-4">
-            <p className="text-sm text-slate-400">© {currentYear} Sports Week. All rights reserved.</p>
+        <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-center gap-6">
+            <p className="text-sm text-slate-400">© {currentYear} OCEM Sports Hub. All rights reserved.</p>
             <div className="hidden sm:block w-1 h-1 bg-slate-600 rounded-full"></div>
-            <div className="flex gap-4 text-sm">
+            <div className="flex gap-6 text-sm">
               <Link href="#" className="hover:text-blue-400 transition-colors">
                 Privacy Policy
               </Link>

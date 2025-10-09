@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { Trophy, Calendar, Brain, Crown, ArrowRight, Zap } from "lucide-react"
 import Link from "next/link"
+import { TeamCard } from "@/components/teams/team-card"
 
 export default async function HomePage() {
   const supabase = await getSupabaseServerClient()
@@ -32,6 +33,13 @@ export default async function HomePage() {
     .eq("status", "live")
     .order("scheduled_at", { ascending: true })
 
+  // Fetch a small set of teams to display on the homepage
+  const { data: featuredTeams } = await supabase
+    .from("teams")
+    .select("*, players(count)")
+    .order("name")
+    .limit(6)
+
   return (
     <div className="min-h-screen">
       <section className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 text-white overflow-hidden">
@@ -52,7 +60,7 @@ export default async function HomePage() {
               <span className="text-sm font-medium">Live Now</span>
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance">Sports Week 2025</h1>
+            <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance">OCEM Sports Hub 2025</h1>
 
             <p className="text-xl md:text-2xl text-blue-100 mb-8 text-pretty max-w-2xl mx-auto">
               Experience the ultimate multi-sport tournament with live scores, interactive quizzes, and competitive
@@ -175,6 +183,25 @@ export default async function HomePage() {
           </Suspense>
         </div>
       </section>
+
+      {/* Featured Teams */}
+      {featuredTeams && featuredTeams.length > 0 && (
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-3xl font-bold text-slate-900">Featured Teams</h2>
+              <Button variant="outline" asChild>
+                <Link href="/teams">View All Teams</Link>
+              </Button>
+            </div>
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {featuredTeams.map((team) => (
+                <TeamCard key={team.id} team={team} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {liveFixtures && liveFixtures.length > 0 && (
         <section className="py-16 bg-white">
