@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { CheckCircle, XCircle, AlertCircle, Loader2, Database, Shield, Globe, Settings } from "lucide-react"
+import { NotificationTest } from "./notification-test"
 
 export default function ComprehensiveTestPage() {
   const { 
@@ -291,6 +292,18 @@ export default function ComprehensiveTestPage() {
         )}
               </CardContent>
             </Card>
+
+            {/* Toast Test */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Notification System Test</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <NotificationTest />
+              </CardContent>
+            </Card>
+
+
           </TabsContent>
 
           {/* Authentication Tab */}
