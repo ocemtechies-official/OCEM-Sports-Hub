@@ -24,10 +24,22 @@ import {
   CheckCircle
 } from "lucide-react"
 import Link from "next/link"
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth";
+import { LiveFixturesRealtime } from "@/components/fixtures/live-fixtures-realtime";
+import { UpcomingFixtures } from "@/components/fixtures/upcoming-fixtures";
+import { StatsOverview } from "@/components/dashboard/stats-overview";
+import { CountDown } from "@/components/Home/CountDown";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Trophy, Calendar, Brain, Crown, ArrowRight, Zap } from "lucide-react";
+import Link from "next/link";
+import { TeamCard } from "@/components/teams/team-card"
 
 export default async function HomePage() {
-  const supabase = await getSupabaseServerClient()
-  const profile = await getCurrentProfile()
+  const supabase = await getSupabaseServerClient();
+  const profile = await getCurrentProfile();
 
   // Fetch data for stats
   const { data: liveFixtures } = await supabase
@@ -228,6 +240,61 @@ export default async function HomePage() {
                     </div>
                   </div>
                 )}
+            <p className="text-xl md:text-2xl text-blue-100 mb-8 text-pretty max-w-2xl mx-auto">
+              Experience the ultimate multi-sport tournament with live scores,
+              interactive quizzes, and competitive chess matches
+            </p>
+
+            <div className="flex flex-wrap gap-4 justify-center mb-12">
+              <Button
+                size="lg"
+                asChild
+                className="bg-white text-blue-600 hover:bg-blue-50"
+              >
+                <Link href="/leaderboard">
+                  <Trophy className="mr-2 h-5 w-5" />
+                  View Leaderboard
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                asChild
+                className="border-white text-white hover:bg-white/10 bg-transparent"
+              >
+                <Link href="/quiz">
+                  <Brain className="mr-2 h-5 w-5" />
+                  Take Quiz
+                </Link>
+              </Button>
+            </div>
+
+            {/* Countdown to the start of the event */}
+            <CountDown />
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div className="text-3xl font-bold mb-1">
+                  {sports?.length || 0}
+                </div>
+                <div className="text-sm text-blue-100">Sports</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div className="text-3xl font-bold mb-1">{totalTeams || 0}</div>
+                <div className="text-sm text-blue-100">Teams</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div className="text-3xl font-bold mb-1">
+                  {totalFixtures || 0}
+                </div>
+                <div className="text-sm text-blue-100">Fixtures</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                <div className="text-3xl font-bold mb-1">
+                  {liveFixtures?.length || 0}
+                </div>
+                <div className="text-sm text-blue-100">Live Now</div>
               </div>
             </div>
           </div>
@@ -366,6 +433,19 @@ export default async function HomePage() {
               </CardContent>
             </Card>
           </div>
+        {/* Wave Divider */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg
+            viewBox="0 0 1440 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full"
+          >
+            <path
+              d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
+              fill="white"
+            />
+          </svg>
         </div>
       </section>
 
