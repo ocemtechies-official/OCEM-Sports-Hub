@@ -11,9 +11,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { User, Settings, LogOut, Shield } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/components/auth/auth-provider"
 
 interface UserNavProps {
   profile: {
@@ -28,16 +28,15 @@ interface UserNavProps {
 export function UserNav({ profile }: UserNavProps) {
   const router = useRouter()
   const { toast } = useToast()
+  const { signOut } = useAuth()
 
   const handleSignOut = async () => {
-    const supabase = getSupabaseBrowserClient()
-    await supabase.auth.signOut()
+    await signOut()
     toast({
       title: "Signed out",
       description: "You have been signed out successfully.",
     })
     router.push("/")
-    router.refresh()
   }
 
   const initials =

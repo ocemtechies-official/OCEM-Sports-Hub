@@ -6,11 +6,11 @@ import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
-import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
+import { useAuth } from "@/components/auth/auth-provider"
 
 const signupSchema = z
   .object({
@@ -29,6 +29,7 @@ type SignupFormData = z.infer<typeof signupSchema>
 export function SignupForm() {
   const router = useRouter()
   const { toast } = useToast()
+  const { signUp } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
 
   const {
@@ -41,55 +42,59 @@ export function SignupForm() {
 
   const onSubmit = async (data: SignupFormData) => {
     setIsLoading(true)
-    const supabase = getSupabaseBrowserClient()
+    console.log("Signup form submitted with data:", data)
+    
+    try {
+      const { error } = await signUp(data.email, data.password, data.fullName)
 
-    const { error } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
-        data: {
-          full_name: data.fullName,
-          role: "viewer",
-        },
-        emailRedirectTo: process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || window.location.origin,
-      },
-    })
+      if (error) {
+        console.error("Signup error:", error)
+        setIsLoading(false)
+        return
+      }
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      })
+      router.push("/auth/login")
+    } catch (error) {
+      console.error("Signup failed:", error)
       setIsLoading(false)
-      return
     }
-
-    toast({
-      title: "Success",
-      description: "Account created! Please check your email to verify.",
-    })
-
-    router.push("/auth/login")
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="fullName">Full Name</Label>
-        <Input id="fullName" type="text" placeholder="John Doe" {...register("fullName")} disabled={isLoading} />
+        <Input 
+          id="fullName" 
+          type="text" 
+          placeholder="John Doe" 
+          {...register("fullName")} 
+          disabled={isLoading} 
+        />
         {errors.fullName && <p className="text-sm text-red-500">{errors.fullName.message}</p>}
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" type="email" placeholder="you@example.com" {...register("email")} disabled={isLoading} />
+        <Input 
+          id="email" 
+          type="email" 
+          placeholder="you@example.com" 
+          {...register("email")} 
+          disabled={isLoading} 
+        />
         {errors.email && <p className="text-sm text-red-500">{errors.email.message}</p>}
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
-        <Input id="password" type="password" placeholder="••••••••" {...register("password")} disabled={isLoading} />
+        <Input 
+          id="password" 
+          type="password" 
+          placeholder="••••••••" 
+          {...register("password")} 
+          disabled={isLoading} 
+        />
         {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
       </div>
 
