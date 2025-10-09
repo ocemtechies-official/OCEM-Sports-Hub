@@ -8,7 +8,9 @@ import {
   Users, 
   Brain, 
   Crown, 
-  BarChart3
+  BarChart3,
+  Home,
+  Award
 } from "lucide-react"
 import { MobileNav } from "@/components/layout/mobile-nav"
 
@@ -16,7 +18,9 @@ export async function Navbar() {
   const profile = await getCurrentProfile()
 
   const navItems = [
-    { href: "/", label: "Fixtures", icon: Calendar },
+    { href: "/", label: "Home", icon: Home },
+    { href: "/fixtures", label: "Fixtures", icon: Calendar },
+    { href: "/tournaments", label: "Tournaments", icon: Award },
     { href: "/register", label: "Register", icon: Users },
     { href: "/teams", label: "Teams", icon: Users },
     { href: "/leaderboard", label: "Leaderboard", icon: BarChart3 },

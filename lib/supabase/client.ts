@@ -10,8 +10,6 @@ export function getSupabaseBrowserClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  console.log("Initializing Supabase client with:", { supabaseUrl, supabaseAnonKey })
-
   if (!supabaseUrl) {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL environment variable")
   }
@@ -30,7 +28,6 @@ export function getSupabaseBrowserClient() {
 
   try {
     client = createBrowserClient(supabaseUrl, supabaseAnonKey)
-    console.log("Supabase client initialized successfully")
     return client
   } catch (error) {
     console.error("Failed to initialize Supabase client:", error)

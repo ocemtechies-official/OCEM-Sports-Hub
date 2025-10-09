@@ -1,18 +1,21 @@
+import { Suspense } from "react"
 import { SignupForm } from "@/components/auth/signup-form"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { SignupSkeleton } from "@/components/auth/signup-skeleton"
+import { AuthLayout } from "@/components/auth/auth-layout"
 
 export default function SignupPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Create Account</CardTitle>
-          <CardDescription>Join OCEM Sports Hub and track all the action</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SignupForm />
-        </CardContent>
-      </Card>
-    </div>
+    <Suspense fallback={<SignupSkeleton />}>
+      <AuthLayout
+        title="Join the Hub"
+        description="Create your account and become part of the OCEM Sports community"
+        gradientFrom="from-blue-600"
+        gradientTo="to-cyan-600"
+        darkGradientFrom="from-blue-400"
+        darkGradientTo="to-cyan-400"
+      >
+        <SignupForm />
+      </AuthLayout>
+    </Suspense>
   )
 }
