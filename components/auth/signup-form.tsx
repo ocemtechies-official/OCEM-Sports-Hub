@@ -393,13 +393,7 @@ export function SignupForm() {
       <div className="text-center animate-fade-in-up delay-900">
         <Link 
           href="/auth/login" 
-          className={cn(
-            "text-sm font-medium text-blue-600 hover:text-blue-500",
-            "dark:text-blue-400 dark:hover:text-blue-300",
-            "transition-all duration-300 hover:underline underline-offset-4",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-sm px-1 py-0.5",
-            "hover:scale-105"
-          )}
+          className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
         >
           Sign in to your account
         </Link>

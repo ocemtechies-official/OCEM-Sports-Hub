@@ -23,6 +23,11 @@ export function ResetPasswordForm() {
   const [isCheckingSession, setIsCheckingSession] = useState(true)
   const supabase = getSupabaseBrowserClient()
 
+  // Log when isLoading changes
+  useEffect(() => {
+    console.log("isLoading state changed to:", isLoading)
+  }, [isLoading])
+
   const {
     register,
     handleSubmit,
@@ -66,6 +71,7 @@ export function ResetPasswordForm() {
       return
     }
 
+    console.log("Setting isLoading to true")
     setIsLoading(true)
     
     try {
@@ -85,6 +91,7 @@ export function ResetPasswordForm() {
       setIsSuccess(true)
       notifications.showSuccess("Password updated successfully!")
       
+      // Don't set loading to false here, let success state handle UI
       // Redirect to login after success
       setTimeout(() => {
         router.push("/auth/login")
@@ -133,8 +140,14 @@ export function ResetPasswordForm() {
         <div className="space-y-3">
           <Link href="/auth/forgot-password">
             <LoadingButton
-              className="w-full"
-              variant="default"
+              className={cn(
+                "w-full h-12 font-medium rounded-xl",
+                "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800",
+                "dark:from-blue-500 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-700",
+                "text-white border-0",
+                "transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]",
+                "shadow-lg hover:shadow-xl hover:shadow-blue-500/30"
+              )}
             >
               Request New Reset Link
             </LoadingButton>
@@ -158,8 +171,8 @@ export function ResetPasswordForm() {
   if (isSuccess) {
     return (
       <div className="text-center space-y-6">
-        <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-          <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+        <div className="mx-auto w-16 h-16 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
+          <CheckCircle className="h-8 w-8 text-blue-600 dark:text-blue-400" />
         </div>
         
         <div className="space-y-2">
@@ -174,7 +187,13 @@ export function ResetPasswordForm() {
         <LoadingButton
           loading={true}
           loadingText="Redirecting to login"
-          className="w-full"
+          className={cn(
+            "w-full h-12 font-medium rounded-xl",
+            "bg-gradient-to-r from-blue-600 to-blue-700",
+            "dark:from-blue-500 dark:to-blue-600",
+            "text-white border-0",
+            "shadow-lg"
+          )}
         >
           Redirecting...
         </LoadingButton>
@@ -202,29 +221,28 @@ export function ResetPasswordForm() {
           >
             New Password
           </Label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-              <Lock className="h-4 w-4 text-gray-400" />
-            </div>
-            <PasswordInput
-              id="password"
-              placeholder="Enter your new password"
-              showStrengthIndicator={true}
-              showGenerateButton={true}
-              className={cn(
-                "pl-10 transition-all duration-200",
-                "focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                "hover:border-gray-400 dark:hover:border-gray-500",
-                errors.password && "border-red-500 focus:ring-red-500 focus:border-red-500"
-              )}
-              disabled={isLoading}
-              value={passwordValue || ""}
-              onPasswordGenerated={(newPassword) => {
-                setValue("password", newPassword)
-              }}
-              {...register("password")}
-            />
-          </div>
+          <PasswordInput
+            id="password"
+            placeholder="Enter your new password"
+            showStrengthIndicator={true}
+            showGenerateButton={true}
+            fillConfirmPassword={true}
+            confirmPasswordSetter={(value) => setValue("confirmPassword", value)}
+            className={cn(
+              "transition-all duration-200",
+              "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500",
+              "hover:border-gray-400 dark:hover:border-gray-500",
+              errors.password && "border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500"
+            )}
+            disabled={isLoading}
+            value={passwordValue || ""}
+            onPasswordGenerated={(newPassword) => {
+              setValue("password", newPassword)
+              // Also set the confirm password when a new password is generated
+              setValue("confirmPassword", newPassword)
+            }}
+            {...register("password")}
+          />
           {errors.password && (
             <div className="flex items-center space-x-1 text-sm text-red-600 animate-in slide-in-from-left-1">
               <AlertCircle className="h-3 w-3" />
@@ -241,23 +259,19 @@ export function ResetPasswordForm() {
           >
             Confirm New Password
           </Label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Lock className="h-4 w-4 text-gray-400" />
-            </div>
-            <PasswordInput
-              id="confirmPassword"
-              placeholder="Confirm your new password"
-              className={cn(
-                "pl-10 transition-all duration-200",
-                "focus:ring-2 focus:ring-blue-500 focus:border-blue-500",
-                "hover:border-gray-400 dark:hover:border-gray-500",
-                errors.confirmPassword && "border-red-500 focus:ring-red-500 focus:border-red-500"
-              )}
-              disabled={isLoading}
-              {...register("confirmPassword")}
-            />
-          </div>
+          <PasswordInput
+            id="confirmPassword"
+            placeholder="Confirm your new password"
+            className={cn(
+              "transition-all duration-200",
+              "focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500",
+              "hover:border-gray-400 dark:hover:border-gray-500",
+              errors.confirmPassword && "border-red-500 focus-visible:ring-red-500 focus-visible:border-red-500"
+            )}
+            disabled={isLoading}
+            value={watch("confirmPassword") || ""}
+            {...register("confirmPassword")}
+          />
           {errors.confirmPassword && (
             <div className="flex items-center space-x-1 text-sm text-red-600 animate-in slide-in-from-left-1">
               <AlertCircle className="h-3 w-3" />
@@ -270,16 +284,18 @@ export function ResetPasswordForm() {
         <LoadingButton
           type="submit"
           loading={isLoading}
-          loadingText="Updating password"
+          loadingText="Updating password..."
           className={cn(
-            "w-full h-11 font-medium",
-            "bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800",
-            "dark:from-green-500 dark:to-green-600 dark:hover:from-green-600 dark:hover:to-green-700",
-            "transform transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]",
-            "shadow-lg hover:shadow-xl",
+            "w-full h-12 font-medium rounded-xl",
+            "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800",
+            "dark:from-blue-500 dark:to-blue-600 dark:hover:from-blue-600 dark:hover:to-blue-700",
+            "text-white border-0",
+            "transform transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]",
+            "shadow-lg hover:shadow-xl hover:shadow-blue-500/30",
             "disabled:transform-none disabled:hover:scale-100"
           )}
           icon={<Key className="h-4 w-4" />}
+          disabled={isLoading}
         >
           Update Password
         </LoadingButton>
@@ -289,12 +305,7 @@ export function ResetPasswordForm() {
       <div className="text-center">
         <Link 
           href="/auth/login" 
-          className={cn(
-            "text-sm font-medium text-gray-600 hover:text-gray-900",
-            "dark:text-gray-400 dark:hover:text-gray-100",
-            "transition-colors duration-200 hover:underline underline-offset-4",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-sm px-1 py-0.5"
-          )}
+          className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors duration-200"
         >
           Back to Sign In
         </Link>

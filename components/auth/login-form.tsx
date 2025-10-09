@@ -151,7 +151,7 @@ export function LoginForm() {
             </Label>
             <Link 
               href="/auth/forgot-password" 
-              className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-all duration-300 hover:underline underline-offset-4 hover:scale-105"
+              className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
             >
               Forgot password?
             </Link>
@@ -207,7 +207,6 @@ export function LoginForm() {
             "disabled:transform-none disabled:hover:scale-100",
             "animate-fade-in-up delay-400"
           )}
-          icon={<Mail className="h-4 w-4" />}
         >
           Sign In
         </LoadingButton>
@@ -281,13 +280,7 @@ export function LoginForm() {
         </span>
         <Link 
           href="/auth/signup" 
-          className={cn(
-            "text-sm font-medium text-blue-600 hover:text-blue-500",
-            "dark:text-blue-400 dark:hover:text-blue-300",
-            "transition-all duration-300 hover:underline underline-offset-4",
-            "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-sm px-1 py-0.5",
-            "hover:scale-105"
-          )}
+          className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors duration-200"
         >
           Create an account
         </Link>
