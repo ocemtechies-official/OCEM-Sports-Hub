@@ -7,8 +7,6 @@ export async function getSupabaseServerClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-  console.log("Initializing Supabase server client with:", { supabaseUrl, supabaseAnonKey })
-
   if (!supabaseUrl) {
     throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL environment variable")
   }
@@ -43,7 +41,6 @@ export async function getSupabaseServerClient() {
       },
     })
     
-    console.log("Supabase server client initialized successfully")
     return client
   } catch (error) {
     console.error("Failed to initialize Supabase server client:", error)
