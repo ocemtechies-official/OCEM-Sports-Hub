@@ -28,7 +28,7 @@ const SportsCarousel = () => {
       id: 'football',
       name: 'Football',
       icon: Circle,
-      image: 'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&h=400&fit=crop&crop=center',
+      image: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=600&h=400&fit=crop&crop=center',
       description: 'Experience the thrill of competitive football with live match tracking and real-time score updates.',
       stats: {
         teams: 12,
@@ -40,7 +40,7 @@ const SportsCarousel = () => {
         { team1: 'Eagles FC', team2: 'Hawks United', time: '15:30', venue: 'Main Ground' },
         { team1: 'Lions XI', team2: 'Tigers CC', time: '17:00', venue: 'Secondary Ground' }
       ],
-      color: 'bg-green-600'
+      color: 'bg-gradient-to-br from-green-600 to-emerald-700'
     },
     {
       id: 'cricket',
@@ -58,7 +58,7 @@ const SportsCarousel = () => {
         { team1: 'Sharks XI', team2: 'Wolves CC', time: '14:00', venue: 'Cricket Ground' },
         { team1: 'Panthers', team2: 'Raptors', time: '16:30', venue: 'Practice Ground' }
       ],
-      color: 'bg-blue-600'
+      color: 'bg-gradient-to-br from-blue-600 to-indigo-700'
     },
     {
       id: 'basketball',
@@ -76,13 +76,13 @@ const SportsCarousel = () => {
         { team1: 'Thunder', team2: 'Lightning', time: '18:00', venue: 'Indoor Court A' },
         { team1: 'Storm', team2: 'Cyclone', time: '19:30', venue: 'Indoor Court B' }
       ],
-      color: 'bg-orange-600'
+      color: 'bg-gradient-to-br from-orange-600 to-amber-700'
     },
     {
       id: 'badminton',
       name: 'Badminton',
       icon: Zap,
-      image: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=600&h=400&fit=crop&crop=center',
+      image: 'https://images.unsplash.com/photo-1603390315034-0c650404a0d4?w=600&h=400&fit=crop&crop=center',
       description: 'Precision and agility in badminton tournaments with set-by-set tracking and match highlights.',
       stats: {
         teams: 16,
@@ -94,7 +94,7 @@ const SportsCarousel = () => {
         { team1: 'Smashers', team2: 'Shuttlers', time: '16:00', venue: 'Badminton Hall 1' },
         { team1: 'Aces', team2: 'Rackets', time: '17:30', venue: 'Badminton Hall 2' }
       ],
-      color: 'bg-purple-600'
+      color: 'bg-gradient-to-br from-purple-600 to-fuchsia-700'
     },
     {
       id: 'chess',
@@ -112,7 +112,7 @@ const SportsCarousel = () => {
         { team1: 'Knights', team2: 'Bishops', time: '14:30', venue: 'Chess Arena' },
         { team1: 'Rooks', team2: 'Pawns', time: '16:00', venue: 'Strategy Room' }
       ],
-      color: 'bg-slate-600'
+      color: 'bg-gradient-to-br from-slate-600 to-gray-700'
     },
     {
       id: 'quiz',
@@ -130,7 +130,7 @@ const SportsCarousel = () => {
         { team1: 'Brainiacs', team2: 'Scholars', time: '15:00', venue: 'Auditorium' },
         { team1: 'Geniuses', team2: 'Masterminds', time: '17:00', venue: 'Conference Hall' }
       ],
-      color: 'bg-indigo-600'
+      color: 'bg-gradient-to-br from-indigo-600 to-violet-700'
     }
   ];
 

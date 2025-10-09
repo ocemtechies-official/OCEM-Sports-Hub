@@ -216,6 +216,11 @@
   animation: gradient-shift 8s ease infinite;
 }
 
+/* Curved hero section */
+section.relative.bg-gradient-to-br.from-gray-900.via-blue-900.to-indigo-900 svg path {
+  fill: #1e3a8a; /* Match the via-blue-900 color */
+}
+
 /* Floating elements animation delay variations */
 .animate-bounce.slow {
   animation-duration: 3s;
