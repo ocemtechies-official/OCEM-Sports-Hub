@@ -1,24 +1,32 @@
-import { getSupabaseServerClient } from "@/lib/supabase/server"
-import { getCurrentProfile } from "@/lib/auth"
-import { LiveFixturesRealtime } from "@/components/fixtures/live-fixtures-realtime"
-import { UpcomingFixtures } from "@/components/fixtures/upcoming-fixtures"
-import { StatsOverview } from "@/components/dashboard/stats-overview"
-import { Suspense } from "react"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Button } from "@/components/ui/button"
-import { Trophy, Calendar, Brain, Crown, ArrowRight, Zap } from "lucide-react"
-import Link from "next/link"
+import { getSupabaseServerClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth";
+import { LiveFixturesRealtime } from "@/components/fixtures/live-fixtures-realtime";
+import { UpcomingFixtures } from "@/components/fixtures/upcoming-fixtures";
+import { StatsOverview } from "@/components/dashboard/stats-overview";
+import { CountDown } from "@/components/Home/CountDown";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Trophy, Calendar, Brain, Crown, ArrowRight, Zap } from "lucide-react";
+import Link from "next/link";
 import { TeamCard } from "@/components/teams/team-card"
 
 export default async function HomePage() {
-  const supabase = await getSupabaseServerClient()
-  const profile = await getCurrentProfile()
+  const supabase = await getSupabaseServerClient();
+  const profile = await getCurrentProfile();
 
-  const { data: sports } = await supabase.from("sports").select("*").order("name")
+  const { data: sports } = await supabase
+    .from("sports")
+    .select("*")
+    .order("name");
 
-  const { count: totalFixtures } = await supabase.from("fixtures").select("*", { count: "exact", head: true })
+  const { count: totalFixtures } = await supabase
+    .from("fixtures")
+    .select("*", { count: "exact", head: true });
 
-  const { count: totalTeams } = await supabase.from("teams").select("*", { count: "exact", head: true })
+  const { count: totalTeams } = await supabase
+    .from("teams")
+    .select("*", { count: "exact", head: true });
 
   const { data: liveFixtures } = await supabase
     .from("fixtures")
@@ -28,10 +36,10 @@ export default async function HomePage() {
       sport:sports(*),
       team_a:teams!fixtures_team_a_id_fkey(*),
       team_b:teams!fixtures_team_b_id_fkey(*)
-    `,
+    `
     )
     .eq("status", "live")
-    .order("scheduled_at", { ascending: true })
+    .order("scheduled_at", { ascending: true });
 
   // Fetch a small set of teams to display on the homepage
   const { data: featuredTeams } = await supabase
@@ -63,12 +71,16 @@ export default async function HomePage() {
             <h1 className="text-5xl md:text-7xl font-bold mb-6 text-balance">OCEM Sports Hub 2025</h1>
 
             <p className="text-xl md:text-2xl text-blue-100 mb-8 text-pretty max-w-2xl mx-auto">
-              Experience the ultimate multi-sport tournament with live scores, interactive quizzes, and competitive
-              chess matches
+              Experience the ultimate multi-sport tournament with live scores,
+              interactive quizzes, and competitive chess matches
             </p>
 
             <div className="flex flex-wrap gap-4 justify-center mb-12">
-              <Button size="lg" asChild className="bg-white text-blue-600 hover:bg-blue-50">
+              <Button
+                size="lg"
+                asChild
+                className="bg-white text-blue-600 hover:bg-blue-50"
+              >
                 <Link href="/leaderboard">
                   <Trophy className="mr-2 h-5 w-5" />
                   View Leaderboard
@@ -87,10 +99,15 @@ export default async function HomePage() {
               </Button>
             </div>
 
+            {/* Countdown to the start of the event */}
+            <CountDown />
+
             {/* Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto">
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <div className="text-3xl font-bold mb-1">{sports?.length || 0}</div>
+                <div className="text-3xl font-bold mb-1">
+                  {sports?.length || 0}
+                </div>
                 <div className="text-sm text-blue-100">Sports</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
@@ -98,11 +115,15 @@ export default async function HomePage() {
                 <div className="text-sm text-blue-100">Teams</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <div className="text-3xl font-bold mb-1">{totalFixtures || 0}</div>
+                <div className="text-3xl font-bold mb-1">
+                  {totalFixtures || 0}
+                </div>
                 <div className="text-sm text-blue-100">Fixtures</div>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                <div className="text-3xl font-bold mb-1">{liveFixtures?.length || 0}</div>
+                <div className="text-3xl font-bold mb-1">
+                  {liveFixtures?.length || 0}
+                </div>
                 <div className="text-sm text-blue-100">Live Now</div>
               </div>
             </div>
@@ -111,7 +132,12 @@ export default async function HomePage() {
 
         {/* Wave Divider */}
         <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full">
+          <svg
+            viewBox="0 0 1440 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full"
+          >
             <path
               d="M0 120L60 105C120 90 240 60 360 45C480 30 600 30 720 37.5C840 45 960 60 1080 67.5C1200 75 1320 75 1380 75L1440 75V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
               fill="white"
@@ -123,9 +149,12 @@ export default async function HomePage() {
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Everything You Need</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
+              Everything You Need
+            </h2>
             <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Track your favorite sports, test your knowledge, and compete in chess tournaments
+              Track your favorite sports, test your knowledge, and compete in
+              chess tournaments
             </p>
           </div>
 
@@ -135,12 +164,16 @@ export default async function HomePage() {
                 <div className="bg-blue-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Trophy className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Live Sports</h3>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">
+                  Live Sports
+                </h3>
                 <p className="text-slate-600 mb-4">
-                  Follow live scores across cricket, football, basketball, badminton, and table tennis
+                  Follow live scores across cricket, football, basketball,
+                  badminton, and table tennis
                 </p>
                 <div className="flex items-center text-blue-600 font-medium">
-                  View Fixtures <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  View Fixtures{" "}
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </Link>
@@ -150,12 +183,16 @@ export default async function HomePage() {
                 <div className="bg-purple-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Brain className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Sports Trivia</h3>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">
+                  Sports Trivia
+                </h3>
                 <p className="text-slate-600 mb-4">
-                  Test your sports knowledge with multi-level quizzes and climb the leaderboard
+                  Test your sports knowledge with multi-level quizzes and climb
+                  the leaderboard
                 </p>
                 <div className="flex items-center text-purple-600 font-medium">
-                  Start Quiz <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  Start Quiz{" "}
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </Link>
@@ -165,10 +202,15 @@ export default async function HomePage() {
                 <div className="bg-amber-600 w-12 h-12 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Crown className="h-6 w-6 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-900 mb-2">Chess Arena</h3>
-                <p className="text-slate-600 mb-4">Compete in online chess matches and solve challenging puzzles</p>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">
+                  Chess Arena
+                </h3>
+                <p className="text-slate-600 mb-4">
+                  Compete in online chess matches and solve challenging puzzles
+                </p>
                 <div className="flex items-center text-amber-600 font-medium">
-                  Play Chess <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  Play Chess{" "}
+                  <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 </div>
               </div>
             </Link>
@@ -237,5 +279,5 @@ export default async function HomePage() {
         </div>
       </section>
     </div>
-  )
+  );
 }

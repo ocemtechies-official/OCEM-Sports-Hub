@@ -17,6 +17,7 @@ export async function Navbar() {
 
   const navItems = [
     { href: "/", label: "Fixtures", icon: Calendar },
+    { href: "/register", label: "Register", icon: Users },
     { href: "/teams", label: "Teams", icon: Users },
     { href: "/leaderboard", label: "Leaderboard", icon: BarChart3 },
     { href: "/quiz", label: "Quiz", icon: Brain },
