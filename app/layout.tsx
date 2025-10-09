@@ -6,11 +6,12 @@ import { Inter } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { Navbar } from "@/components/layout/navbar"
 import { Footer } from "@/components/layout/footer"
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/sonner"
 import { NotificationProvider } from "@/components/notifications/notification-provider"
 import { AuthProvider } from "@/components/auth/auth-provider"
 import { Suspense } from "react"
 import "./globals.css"
+import "../styles/animations.css"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,7 +38,7 @@ export default function RootLayout({
               <Navbar />
               {children}
               <Footer />
-              <Toaster />
+              <Toaster position="top-right" duration={2500} />
             </Suspense>
           </NotificationProvider>
         </AuthProvider>
