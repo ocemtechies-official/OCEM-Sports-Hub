@@ -1,0 +1,292 @@
+/* Custom animations with new color theme */
+/* Color Palette: Primary #4338CA, Accent #F97316, Secondary #7C3AED, Highlight #06B6D4, Success #22C55E, Background #F9FAFB */
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(67, 56, 202, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(67, 56, 202, 0.8), 0 0 30px rgba(249, 115, 22, 0.6);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(34, 197, 94, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.8), 0 0 30px rgba(34, 197, 94, 0.6);
+  }
+}
+
+@keyframes rotate-pulse {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Apply animations */
+.animate-fade-in-up {
+  animation: fade-in-up 0.6s ease-out forwards;
+}
+
+.animate-fade-in-up.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.animate-fade-in-up.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.animate-fade-in-up.delay-300 {
+  animation-delay: 0.3s;
+}
+
+.animate-fade-in-up.delay-400 {
+  animation-delay: 0.4s;
+}
+
+.animate-fade-in-up.delay-500 {
+  animation-delay: 0.5s;
+}
+
+.animate-fade-in-up.delay-600 {
+  animation-delay: 0.6s;
+}
+
+.animate-fade-in-up.delay-700 {
+  animation-delay: 0.7s;
+}
+
+.animate-fade-in-up.delay-800 {
+  animation-delay: 0.8s;
+}
+
+.animate-fade-in-up.delay-900 {
+  animation-delay: 0.9s;
+}
+
+.animate-fade-in-up.delay-1000 {
+  animation-delay: 1s;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.8s ease-out forwards;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 1s ease-out forwards;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 1s ease-out forwards;
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-rotate-pulse {
+  animation: rotate-pulse 1s linear infinite;
+}
+
+/* Hero section enhancements with new color theme */
+.hero-gradient-animated {
+  background: linear-gradient(45deg, #4338CA, #7C3AED, #06B6D4, #F97316);
+  background-size: 400% 400%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+/* Floating elements animation delay variations */
+.animate-bounce.slow {
+  animation-duration: 3s;
+}
+
+.animate-pulse.delay-500 {
+  animation-delay: 0.5s;
+}
+
+.animate-pulse.delay-1000 {
+  animation-delay: 1s;
+}
+
+/* Card hover effects with new theme colors */
+.card-hover-glow:hover {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+              0 10px 10px -5px rgba(0, 0, 0, 0.04),
+              0 0 30px rgba(67, 56, 202, 0.3);
+  transform: translateY(-5px) scale(1.02);
+  transition: all 0.3s ease;
+}
+
+/* Button animations with accent color */
+.btn-glow:hover {
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.6),
+              0 0 40px rgba(249, 115, 22, 0.4),
+              0 0 60px rgba(249, 115, 22, 0.2);
+}
+
+/* Text animations with highlight color */
+.text-glow {
+  text-shadow: 0 0 10px rgba(6, 182, 212, 0.5),
+               0 0 20px rgba(6, 182, 212, 0.3),
+               0 0 30px rgba(6, 182, 212, 0.1);
+}
+
+/* Loading state for stats */
+.stat-counter {
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background-size: 200% 200%;
+  animation: gradient-shift 2s ease infinite;
+}
+
+/* Form element enhancements */
+.form-input-glow:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+  border-color: #3b82f6;
+}
+
+.form-input-hover:hover {
+  border-color: #93c5fd;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.form-button-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.form-button-active:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive enhancements */
+@media (max-width: 640px) {
+  .animate-fade-in-up {
+    animation-duration: 0.4s;
+  }
+  
+  .animate-bounce-in {
+    animation-duration: 0.6s;
+  }
+}
