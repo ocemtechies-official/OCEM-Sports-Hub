@@ -2,9 +2,11 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { Suspense } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Button } from "@/components/ui/button"
 import { FixtureCard } from "@/components/fixtures/fixture-card"
 import { SportFilter } from "@/components/fixtures/sport-filter"
-import { Calendar, Radio } from "lucide-react"
+import { Calendar, Radio, Trophy } from "lucide-react"
+import Link from "next/link"
 
 export default async function FixturesPage({ searchParams }: { searchParams: { sport?: string } }) {
   const supabase = await getSupabaseServerClient()
@@ -72,6 +74,20 @@ export default async function FixturesPage({ searchParams }: { searchParams: { s
             </div>
             <SportFilter sports={sports || []} basePath="/fixtures" />
           </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="flex gap-4 mb-6">
+          <Button variant="default">
+            <Radio className="mr-2 h-4 w-4" />
+            Regular Fixtures
+          </Button>
+          <Button variant="secondary" asChild>
+            <Link href="/tournaments">
+              <Trophy className="mr-2 h-4 w-4" />
+              Tournament Brackets
+            </Link>
+          </Button>
         </div>
 
         {/* Tabs */}
