@@ -86,7 +86,7 @@
 
 ### Pagination Controls
 
-```
+```bash
 Showing 1 to 10 of 45 users  [10 / page ▼]
 
 [Previous]  [1] [2] [3] [4] [5]  [Next]
@@ -284,7 +284,7 @@ const paginatedUsers = filteredAndSortedUsers.slice(
 
 ## 🧪 Testing Checklist
 
-### Search Functionality
+### Search Functionalit
 
 - [ ] Search by name works
 - [ ] Search by email works
@@ -309,7 +309,7 @@ const paginatedUsers = filteredAndSortedUsers.slice(
 - [ ] Toggle order works (↑/↓)
 - [ ] Sorting maintains filters
 
-### Pagination
+### Paginations
 
 - [ ] Page size selector works
 - [ ] Previous/Next buttons work
@@ -318,7 +318,7 @@ const paginatedUsers = filteredAndSortedUsers.slice(
 - [ ] Shows correct range
 - [ ] Handles last page correctly
 
-### Bulk Operations
+### Bulk Operation
 
 - [ ] Select all works
 - [ ] Individual selection works

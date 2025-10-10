@@ -117,7 +117,7 @@
 
 ### Quiz Management Stats
 
-```
+```bash
 ┌─────────────┬─────────────┬─────────────┐
 │ Total       │ Active      │ Total       │
 │ Quizzes     │ Quizzes     │ Questions   │
@@ -127,7 +127,7 @@
 
 ### Team Management Stats
 
-```
+```bash
 ┌─────────────┬─────────────┬─────────────┐
 │ Total       │ Total       │ Avg Players │
 │ Teams       │ Players     │ per Team    │
@@ -282,7 +282,7 @@ const paginated = filtered.slice(
 
 ## 🧪 Testing Checklist
 
-### Quiz Management
+### Quiz Managements
 
 - [ ] Search by title works
 - [ ] Search by description works
@@ -295,7 +295,7 @@ const paginated = filtered.slice(
 - [ ] Stats display correctly
 - [ ] Actions menu works
 
-### Team Management
+### Team Managements
 
 - [ ] Search by name works
 - [ ] Sorting works (all fields)

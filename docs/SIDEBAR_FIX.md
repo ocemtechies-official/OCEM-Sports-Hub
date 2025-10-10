@@ -57,7 +57,7 @@ Changed the sidebar positioning to:
 
 ### Layout Structure
 
-```
+```bash
 ┌─────────────────────────────────────┐
 │         Navbar (64px)               │ ← Fixed at top
 ├──────────┬──────────────────────────┤
@@ -100,7 +100,7 @@ Changed the sidebar positioning to:
 
 ### Before (WRONG)
 
-```
+```bash
 Navbar
 ├─────────┐
 │ Sidebar │ ← Extends to viewport bottom
@@ -113,7 +113,7 @@ Footer (hidden behind sidebar)
 
 ### After (CORRECT)
 
-```
+```bash
 Navbar
 ├─────────┐
 │ Sidebar │ ← Stops before footer

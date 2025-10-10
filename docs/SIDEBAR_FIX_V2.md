@@ -83,7 +83,7 @@ Changed from `fixed` to `sticky` positioning with proper flexbox layout.
 
 ### Layout Structure
 
-```
+```bash
 ┌─────────────────────────────────────┐
 │         Navbar (fixed)              │
 ├──────────┬──────────────────────────┤
@@ -175,7 +175,7 @@ flex-1           // Content takes remaining space
 
 ### Before (Fixed - WRONG)
 
-```
+```bash
 Scroll Position: Bottom
 ┌─────────────────────────┐
 │ Navbar                  │
@@ -192,7 +192,7 @@ Scroll Position: Bottom
 
 ### After (Sticky - CORRECT)
 
-```
+```bash
 Scroll Position: Bottom
 ┌─────────────────────────┐
 │ Navbar                  │
