@@ -10,6 +10,7 @@ This directory contains SQL scripts for setting up and populating the Supabase d
 4. `04-create-functions.sql` - Creates database functions and triggers
 5. `05-sample-data.sql` - Inserts comprehensive sample data for testing
 6. `06-complete-sample-data.sql` - Complete sample data with players, fixtures, quizzes, and more
+7. `07-add-profile-fields.sql` - Adds new profile fields for enhanced functionality (run after initial setup)
 
 ## Usage
 
@@ -23,6 +24,8 @@ To run the SQL scripts directly in Supabase:
 4. Run each script
 
 For the most comprehensive sample data, run `06-complete-sample-data.sql` after running the first four scripts.
+
+For existing installations upgrading to the enhanced profile functionality, run `07-add-profile-fields.sql` to add the new profile fields.
 
 ### Sample Data Population Script
 
