@@ -11,9 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, Settings, LogOut, Shield } from "lucide-react"
+import { User, Settings, LogOut, Shield, UserCheck } from "lucide-react"
 import { showToast as toast } from "@/components/ui/toast"
 import { useAuth } from "@/components/auth/auth-provider"
+import { cn } from "@/lib/utils"
 
 interface UserNavProps {
   profile: {
@@ -30,12 +31,20 @@ export function UserNav({ profile }: UserNavProps) {
   const { signOut } = useAuth()
 
   const handleSignOut = async () => {
-    await signOut()
-    toast.success({
-      title: "Signed out",
-      description: "You have been signed out successfully.",
-    })
-    router.push("/")
+    try {
+      await signOut()
+      toast.success({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      })
+      // Instead of redirecting, let's just close the dropdown and let the UI update
+      // The page will automatically update due to the auth context
+    } catch (error) {
+      toast.error({
+        title: "Sign out failed",
+        description: "There was an error signing you out. Please try again.",
+      })
+    }
   }
 
   const initials =
@@ -48,38 +57,66 @@ export function UserNav({ profile }: UserNavProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-          <Avatar className="h-10 w-10">
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-slate-100 transition-colors duration-300">
+          <Avatar className="h-10 w-10 ring-2 ring-transparent hover:ring-blue-500 transition-all duration-300">
             <AvatarImage src={profile.avatar_url || undefined} alt={profile.full_name || profile.email} />
-            <AvatarFallback>{initials}</AvatarFallback>
+            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-medium">
+              {initials}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal">
+      <DropdownMenuContent className="w-64 border border-slate-200 shadow-lg rounded-lg" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal py-3">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">{profile.full_name || "User"}</p>
+            <p className="text-sm font-semibold leading-none">{profile.full_name || "User"}</p>
             <p className="text-xs leading-none text-muted-foreground">{profile.email}</p>
-            {profile.role === "admin" && <p className="text-xs leading-none text-blue-600 font-medium mt-1">Admin</p>}
+            {profile.role === "admin" && (
+              <div className="flex items-center mt-2">
+                <Shield className="h-3 w-3 text-blue-600 mr-1" />
+                <span className="text-xs leading-none text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full">
+                  Admin
+                </span>
+              </div>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => router.push("/profile")}>
-          <User className="mr-2 h-4 w-4" />
+        <DropdownMenuItem 
+          onClick={() => router.push("/profile")}
+            className="cursor-pointer text-slate-700 hover:text-blue-600 hover:bg-blue-50 py-2 transition-colors duration-300 focus:bg-blue-50 focus:text-blue-700"
+        >
+          <User className="mr-2 h-4 w-4 hover:text-blue-800" />
           Profile
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push("/settings")}>
-          <Settings className="mr-2 h-4 w-4" />
+        <DropdownMenuItem 
+          onClick={() => router.push("/profile/registrations")}
+            className="cursor-pointer text-slate-700 hover:text-blue-600 hover:bg-blue-50 py-2 transition-colors duration-300 focus:bg-blue-50 focus:text-blue-700"
+        >
+          <UserCheck className="mr-2 h-4 w-4 hover:text-blue-800" />
+          My Registrations
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={() => router.push("/settings")}
+            className="cursor-pointer text-slate-700 hover:text-blue-600 hover:bg-blue-50 py-2 transition-colors duration-300 focus:bg-blue-50 focus:text-blue-700"
+        >
+          <Settings className="mr-2 h-4 w-4 hover:text-blue-800" />
           Settings
         </DropdownMenuItem>
         {profile.role === "admin" && (
-          <DropdownMenuItem onClick={() => router.push("/admin")}>
-            <Shield className="mr-2 h-4 w-4" />
+          <DropdownMenuItem 
+            onClick={() => router.push("/admin")}
+            className="cursor-pointer text-slate-700 hover:text-blue-600 hover:bg-blue-50 py-2 transition-colors duration-300 focus:bg-blue-50 focus:text-blue-700"
+          >
+            <Shield className="mr-2 h-4 w-4 hover:text-blue-800 "/>
             Admin Panel
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleSignOut}>
+        <DropdownMenuItem 
+          onClick={handleSignOut}
+          className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 py-2 transition-colors duration-200 focus:bg-red-50 focus:text-red-700"
+        >
           <LogOut className="mr-2 h-4 w-4" />
           Sign Out
         </DropdownMenuItem>
