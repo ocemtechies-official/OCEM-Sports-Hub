@@ -348,7 +348,3 @@ For documentation:
 3. Each management page
 4. Sidebar navigation
 5. Stat cards with hover effect
-
----
-
-**Happy Testing! 🎉*

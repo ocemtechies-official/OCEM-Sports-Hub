@@ -4,8 +4,8 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Plus, ArrowLeft } from "lucide-react"
-import { FixtureManagementTable } from "@/components/admin/fixture-management-table"
+import { Plus } from "lucide-react"
+import { EnhancedFixtureTable } from "@/components/admin/fixtures/enhanced-fixture-table"
 
 export default async function AdminFixturesPage() {
   const admin = await isAdmin()
@@ -31,11 +31,11 @@ export default async function AdminFixturesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-          <div>
+        <div>
           <h1 className="text-3xl font-bold text-slate-900">Fixtures Management</h1>
-          <p className="text-slate-600 mt-1">Create and manage sports fixtures</p>
+          <p className="text-slate-600 mt-1">Create and manage sports fixtures with advanced filtering</p>
         </div>
-          <Button asChild>
+        <Button asChild>
           <Link href="/admin/fixtures/create">
             <Plus className="mr-2 h-4 w-4" />
             Create Fixture
@@ -44,11 +44,11 @@ export default async function AdminFixturesPage() {
       </div>
 
       <Card>
-          <CardHeader>
-            <CardTitle>All Fixtures</CardTitle>
-          </CardHeader>
-          <CardContent>
-          <FixtureManagementTable fixtures={fixtures || []} />
+        <CardHeader>
+          <CardTitle>All Fixtures</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EnhancedFixtureTable fixtures={fixtures || []} />
         </CardContent>
       </Card>
     </div>

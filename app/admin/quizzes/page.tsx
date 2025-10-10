@@ -4,8 +4,8 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Plus, ArrowLeft } from "lucide-react"
-import { QuizManagementTable } from "@/components/admin/quiz-management-table"
+import { Plus } from "lucide-react"
+import { EnhancedQuizTable } from "@/components/admin/quizzes/enhanced-quiz-table"
 
 export default async function AdminQuizzesPage() {
   const admin = await isAdmin()
@@ -26,9 +26,9 @@ export default async function AdminQuizzesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Quiz Management</h1>
-          <p className="text-slate-600 mt-1">Create and manage quizzes</p>
+          <p className="text-slate-600 mt-1">Create and manage quizzes with advanced filtering</p>
         </div>
-          <Button asChild>
+        <Button asChild>
           <Link href="/admin/quizzes/create">
             <Plus className="mr-2 h-4 w-4" />
             Create Quiz
@@ -37,11 +37,11 @@ export default async function AdminQuizzesPage() {
       </div>
 
       <Card>
-          <CardHeader>
-            <CardTitle>All Quizzes</CardTitle>
-          </CardHeader>
-          <CardContent>
-          <QuizManagementTable quizzes={quizzes || []} />
+        <CardHeader>
+          <CardTitle>All Quizzes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EnhancedQuizTable quizzes={quizzes || []} />
         </CardContent>
       </Card>
     </div>

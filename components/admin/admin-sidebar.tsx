@@ -14,6 +14,7 @@ import {
   Activity,
   FileText,
   Settings,
+  UserCheck,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -44,6 +45,11 @@ const navigation = [
         name: "Users", 
         href: "/admin/users", 
         icon: Users 
+      },
+      { 
+        name: "Registrations", 
+        href: "/admin/registrations", 
+        icon: UserCheck 
       },
       { 
         name: "Fixtures", 
@@ -101,8 +107,8 @@ export function AdminSidebar() {
   }
 
   return (
-    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:border-r lg:bg-white lg:pt-16 lg:pb-4 lg:z-30">
-      <ScrollArea className="flex-1 px-3">
+    <aside className="hidden lg:flex lg:flex-col lg:w-64 lg:sticky lg:top-16 lg:self-start lg:h-[calc(100vh-4rem)] lg:border-r lg:bg-white lg:z-30 lg:overflow-hidden">
+      <ScrollArea className="flex-1 px-3 h-full">
         <div className="space-y-6 py-4">
           {navigation.map((section) => (
             <div key={section.title}>
@@ -112,7 +118,7 @@ export function AdminSidebar() {
               <nav className="space-y-1">
                 {section.items.map((item) => {
                   const Icon = item.icon
-                  const active = isActive(item.href, item.exact)
+                  const active = isActive(item.href, (item as any).exact)
 
                   return (
                     <Link
@@ -149,10 +155,8 @@ export function AdminSidebar() {
         </div>
       </ScrollArea>
 
-      <Separator className="my-4" />
-
       {/* Quick Stats Footer */}
-      <div className="px-6">
+      <div className="px-6 py-4 border-t flex-shrink-0">
         <div className="rounded-lg bg-gradient-to-br from-indigo-50 to-blue-50 p-4 border border-indigo-100">
           <div className="text-xs font-medium text-slate-600 mb-3">
             Quick Stats

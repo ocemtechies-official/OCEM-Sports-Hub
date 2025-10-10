@@ -22,6 +22,11 @@ export const metadata: Metadata = {
   description:
     "Track live sports fixtures, scores, quizzes, and chess tournaments",
   generator: "v0.app",
+  icons: {
+    icon: "/favicons/favicon.ico",
+    shortcut: "/favicons/favicon-16x16.png",
+    apple: "/favicons/apple-touch-icon.png",
+  },
 };
 
 // ✅ Separate component to use hooks (can't use usePathname in RootLayout directly)

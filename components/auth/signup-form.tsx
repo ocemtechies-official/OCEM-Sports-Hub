@@ -53,17 +53,21 @@ export function SignupForm() {
 
       if (error) {
         console.error("Signup error:", error)
-        notifications.showError(
-          error.message === "User already registered"
+        notifications.showError({
+          title: "Signup Failed",
+          description: error.message === "User already registered"
             ? "An account with this email already exists. Please try signing in instead."
             : error.message || "Failed to create account. Please try again."
-        )
+        })
         setIsLoading(false)
         return
       }
 
       setIsSuccess(true)
-      notifications.showSuccess("Account created successfully! Please check your email to verify your account.")
+      notifications.showSuccess({
+        title: "Account Created Successfully!",
+        description: "Please check your email to verify your account."
+      })
       
       // Redirect to login after showing success
       setTimeout(() => {
@@ -71,7 +75,10 @@ export function SignupForm() {
       }, 2000)
     } catch (error: any) {
       console.error("Signup failed:", error)
-      notifications.showError("An unexpected error occurred. Please try again.")
+      notifications.showError({
+        title: "Signup Failed",
+        description: "An unexpected error occurred. Please try again."
+      })
       setIsLoading(false)
     }
   }
@@ -82,11 +89,17 @@ export function SignupForm() {
       const { error } = await signInWithGoogle()
       if (error) {
         console.error("Google sign in error:", error)
-        notifications.showError(error.message || "Failed to sign in with Google. Please try again.")
+        notifications.showError({
+          title: "Google Sign In Failed",
+          description: error.message || "Failed to sign in with Google. Please try again."
+        })
       }
     } catch (error: any) {
       console.error("Google sign in failed:", error)
-      notifications.showError("An unexpected error occurred. Please try again.")
+      notifications.showError({
+        title: "Google Sign In Failed",
+        description: "An unexpected error occurred. Please try again."
+      })
     } finally {
       setIsGoogleLoading(false)
     }
@@ -98,11 +111,17 @@ export function SignupForm() {
       const { error } = await signInWithGithub()
       if (error) {
         console.error("GitHub sign in error:", error)
-        notifications.showError(error.message || "Failed to sign in with GitHub. Please try again.")
+        notifications.showError({
+          title: "GitHub Sign In Failed",
+          description: error.message || "Failed to sign in with GitHub. Please try again."
+        })
       }
     } catch (error: any) {
       console.error("GitHub sign in failed:", error)
-      notifications.showError("An unexpected error occurred. Please try again.")
+      notifications.showError({
+        title: "GitHub Sign In Failed",
+        description: "An unexpected error occurred. Please try again."
+      })
     } finally {
       setIsGithubLoading(false)
     }
@@ -113,13 +132,22 @@ export function SignupForm() {
       const { error } = await resendVerificationEmail(signupEmail)
       if (error) {
         console.error("Resend verification email error:", error)
-        notifications.showError(error.message || "Failed to resend verification email. Please try again.")
+        notifications.showError({
+          title: "Failed to Resend Email",
+          description: error.message || "Failed to resend verification email. Please try again."
+        })
       } else {
-        notifications.showSuccess("Verification email resent successfully! Please check your inbox.")
+        notifications.showSuccess({
+          title: "Email Resent Successfully!",
+          description: "Please check your inbox for the verification email."
+        })
       }
     } catch (error: any) {
       console.error("Resend verification email failed:", error)
-      notifications.showError("An unexpected error occurred. Please try again.")
+      notifications.showError({
+        title: "Failed to Resend Email",
+        description: "An unexpected error occurred. Please try again."
+      })
     }
   }
 
