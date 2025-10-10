@@ -64,6 +64,7 @@ After setting up your Supabase project and environment variables:
    - [02-enable-rls.sql](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/02-enable-rls.sql) - Enables Row Level Security policies
    - [03-seed-data.sql](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/03-seed-data.sql) - Inserts basic seed data (sports and teams)
    - [04-create-functions.sql](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/04-create-functions.sql) - Creates database functions and triggers
+   - [07-add-profile-fields.sql](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/07-add-profile-fields.sql) - Adds new profile fields for enhanced functionality (run after initial setup)
 
 For comprehensive sample data, additionally run:
 
