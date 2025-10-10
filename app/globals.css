@@ -124,3 +124,84 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom Navbar Styles */
+.navbar-hover-effect {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.navbar-hover-effect::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(to right, #4f46e5, #7c3aed);
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.navbar-hover-effect:hover::after {
+  width: 80%;
+}
+
+.navbar-glow-effect {
+  transition: all 0.3s ease;
+}
+
+.navbar-glow-effect:hover {
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Active state for navigation items - filled background with white text */
+.nav-active {
+  @apply text-white bg-blue-600 font-semibold;
+}
+
+.nav-active svg {
+  @apply text-white;
+}
+
+/* Hover state for navigation items */
+.nav-hover {
+  @apply text-slate-600 hover:text-blue-600 hover:bg-blue-50;
+}
+
+/* Dropdown menu items */
+.dropdown-item-active {
+  @apply text-blue-600 bg-blue-50 font-medium;
+}
+
+.dropdown-item-hover {
+  @apply text-slate-700 hover:text-blue-600 hover:bg-blue-50;
+}
+
+/* Active dropdown trigger */
+.dropdown-trigger-active {
+  @apply text-white bg-blue-600 font-semibold;
+}
+
+.dropdown-trigger-active svg {
+  @apply text-white;
+}
+
+/* Hover dropdown trigger */
+.dropdown-trigger-hover {
+  @apply text-slate-600 hover:text-blue-600 hover:bg-blue-50;
+}
+
+/* Destructive button styles */
+.destructive-button {
+  @apply bg-red-50 hover:bg-red-100 text-red-600 transition-colors duration-200;
+}
+
+.destructive-button:hover {
+  @apply bg-red-100 text-red-700;
+}
+
+.destructive-button:focus {
+  @apply bg-red-100 text-red-700 ring-2 ring-red-200;
+}
