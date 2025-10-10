@@ -20,20 +20,29 @@ class NotificationManager {
     return { ...this.defaultOptions, ...options }
   }
 
-  showSuccess(message: string, options?: NotificationOptions) {
+  showSuccess(notification: { title?: string; description: string } | string, options?: NotificationOptions) {
     const opts = this.getOptions(options)
+    
+    if (typeof notification === 'string') {
+      return toast.success({
+        title: 'Success',
+        description: notification,
+        duration: opts.duration,
+      })
+    }
+    
     return toast.success({
-      title: 'Success',
-      description: message,
+      title: notification.title || 'Success',
+      description: notification.description,
       duration: opts.duration,
     })
   }
 
-  showError(message: string, options?: NotificationOptions) {
+  showError(notification: { title?: string; description: string }, options?: NotificationOptions) {
     const opts = this.getOptions(options)
     return toast.error({
-      title: 'Error',
-      description: message,
+      title: notification.title || 'Error',
+      description: notification.description,
       duration: opts.duration,
     })
   }
