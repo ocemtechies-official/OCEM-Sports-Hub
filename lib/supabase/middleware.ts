@@ -52,7 +52,7 @@ export async function updateSession(request: NextRequest) {
     } = await supabase.auth.getUser()
 
     // Protected routes
-    const protectedPaths = ["/admin", "/profile", "/chess/play", "/quiz/attempt"]
+    const protectedPaths = ["/admin", "/profile", "/chess/play", "/quiz/attempt", "/moderator"]
     const isProtectedPath = protectedPaths.some((path) => request.nextUrl.pathname.startsWith(path))
 
     if (isProtectedPath && !user) {
@@ -67,6 +67,17 @@ export async function updateSession(request: NextRequest) {
       const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
 
       if (profile?.role !== "admin") {
+        const url = request.nextUrl.clone()
+        url.pathname = "/"
+        return NextResponse.redirect(url)
+      }
+    }
+
+    // Moderator-only routes
+    if (request.nextUrl.pathname.startsWith("/moderator") && user) {
+      const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single()
+
+      if (profile?.role !== "moderator" && profile?.role !== "admin") {
         const url = request.nextUrl.clone()
         url.pathname = "/"
         return NextResponse.redirect(url)
