@@ -52,6 +52,7 @@ export function EnhancedTeamTable({ teams }: EnhancedTeamTableProps) {
   const [selectedTeams, setSelectedTeams] = useState<Set<string>>(new Set())
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [deletingTeam, setDeletingTeam] = useState<string | null>(null)
 
   // Filter and sort teams
   const filteredAndSortedTeams = useMemo(() => {
@@ -133,6 +134,41 @@ export function EnhancedTeamTable({ teams }: EnhancedTeamTableProps) {
     
     notifications.showSuccess(`Exported ${selectedTeams.size} teams`)
     setSelectedTeams(new Set())
+  }
+
+  // Delete team handler
+  const handleDeleteTeam = async (teamId: string) => {
+    if (!confirm('Are you sure you want to delete this team? This action cannot be undone and will fail if the team is used in any fixtures.')) {
+      return
+    }
+
+    setDeletingTeam(teamId)
+    try {
+      const response = await fetch(`/api/admin/teams/${teamId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete team')
+      }
+
+      notifications.showSuccess({
+        title: "Success",
+        description: "Team deleted successfully"
+      })
+
+      // Refresh the page to show updated data
+      window.location.reload()
+    } catch (error: any) {
+      console.error('Error deleting team:', error)
+      notifications.showError({
+        title: "Error",
+        description: error.message || "Failed to delete team"
+      })
+    } finally {
+      setDeletingTeam(null)
+    }
   }
 
   return (
@@ -291,18 +327,26 @@ export function EnhancedTeamTable({ teams }: EnhancedTeamTableProps) {
                               View Team
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Team
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/teams/${team.id}/edit`}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit Team
+                            </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <UserPlus className="h-4 w-4 mr-2" />
-                            Manage Players
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/teams/${team.id}/players`}>
+                              <UserPlus className="h-4 w-4 mr-2" />
+                              Manage Players
+                            </Link>
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
+                          <DropdownMenuItem 
+                            className="text-red-600"
+                            onClick={() => handleDeleteTeam(team.id)}
+                            disabled={deletingTeam === team.id}
+                          >
                             <Trash2 className="h-4 w-4 mr-2" />
-                            Delete Team
+                            {deletingTeam === team.id ? "Deleting..." : "Delete Team"}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>

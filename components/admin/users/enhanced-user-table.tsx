@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Shield, Users, Search, Crown, MoreVertical, Download, Trash2, Mail } from "lucide-react"
 import { notifications } from "@/lib/notifications"
+import { SendEmailDialog } from "@/components/admin/send-email-dialog"
 
 interface User {
   id: string
@@ -42,7 +43,7 @@ interface User {
 
 interface EnhancedUserTableProps {
   users: User[]
-  onUpdateUserRole: (userId: string, newRole: 'admin' | 'viewer') => Promise<{ success: boolean }>
+  onUpdateUserRole: (userId: string, newRole: 'admin' | 'moderator' | 'viewer') => Promise<{ success: boolean }>
 }
 
 export function EnhancedUserTable({ users, onUpdateUserRole }: EnhancedUserTableProps) {
@@ -54,6 +55,7 @@ export function EnhancedUserTable({ users, onUpdateUserRole }: EnhancedUserTable
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
   const [isUpdating, setIsUpdating] = useState<string | null>(null)
+  const [deletingUser, setDeletingUser] = useState<string | null>(null)
 
   // Filter and sort users
   const filteredAndSortedUsers = useMemo(() => {
@@ -98,6 +100,7 @@ export function EnhancedUserTable({ users, onUpdateUserRole }: EnhancedUserTable
 
   // Stats
   const adminCount = users.filter(u => u.role === 'admin').length
+  const moderatorCount = users.filter(u => u.role === 'moderator').length
   const viewerCount = users.filter(u => u.role === 'viewer').length
 
   // Selection handlers
@@ -120,15 +123,15 @@ export function EnhancedUserTable({ users, onUpdateUserRole }: EnhancedUserTable
   }
 
   // Role update handler
-  const handleRoleUpdate = async (userId: string, newRole: 'admin' | 'viewer') => {
+  const handleRoleUpdate = async (userId: string, newRole: 'admin' | 'moderator' | 'viewer') => {
     setIsUpdating(userId)
     try {
       const result = await onUpdateUserRole(userId, newRole)
       if (result.success) {
         notifications.showSuccess(`User role has been updated to ${newRole}.`)
       }
-    } catch (error) {
-      notifications.showError("Failed to update user role. Please try again.")
+    } catch (error: any) {
+      notifications.showError(error.message || "Failed to update user role. Please try again.")
     } finally {
       setIsUpdating(null)
     }
@@ -179,46 +182,95 @@ export function EnhancedUserTable({ users, onUpdateUserRole }: EnhancedUserTable
     notifications.showSuccess(`Exported all ${users.length} users`)
   }
 
+  // Delete user handler
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return
+    }
+
+    setDeletingUser(userId)
+    try {
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete user')
+      }
+
+      notifications.showSuccess({
+        title: "Success",
+        description: "User deleted successfully"
+      })
+
+      // Refresh the page to show updated data
+      window.location.reload()
+    } catch (error: any) {
+      console.error('Error deleting user:', error)
+      notifications.showError({
+        title: "Error",
+        description: error.message || "Failed to delete user"
+      })
+    } finally {
+      setDeletingUser(null)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-blue-100">
                 <Users className="h-5 w-5 text-blue-600" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{users.length}</div>
+                <div className="text-2xl font-bold text-gray-900">{users.length}</div>
                 <div className="text-sm text-gray-600">Total Users</div>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-purple-100">
-                <Crown className="h-5 w-5 text-purple-600" />
+              <div className="p-2 rounded-lg bg-gradient-to-r from-purple-100 to-indigo-100">
+                <Crown className="h-5 w-5 text-purple-700" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{adminCount}</div>
+                <div className="text-2xl font-bold text-gray-900">{adminCount}</div>
                 <div className="text-sm text-gray-600">Admins</div>
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-green-100">
-                <Shield className="h-5 w-5 text-green-600" />
+              <div className="p-2 rounded-lg bg-gradient-to-r from-orange-100 to-amber-100">
+                <Shield className="h-5 w-5 text-orange-700" />
               </div>
               <div>
-                <div className="text-2xl font-bold">{viewerCount}</div>
+                <div className="text-2xl font-bold text-gray-900">{moderatorCount}</div>
+                <div className="text-sm text-gray-600">Moderators</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-gradient-to-r from-gray-100 to-gray-200">
+                <Shield className="h-5 w-5 text-gray-700" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">{viewerCount}</div>
                 <div className="text-sm text-gray-600">Viewers</div>
               </div>
             </div>
@@ -288,9 +340,30 @@ export function EnhancedUserTable({ users, onUpdateUserRole }: EnhancedUserTable
                 <SelectValue placeholder="Filter by role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Roles</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="viewer">Viewer</SelectItem>
+                <SelectItem value="all">
+                  <div className="flex items-center">
+                    <Users className="h-4 w-4 mr-2 text-gray-600" />
+                    All Roles
+                  </div>
+                </SelectItem>
+                <SelectItem value="admin">
+                  <div className="flex items-center">
+                    <Crown className="h-4 w-4 mr-2 text-purple-700" />
+                    Admin
+                  </div>
+                </SelectItem>
+                <SelectItem value="moderator">
+                  <div className="flex items-center">
+                    <Shield className="h-4 w-4 mr-2 text-orange-700" />
+                    Moderator
+                  </div>
+                </SelectItem>
+                <SelectItem value="viewer">
+                  <div className="flex items-center">
+                    <Shield className="h-4 w-4 mr-2 text-gray-600" />
+                    Viewer
+                  </div>
+                </SelectItem>
               </SelectContent>
             </Select>
 
@@ -349,15 +422,30 @@ export function EnhancedUserTable({ users, onUpdateUserRole }: EnhancedUserTable
                       </TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
-                        <Badge variant={user.role === 'admin' ? 'default' : 'secondary'}>
+                        <Badge 
+                          variant={user.role === 'admin' ? 'default' : user.role === 'moderator' ? 'destructive' : 'secondary'}
+                          className={`
+                            ${user.role === 'admin' ? 
+                              'bg-gradient-to-r from-purple-600 to-indigo-700 hover:from-purple-700 hover:to-indigo-800 text-white border-0' : 
+                              user.role === 'moderator' ? 
+                              'bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white border-0' : 
+                              'bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-800 border-gray-300'}
+                            font-medium px-3 py-1 text-xs rounded-full shadow-sm
+                          `}
+                        >
                           {user.role === 'admin' ? (
                             <>
-                              <Crown className="h-3 w-3 mr-1" />
+                              <Crown className="h-3 w-3 mr-1 text-white drop-shadow" />
                               Admin
+                            </>
+                          ) : user.role === 'moderator' ? (
+                            <>
+                              <Shield className="h-3 w-3 mr-1 text-white drop-shadow" />
+                              Moderator
                             </>
                           ) : (
                             <>
-                              <Shield className="h-3 w-3 mr-1" />
+                              <Shield className="h-3 w-3 mr-1 text-gray-700" />
                               Viewer
                             </>
                           )}
@@ -377,30 +465,80 @@ export function EnhancedUserTable({ users, onUpdateUserRole }: EnhancedUserTable
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             {user.role === 'viewer' ? (
-                              <DropdownMenuItem
-                                onClick={() => handleRoleUpdate(user.id, 'admin')}
-                                disabled={isUpdating === user.id}
-                              >
-                                <Crown className="h-4 w-4 mr-2" />
-                                Make Admin
-                              </DropdownMenuItem>
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => handleRoleUpdate(user.id, 'admin')}
+                                  disabled={isUpdating === user.id}
+                                  className="flex items-center"
+                                >
+                                  <Crown className="h-4 w-4 mr-2 text-purple-700" />
+                                  Make Admin
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleRoleUpdate(user.id, 'moderator')}
+                                  disabled={isUpdating === user.id}
+                                  className="flex items-center"
+                                >
+                                  <Shield className="h-4 w-4 mr-2 text-orange-700" />
+                                  Make Moderator
+                                </DropdownMenuItem>
+                              </>
+                            ) : user.role === 'moderator' ? (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => handleRoleUpdate(user.id, 'admin')}
+                                  disabled={isUpdating === user.id}
+                                  className="flex items-center"
+                                >
+                                  <Crown className="h-4 w-4 mr-2 text-purple-700" />
+                                  Make Admin
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleRoleUpdate(user.id, 'viewer')}
+                                  disabled={isUpdating === user.id}
+                                  className="flex items-center"
+                                >
+                                  <Shield className="h-4 w-4 mr-2 text-gray-600" />
+                                  Remove Moderator
+                                </DropdownMenuItem>
+                              </>
                             ) : (
-                              <DropdownMenuItem
-                                onClick={() => handleRoleUpdate(user.id, 'viewer')}
-                                disabled={isUpdating === user.id}
-                              >
-                                <Shield className="h-4 w-4 mr-2" />
-                                Remove Admin
-                              </DropdownMenuItem>
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => handleRoleUpdate(user.id, 'moderator')}
+                                  disabled={isUpdating === user.id}
+                                  className="flex items-center"
+                                >
+                                  <Shield className="h-4 w-4 mr-2 text-orange-700" />
+                                  Make Moderator
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => handleRoleUpdate(user.id, 'viewer')}
+                                  disabled={isUpdating === user.id}
+                                  className="flex items-center"
+                                >
+                                  <Shield className="h-4 w-4 mr-2 text-gray-600" />
+                                  Remove Admin
+                                </DropdownMenuItem>
+                              </>
                             )}
-                            <DropdownMenuItem>
-                              <Mail className="h-4 w-4 mr-2" />
-                              Send Email
-                            </DropdownMenuItem>
+                            <SendEmailDialog 
+                              user={user}
+                              trigger={
+                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                                  <Mail className="h-4 w-4 mr-2" />
+                                  Send Email
+                                </DropdownMenuItem>
+                              }
+                            />
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600">
+                            <DropdownMenuItem 
+                              className="text-red-600"
+                              onClick={() => handleDeleteUser(user.id)}
+                              disabled={deletingUser === user.id}
+                            >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Delete User
+                              {deletingUser === user.id ? "Deleting..." : "Delete User"}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

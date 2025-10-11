@@ -79,11 +79,32 @@ export function ModeratorManagementTable({ moderators }: ModeratorManagementTabl
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'admin':
-        return <Badge className="bg-red-100 text-red-800">Admin</Badge>
+        return (
+          <Badge 
+            className="bg-gradient-to-r from-purple-600 to-indigo-700 text-white border-0 font-medium px-3 py-1 text-xs rounded-full shadow-sm"
+          >
+            <Shield className="h-3 w-3 mr-1 text-white drop-shadow" />
+            Admin
+          </Badge>
+        );
       case 'moderator':
-        return <Badge className="bg-blue-100 text-blue-800">Moderator</Badge>
+        return (
+          <Badge 
+            className="bg-gradient-to-r from-orange-500 to-amber-600 text-white border-0 font-medium px-3 py-1 text-xs rounded-full shadow-sm"
+          >
+            <Shield className="h-3 w-3 mr-1 text-white drop-shadow" />
+            Moderator
+          </Badge>
+        );
       default:
-        return <Badge variant="secondary">Viewer</Badge>
+        return (
+          <Badge 
+            className="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border-gray-300 font-medium px-3 py-1 text-xs rounded-full shadow-sm"
+          >
+            <Shield className="h-3 w-3 mr-1 text-gray-700" />
+            Viewer
+          </Badge>
+        );
     }
   }
 
@@ -106,8 +127,8 @@ export function ModeratorManagementTable({ moderators }: ModeratorManagementTabl
               <TableRow key={moderator.id}>
                 <TableCell>
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100">
-                      <User className="h-4 w-4 text-slate-600" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-blue-100 to-indigo-100">
+                      <User className="h-4 w-4 text-blue-700" />
                     </div>
                     <div>
                       <div className="font-medium">{moderator.full_name || 'No name'}</div>
@@ -124,7 +145,7 @@ export function ModeratorManagementTable({ moderators }: ModeratorManagementTabl
                   <div className="flex flex-wrap gap-1">
                     {moderator.assigned_sports && moderator.assigned_sports.length > 0 ? (
                       moderator.assigned_sports.map((sport: string) => (
-                        <Badge key={sport} variant="outline" className="text-xs">
+                        <Badge key={sport} variant="outline" className="text-xs text-gray-700 border-gray-300">
                           {sport}
                         </Badge>
                       ))
@@ -140,7 +161,7 @@ export function ModeratorManagementTable({ moderators }: ModeratorManagementTabl
                   <div className="flex flex-wrap gap-1">
                     {moderator.assigned_venues && moderator.assigned_venues.length > 0 ? (
                       moderator.assigned_venues.map((venue: string) => (
-                        <Badge key={venue} variant="outline" className="text-xs">
+                        <Badge key={venue} variant="outline" className="text-xs text-gray-700 border-gray-300">
                           {venue}
                         </Badge>
                       ))
@@ -154,7 +175,7 @@ export function ModeratorManagementTable({ moderators }: ModeratorManagementTabl
                 
                 <TableCell>
                   <div className="flex items-center gap-2 text-sm text-slate-500">
-                    <Calendar className="h-4 w-4" />
+                    <Calendar className="h-4 w-4 text-gray-700" />
                     {formatDate(moderator.created_at)}
                   </div>
                 </TableCell>
@@ -168,11 +189,11 @@ export function ModeratorManagementTable({ moderators }: ModeratorManagementTabl
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => setViewingActivity(moderator)}>
-                        <Eye className="mr-2 h-4 w-4" />
+                        <Eye className="mr-2 h-4 w-4 text-gray-700" />
                         View Activity
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => setEditingModerator(moderator)}>
-                        <Edit className="mr-2 h-4 w-4" />
+                        <Edit className="mr-2 h-4 w-4 text-gray-700" />
                         Edit Assignments
                       </DropdownMenuItem>
                       {moderator.role === 'moderator' && (

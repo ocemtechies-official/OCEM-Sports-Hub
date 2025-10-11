@@ -20,8 +20,22 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import { DynamicSidebarStats } from "@/components/admin/dynamic-sidebar-stats"
 
-const navigation = [
+interface NavigationItem {
+  name: string
+  href: string
+  icon: React.ComponentType<any>
+  exact?: boolean
+  badge?: string
+}
+
+interface NavigationSection {
+  title: string
+  items: NavigationItem[]
+}
+
+const navigation: NavigationSection[] = [
   {
     title: "Dashboard",
     items: [
@@ -34,8 +48,7 @@ const navigation = [
       { 
         name: "Analytics", 
         href: "/admin/analytics", 
-        icon: BarChart3,
-        badge: "Soon" 
+        icon: BarChart3
       },
     ],
   },
@@ -124,7 +137,7 @@ export function AdminSidebar() {
               <nav className="space-y-1">
                 {section.items.map((item) => {
                   const Icon = item.icon
-                  const active = isActive(item.href, (item as any).exact)
+                  const active = isActive(item.href, item.exact)
 
                   return (
                     <Link
@@ -161,28 +174,8 @@ export function AdminSidebar() {
         </div>
       </ScrollArea>
 
-      {/* Quick Stats Footer */}
-      <div className="px-6 py-4 border-t flex-shrink-0">
-        <div className="rounded-lg bg-gradient-to-br from-indigo-50 to-blue-50 p-4 border border-indigo-100">
-          <div className="text-xs font-medium text-slate-600 mb-3">
-            Quick Stats
-          </div>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-600">Active Users</span>
-              <span className="text-sm font-bold text-slate-900">1,234</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-600">Live Fixtures</span>
-              <span className="text-sm font-bold text-green-600">3</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-600">Pending</span>
-              <span className="text-sm font-bold text-orange-600">12</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Dynamic Stats Footer */}
+      <DynamicSidebarStats />
     </aside>
   )
 }

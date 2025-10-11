@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Search, MoreVertical, Download, Edit, Trash2, Copy, Eye, BarChart } from "lucide-react"
 import { notifications } from "@/lib/notifications"
+import Link from "next/link"
 
 interface Quiz {
   id: string
@@ -55,6 +56,8 @@ export function EnhancedQuizTable({ quizzes }: EnhancedQuizTableProps) {
   const [selectedQuizzes, setSelectedQuizzes] = useState<Set<string>>(new Set())
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
+  const [deletingQuiz, setDeletingQuiz] = useState<string | null>(null)
+  const [duplicatingQuiz, setDuplicatingQuiz] = useState<string | null>(null)
 
   // Filter and sort quizzes
   const filteredAndSortedQuizzes = useMemo(() => {
@@ -150,6 +153,101 @@ export function EnhancedQuizTable({ quizzes }: EnhancedQuizTableProps) {
     
     notifications.showSuccess(`Exported ${selectedQuizzes.size} quizzes`)
     setSelectedQuizzes(new Set())
+  }
+
+  // Delete quiz handler
+  const handleDeleteQuiz = async (quizId: string) => {
+    if (!confirm('Are you sure you want to delete this quiz? This action cannot be undone.')) {
+      return
+    }
+
+    setDeletingQuiz(quizId)
+    try {
+      const response = await fetch(`/api/admin/quizzes/${quizId}`, {
+        method: 'DELETE',
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to delete quiz')
+      }
+
+      notifications.showSuccess({
+        title: "Success",
+        description: "Quiz deleted successfully"
+      })
+
+      // Refresh the page to show updated data
+      window.location.reload()
+    } catch (error: any) {
+      console.error('Error deleting quiz:', error)
+      notifications.showError({
+        title: "Error",
+        description: error.message || "Failed to delete quiz"
+      })
+    } finally {
+      setDeletingQuiz(null)
+    }
+  }
+
+  // Duplicate quiz handler
+  const handleDuplicateQuiz = async (quizId: string) => {
+    if (!confirm('Create a copy of this quiz?')) {
+      return
+    }
+
+    setDuplicatingQuiz(quizId)
+    try {
+      // First get the quiz data
+      const quizResponse = await fetch(`/api/admin/quizzes/${quizId}`)
+      if (!quizResponse.ok) {
+        throw new Error('Failed to fetch quiz data')
+      }
+      
+      const { data: quizData } = await quizResponse.json()
+
+      // Create the duplicate
+      const response = await fetch('/api/admin/quizzes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: `${quizData.title} (Copy)`,
+          description: quizData.description,
+          difficulty: quizData.difficulty,
+          time_limit: quizData.time_limit,
+          is_active: false, // Start as inactive
+          questions: quizData.questions?.map((q: any) => ({
+            question_text: q.question_text,
+            options: q.options,
+            correct_answer: q.correct_answer,
+            explanation: q.explanation
+          })) || []
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to duplicate quiz')
+      }
+
+      notifications.showSuccess({
+        title: "Success",
+        description: "Quiz duplicated successfully"
+      })
+
+      // Refresh the page to show updated data
+      window.location.reload()
+    } catch (error: any) {
+      console.error('Error duplicating quiz:', error)
+      notifications.showError({
+        title: "Error",
+        description: error.message || "Failed to duplicate quiz"
+      })
+    } finally {
+      setDuplicatingQuiz(null)
+    }
   }
 
   const difficultyColors = {
@@ -327,31 +425,44 @@ export function EnhancedQuizTable({ quizzes }: EnhancedQuizTableProps) {
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
-                          <Eye className="h-4 w-4 mr-2" />
-                          View Quiz
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Edit className="h-4 w-4 mr-2" />
-                          Edit Quiz
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <Copy className="h-4 w-4 mr-2" />
-                          Duplicate
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <BarChart className="h-4 w-4 mr-2" />
-                          View Analytics
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-red-600">
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem asChild>
+                            <Link href={`/quiz/${quiz.id}`}>
+                              <Eye className="h-4 w-4 mr-2" />
+                              View Quiz
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/quizzes/${quiz.id}/edit`}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit Quiz
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDuplicateQuiz(quiz.id)}
+                            disabled={duplicatingQuiz === quiz.id}
+                          >
+                            <Copy className="h-4 w-4 mr-2" />
+                            {duplicatingQuiz === quiz.id ? "Duplicating..." : "Duplicate"}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <Link href={`/admin/quizzes/${quiz.id}/analytics`}>
+                              <BarChart className="h-4 w-4 mr-2" />
+                              View Analytics
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem 
+                            className="text-red-600"
+                            onClick={() => handleDeleteQuiz(quiz.id)}
+                            disabled={deletingQuiz === quiz.id}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            {deletingQuiz === quiz.id ? "Deleting..." : "Delete"}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
