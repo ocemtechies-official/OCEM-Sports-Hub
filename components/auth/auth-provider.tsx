@@ -138,11 +138,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (event === "SIGNED_IN" && session) {
             setUser(session.user)
             await fetchProfile(session.user.id)
-            notifications.showSuccess("You have been signed in successfully.")
+            // Don't show notification here as it's handled by login form
           } else if (event === "SIGNED_OUT") {
-            setUser(null)
-            setProfile(null)
-            notifications.showSuccess("You have been signed out successfully.")
+            // Only update state if not already handled by signOut function
+            if (user !== null) {
+              setUser(null)
+              setProfile(null)
+              console.log("Auth state listener: User signed out")
+            }
+          } else if (event === "TOKEN_REFRESHED" && session) {
+            setUser(session.user)
           }
         }
       )
@@ -184,16 +189,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (error) {
         console.error("Connection test failed:", error)
-        notifications.showError(`Connection Test Failed: ${error.message}`)
+        notifications.showError({
+          title: "Connection Test Failed",
+          description: error.message
+        })
         return false
       }
       
       console.log("Connection test successful:", data)
-      notifications.showSuccess("Successfully connected to Supabase")
+      notifications.showSuccess({
+        title: "Success",
+        description: "Successfully connected to Supabase"
+      })
       return true
     } catch (error: any) {
       console.error("Connection test error:", error)
-      notifications.showError(error.message || "Network error - check your connection")
+      notifications.showError({
+        title: "Connection Error",
+        description: error.message || "Network error - check your connection"
+      })
       return false
     }
   }
@@ -229,7 +243,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error("Sign in error:", error)
         
-        // Record failed attempt for rate limiting
+        // Handle email not confirmed case specially - don't record as failed attempt
+        if (error.message.includes("Email not confirmed")) {
+          return { 
+            data: null, 
+            error: { 
+              type: 'email_not_confirmed', 
+              message: "Please verify your email address before logging in.",
+              email: email 
+            } 
+          }
+        }
+        
+        // Record failed attempt for rate limiting (only for actual auth failures)
         if (rateLimitKey) {
           const rateLimitResult = rateLimiter.recordAttempt(rateLimitKey)
           if (rateLimitResult.blocked) {
@@ -243,8 +269,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error.message) {
           if (error.message.includes("Invalid login credentials")) {
             errorMessage = "Invalid email or password. Please check your credentials and try again."
-          } else if (error.message.includes("Email not confirmed")) {
-            errorMessage = "Please verify your email address before logging in."
           } else {
             errorMessage = error.message
           }
@@ -395,7 +419,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch (netErr: any) {
         console.error("Supabase auth endpoint unreachable:", netErr)
-        notifications.showError("Cannot reach Supabase Auth. Check internet/VPN/firewall or ad-blockers.")
+        notifications.showError({
+          title: "Connection Error",
+          description: "Cannot reach Supabase Auth. Check internet/VPN/firewall or ad-blockers."
+        })
         return { data: null, error: netErr }
       }
       const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (typeof window !== 'undefined' ? window.location.origin : '')
@@ -549,13 +576,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signOut()
       
       if (error) {
+        console.error("Supabase signOut error:", error)
         throw error
       }
       
+      console.log("Supabase signOut successful")
+      
+      // Immediately clear the state to ensure UI updates
       setUser(null)
       setProfile(null)
-      router.push("/")
-      router.refresh()
+      
+      // Show success notification
+      notifications.showSuccess("You have been signed out successfully.")
+      
+      // Navigate to home page
+      if (typeof window !== 'undefined') {
+        window.location.href = "/"
+      }
     } catch (error: any) {
       console.error("Sign out failed:", error)
       let message = "Failed to sign out"
@@ -566,7 +603,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         message = "Network error - please check your connection"
       }
       
-      notifications.showError(message)
+      notifications.showError({
+        title: "Sign Out Error",
+        description: message
+      })
     }
   }
 

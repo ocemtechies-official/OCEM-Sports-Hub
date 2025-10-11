@@ -18,6 +18,8 @@ import {
   Activity,
   FileText,
   Settings,
+  UserCheck,
+  UserCog,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -48,6 +50,16 @@ const navigation = [
         name: "Users", 
         href: "/admin/users", 
         icon: Users 
+      },
+      { 
+        name: "Moderators", 
+        href: "/admin/moderators", 
+        icon: UserCog 
+      },
+      { 
+        name: "Registrations", 
+        href: "/admin/registrations", 
+        icon: UserCheck 
       },
       { 
         name: "Fixtures", 

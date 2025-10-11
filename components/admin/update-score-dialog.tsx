@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
-import { Target } from "lucide-react"
+import { Target, User, Clock } from "lucide-react"
 
 interface UpdateScoreDialogProps {
   fixture: any
@@ -30,6 +30,7 @@ export function UpdateScoreDialog({ fixture }: UpdateScoreDialogProps) {
   const [teamBScore, setTeamBScore] = useState(fixture.team_b_score?.toString() || "0")
   const [status, setStatus] = useState(fixture.status)
   const [isUpdating, setIsUpdating] = useState(false)
+  const [lastUpdatedBy, setLastUpdatedBy] = useState(fixture.updated_by_name || null)
 
   const handleUpdate = async () => {
     setIsUpdating(true)
@@ -54,6 +55,8 @@ export function UpdateScoreDialog({ fixture }: UpdateScoreDialogProps) {
         team_b_score: scoreB,
         status,
         winner_id: winnerId,
+        updated_by: (await supabase.auth.getUser()).data.user?.id,
+        version: (fixture.version || 1) + 1,
         updated_at: new Date().toISOString(),
       })
       .eq("id", fixture.id)
@@ -72,6 +75,17 @@ export function UpdateScoreDialog({ fixture }: UpdateScoreDialogProps) {
       title: "Success",
       description: "Score updated successfully! Real-time updates sent.",
     })
+
+    // Update the last updated by info
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single()
+      setLastUpdatedBy(profile?.full_name || user.email || 'Unknown')
+    }
 
     setOpen(false)
     setIsUpdating(false)
@@ -135,6 +149,16 @@ export function UpdateScoreDialog({ fixture }: UpdateScoreDialogProps) {
           <Button onClick={handleUpdate} disabled={isUpdating} className="w-full">
             {isUpdating ? "Updating..." : "Update Score"}
           </Button>
+
+          {/* Last Updated Info */}
+          {lastUpdatedBy && (
+            <div className="text-sm text-slate-500 text-center pt-2 border-t">
+              <div className="flex items-center justify-center gap-2">
+                <User className="h-4 w-4" />
+                <span>Last updated by {lastUpdatedBy}</span>
+              </div>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

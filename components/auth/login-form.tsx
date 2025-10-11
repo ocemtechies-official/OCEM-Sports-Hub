@@ -22,11 +22,12 @@ import { Checkbox } from "@/components/ui/checkbox"
 export function LoginForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { signIn, signInWithGoogle, signInWithGithub } = useAuth()
+  const { signIn, signInWithGoogle, signInWithGithub, resendVerificationEmail } = useAuth()
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const [isGithubLoading, setIsGithubLoading] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  const [isResendingVerification, setIsResendingVerification] = useState(false)
 
   const {
     register,
@@ -40,6 +41,28 @@ export function LoginForm() {
 
   const watchedFields = watch()
 
+  const handleResendVerification = async (email: string) => {
+    setIsResendingVerification(true)
+    try {
+      const { error } = await resendVerificationEmail(email)
+      if (error) {
+        notifications.showError({
+          title: "Failed to resend verification",
+          description: error.message || "Please try again later."
+        })
+      } else {
+        notifications.showSuccess("Verification email sent! Please check your inbox and spam folder.")
+      }
+    } catch (error: any) {
+      notifications.showError({
+        title: "Failed to resend verification",
+        description: "An unexpected error occurred. Please try again."
+      })
+    } finally {
+      setIsResendingVerification(false)
+    }
+  }
+
   const onSubmit = async (data: LoginFormData) => {
     setIsLoading(true)
     console.log("Login form submitted with data:", data)
@@ -49,11 +72,31 @@ export function LoginForm() {
 
       if (error) {
         console.error("Login error:", error)
-        notifications.showError(
-          error.message === "Invalid login credentials" 
+        
+        // Handle unconfirmed email case with custom toast and resend option
+        if (error.type === 'email_not_confirmed') {
+          notifications.showWarning("Email not verified. Please check your inbox for the verification email.")
+          
+          // Show a second notification offering to resend
+          setTimeout(() => {
+            notifications.showInfo("Didn't receive the email? We can send another verification email to help you get started.")
+            
+            // Auto-trigger resend verification email after a brief delay
+            setTimeout(() => {
+              handleResendVerification(data.email)
+            }, 2000)
+          }, 2000)
+          
+          setIsLoading(false)
+          return
+        }
+        
+        notifications.showError({
+          title: "Login failed",
+          description: error.message === "Invalid login credentials" 
             ? "Invalid email or password. Please check your credentials and try again."
             : error.message || "Login failed. Please try again."
-        )
+        })
         setIsLoading(false)
         return
       }
@@ -65,7 +108,10 @@ export function LoginForm() {
       router.refresh()
     } catch (error: any) {
       console.error("Login failed:", error)
-      notifications.showError("An unexpected error occurred. Please try again.")
+      notifications.showError({
+        title: "Login failed",
+        description: "An unexpected error occurred. Please try again."
+      })
       setIsLoading(false)
     }
   }
@@ -76,11 +122,15 @@ export function LoginForm() {
       const { error } = await signInWithGoogle()
       if (error) {
         console.error("Google sign in error:", error)
-        notifications.showError(error.message || "Failed to sign in with Google. Please try again.")
+        notifications.showError({
+          description: error.message || "Failed to sign in with Google. Please try again."
+        })
       }
     } catch (error: any) {
       console.error("Google sign in failed:", error)
-      notifications.showError("An unexpected error occurred. Please try again.")
+      notifications.showError({
+        description: "An unexpected error occurred. Please try again."
+      })
     } finally {
       setIsGoogleLoading(false)
     }
@@ -92,11 +142,15 @@ export function LoginForm() {
       const { error } = await signInWithGithub()
       if (error) {
         console.error("GitHub sign in error:", error)
-        notifications.showError(error.message || "Failed to sign in with GitHub. Please try again.")
+        notifications.showError({
+          description: error.message || "Failed to sign in with GitHub. Please try again."
+        })
       }
     } catch (error: any) {
       console.error("GitHub sign in failed:", error)
-      notifications.showError("An unexpected error occurred. Please try again.")
+      notifications.showError({
+        description: "An unexpected error occurred. Please try again."
+      })
     } finally {
       setIsGithubLoading(false)
     }
