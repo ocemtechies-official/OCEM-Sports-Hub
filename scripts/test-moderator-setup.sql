@@ -32,7 +32,7 @@ WHERE table_name = 'fixtures'
 ORDER BY column_name;
 
 -- Check role constraint
-SELECT conname, consrc 
+SELECT conname, pg_get_constraintdef(oid) as constraint_definition
 FROM pg_constraint 
 WHERE conrelid = 'public.profiles'::regclass 
   AND contype = 'c'
