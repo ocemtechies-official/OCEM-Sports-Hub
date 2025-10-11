@@ -153,7 +153,7 @@ export default async function AdminTournamentsPage() {
                     <Button variant="outline" asChild>
                       <Link href={`/admin/tournaments/${tournament.id}/edit`}>
                         <Settings className="mr-2 h-4 w-4" />
-                        Manage
+                        Edit
                       </Link>
                     </Button>
                   </div>
