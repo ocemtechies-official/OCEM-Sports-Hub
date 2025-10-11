@@ -80,11 +80,21 @@ export async function GET(request: NextRequest) {
           // If moderator has specific assignments, filter by them
           if (assignedSports.length > 0) {
             query = query.in('sport_id', assignedSports)
+          } else {
+            // If moderator has no assigned sports, return empty result
+            fixtures = []
+            error = null
+            return
           }
           
           if (assignedVenues.length > 0) {
             query = query.in('venue', assignedVenues)
           }
+        } else {
+          // If no profile data found, return empty result for safety
+          fixtures = []
+          error = null
+          return
         }
       }
       

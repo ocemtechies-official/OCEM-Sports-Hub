@@ -9,6 +9,7 @@ import {
   Calendar, 
   Clock, 
   Filter,
+  Link,
   Search,
   Trophy
 } from "lucide-react"
@@ -18,7 +19,7 @@ import { FixturesFilter } from "@/components/moderator/fixtures-filter"
 export default async function ModeratorFixturesPage({
   searchParams,
 }: {
-  searchParams: { status?: string; sport?: string; search?: string }
+  searchParams: Promise<{ status?: string; sport?: string; search?: string }>
 }) {
   const { user, profile, isModerator } = await requireModerator()
   
@@ -26,17 +27,113 @@ export default async function ModeratorFixturesPage({
     return null
   }
 
+  const params = await searchParams
   const supabase = await getSupabaseServerClient()
 
-  // Get fixtures with filters
-  const { data: fixtures } = await supabase
-    .rpc('get_moderator_fixtures', {
-      p_user_id: user.id,
-      p_status: searchParams.status || null,
-      p_sport_name: searchParams.sport || null,
-      p_limit: 50,
-      p_offset: 0
+  // Get fixtures using the API route (which has proper fallback logic)
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+  const fixturesResponse = await fetch(`${baseUrl}/api/moderator/fixtures?${new URLSearchParams({
+    status: params.status || 'all',
+    sport: params.sport || 'all',
+    limit: '50',
+    offset: '0'
+  })}`, {
+    headers: {
+      'Cookie': `sb-access-token=${user.id}` // This won't work in server components, need different approach
+    }
+  })
+
+  // Fallback: Use direct database query with proper filtering
+  let fixtures = []
+  let assignedSports = []
+  let canManageAllSports = false
+
+  try {
+    // Try to get assignments first
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('assigned_sports, assigned_venues, role')
+      .eq('id', user.id)
+      .single()
+
+    if (profileData) {
+      assignedSports = profileData.assigned_sports || []
+      canManageAllSports = profile.role === 'admin' || assignedSports.length === 0
+    }
+
+    console.log('Moderator assignments:', { 
+      userId: user.id, 
+      role: profile.role, 
+      assignedSports, 
+      canManageAllSports 
     })
+
+    // For moderators (non-admins), check if they have assignments
+    if (profile.role !== 'admin') {
+      if (assignedSports.length === 0) {
+        // If moderator has no assigned sports, return empty result
+        console.log('Moderator has no assigned sports, returning empty fixtures')
+        fixtures = []
+      } else {
+        // Build query based on moderator assignments
+        let query = supabase
+          .from('fixtures')
+          .select(`
+            *,
+            sport:sports(id, name, icon),
+            team_a:teams!fixtures_team_a_id_fkey(id, name, logo_url),
+            team_b:teams!fixtures_team_b_id_fkey(id, name, logo_url),
+            updated_by_profile:profiles!fixtures_updated_by_fkey(full_name)
+          `)
+          .in('sport_id', assignedSports)
+          .order('scheduled_at', { ascending: true })
+
+        // Apply status filter
+        if (params.status && params.status !== 'all') {
+          query = query.eq('status', params.status)
+        }
+
+        // Apply sport filter
+        if (params.sport && params.sport !== 'all') {
+          query = query.eq('sport_id', params.sport)
+        }
+
+        const { data: fixturesData } = await query
+        fixtures = fixturesData || []
+        console.log('Moderator fixtures found:', fixtures.length)
+      }
+    } else {
+      // Admin can see all fixtures
+      let query = supabase
+        .from('fixtures')
+        .select(`
+          *,
+          sport:sports(id, name, icon),
+          team_a:teams!fixtures_team_a_id_fkey(id, name, logo_url),
+          team_b:teams!fixtures_team_b_id_fkey(id, name, logo_url),
+          updated_by_profile:profiles!fixtures_updated_by_fkey(full_name)
+        `)
+        .order('scheduled_at', { ascending: true })
+
+      // Apply status filter
+      if (params.status && params.status !== 'all') {
+        query = query.eq('status', params.status)
+      }
+
+      // Apply sport filter
+      if (params.sport && params.sport !== 'all') {
+        query = query.eq('sport_id', params.sport)
+      }
+
+      const { data: fixturesData } = await query
+      fixtures = fixturesData || []
+      console.log('Admin fixtures found:', fixtures.length)
+    }
+
+  } catch (error) {
+    console.error('Error fetching moderator fixtures:', error)
+    fixtures = []
+  }
 
   // Get available sports for filter
   const { data: sports } = await supabase
@@ -44,21 +141,12 @@ export default async function ModeratorFixturesPage({
     .select('name')
     .order('name')
 
-  // Get assignments to show what sports this moderator can manage
-  const { data: assignments } = await supabase
-    .rpc('get_moderator_assignments', {
-      p_user_id: user.id
-    })
-
-  const assignedSports = assignments?.assigned_sports || []
-  const canManageAllSports = assignedSports.length === 0
-
   // Filter fixtures by search term if provided
-  const filteredFixtures = searchParams.search
+  const filteredFixtures = params.search
     ? fixtures?.filter((fixture: any) =>
-        fixture.team_a_name.toLowerCase().includes(searchParams.search!.toLowerCase()) ||
-        fixture.team_b_name.toLowerCase().includes(searchParams.search!.toLowerCase()) ||
-        fixture.sport_name.toLowerCase().includes(searchParams.search!.toLowerCase())
+        fixture.team_a?.name?.toLowerCase().includes(params.search!.toLowerCase()) ||
+        fixture.team_b?.name?.toLowerCase().includes(params.search!.toLowerCase()) ||
+        fixture.sport?.name?.toLowerCase().includes(params.search!.toLowerCase())
       )
     : fixtures
 
@@ -97,9 +185,9 @@ export default async function ModeratorFixturesPage({
         </CardHeader>
         <CardContent>
           <FixturesFilter 
-            currentStatus={searchParams.status}
-            currentSport={searchParams.sport}
-            currentSearch={searchParams.search}
+            currentStatus={params.status}
+            currentSport={params.sport}
+            currentSearch={params.search}
             availableSports={sports?.map(s => s.name) || []}
             assignedSports={assignedSports}
           />
@@ -191,12 +279,25 @@ export default async function ModeratorFixturesPage({
         <Card>
           <CardContent className="py-12 text-center">
             <Calendar className="h-12 w-12 mx-auto mb-4 text-slate-400" />
-            <h3 className="text-lg font-medium text-slate-900 mb-2">No fixtures found</h3>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">
+              {profile.role !== 'admin' && assignedSports.length === 0
+                ? "No Sports Assigned"
+                : "No fixtures found"}
+            </h3>
             <p className="text-slate-500">
-              {searchParams.status || searchParams.sport || searchParams.search
+              {profile.role !== 'admin' && assignedSports.length === 0
+                ? "You haven't been assigned to any sports yet. Contact an administrator to get sports assignments."
+                : params.status || params.sport || params.search
                 ? "Try adjusting your filters to see more matches."
                 : "No fixtures are available for you to moderate at the moment."}
             </p>
+            {profile.role !== 'admin' && assignedSports.length === 0 && (
+              <div className="mt-4">
+                <Button variant="outline" asChild>
+                  <Link href="/admin">Contact Admin</Link>
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}

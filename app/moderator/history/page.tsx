@@ -2,7 +2,6 @@ import { requireModerator } from "@/lib/auth"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { 
   History, 
   Clock, 
@@ -12,11 +11,12 @@ import {
   Filter
 } from "lucide-react"
 import { UpdateHistoryTable } from "@/components/moderator/update-history-table"
+import { HistoryFilters } from "@/components/moderator/history-filters"
 
 export default async function ModeratorHistoryPage({
   searchParams,
 }: {
-  searchParams: { days?: string; type?: string }
+  searchParams: Promise<{ days?: string; type?: string }>
 }) {
   const { user, profile, isModerator } = await requireModerator()
   
@@ -24,9 +24,10 @@ export default async function ModeratorHistoryPage({
     return null
   }
 
+  const params = await searchParams
   const supabase = await getSupabaseServerClient()
-  const days = parseInt(searchParams.days || "7")
-  const changeType = searchParams.type || null
+  const days = parseInt(params.days || "7")
+  const changeType = params.type || null
 
   // Get update history
   const { data: updates } = await supabase
@@ -136,74 +137,11 @@ export default async function ModeratorHistoryPage({
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filters
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-4">
-            {/* Time Period */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Period:</span>
-              <div className="flex gap-1">
-                {[1, 7, 30].map((period) => (
-                  <Button
-                    key={period}
-                    variant={days === period ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => {
-                      const params = new URLSearchParams(searchParams)
-                      if (period === 7) {
-                        params.delete('days')
-                      } else {
-                        params.set('days', period.toString())
-                      }
-                      window.location.href = `/moderator/history?${params.toString()}`
-                    }}
-                  >
-                    {period === 1 ? 'Today' : `${period} days`}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Change Type */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Type:</span>
-              <div className="flex gap-1">
-                <Button
-                  variant={!changeType ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    const params = new URLSearchParams(searchParams)
-                    params.delete('type')
-                    window.location.href = `/moderator/history?${params.toString()}`
-                  }}
-                >
-                  All
-                </Button>
-                {Object.keys(changeTypeCounts).map((type) => (
-                  <Button
-                    key={type}
-                    variant={changeType === type ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => {
-                      const params = new URLSearchParams(searchParams)
-                      params.set('type', type)
-                      window.location.href = `/moderator/history?${params.toString()}`
-                    }}
-                  >
-                    {type.replace('_', ' ')} ({changeTypeCounts[type]})
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <HistoryFilters 
+        currentDays={days}
+        currentType={changeType}
+        changeTypeCounts={changeTypeCounts}
+      />
 
       {/* Update History Table */}
       <Card>

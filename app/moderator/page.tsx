@@ -24,43 +24,114 @@ export default async function ModeratorDashboard() {
 
   const supabase = await getSupabaseServerClient()
 
-  // Get today's fixtures
+  // Get moderator assignments and build proper queries
+  let assignedSports = []
+  let assignedVenues = []
+  let canManageAllSports = false
+
+  try {
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('assigned_sports, assigned_venues, role')
+      .eq('id', user.id)
+      .single()
+
+    if (profileData) {
+      assignedSports = profileData.assigned_sports || []
+      assignedVenues = profileData.assigned_venues || []
+      canManageAllSports = profile.role === 'admin' || assignedSports.length === 0
+    }
+  } catch (error) {
+    console.error('Error fetching moderator assignments:', error)
+  }
+
+  // Get today's fixtures with proper filtering
   const today = new Date()
   today.setHours(0, 0, 0, 0)
   const tomorrow = new Date(today)
   tomorrow.setDate(tomorrow.getDate() + 1)
 
-  const { data: todayFixtures } = await supabase
-    .rpc('get_moderator_fixtures', {
-      p_user_id: user.id,
-      p_limit: 10,
-      p_offset: 0
-    })
+  let todayQuery = supabase
+    .from('fixtures')
+    .select(`
+      *,
+      sport:sports(id, name, icon),
+      team_a:teams!fixtures_team_a_id_fkey(id, name, logo_url),
+      team_b:teams!fixtures_team_b_id_fkey(id, name, logo_url),
+      updated_by_profile:profiles!fixtures_updated_by_fkey(full_name)
+    `)
+    .gte('scheduled_at', today.toISOString())
+    .lt('scheduled_at', tomorrow.toISOString())
+    .order('scheduled_at', { ascending: true })
+    .limit(10)
 
-  // Get live fixtures
-  const { data: liveFixtures } = await supabase
-    .rpc('get_moderator_fixtures', {
-      p_user_id: user.id,
-      p_status: 'live',
-      p_limit: 5,
-      p_offset: 0
-    })
+  // Apply moderator filtering
+  let todayFixtures = []
+  let liveFixtures = []
 
-  // Get moderator stats
-  const { data: stats } = await supabase
-    .rpc('get_moderator_stats', {
-      p_user_id: user.id,
-      p_days: 7
-    })
+  if (profile.role === 'admin' || assignedSports.length > 0) {
+    // Apply moderator filtering
+    if (profile.role !== 'admin' && assignedSports.length > 0) {
+      todayQuery = todayQuery.in('sport_id', assignedSports)
+    }
 
-  // Get assignments
-  const { data: assignments } = await supabase
-    .rpc('get_moderator_assignments', {
-      p_user_id: user.id
-    })
+    const { data: todayData } = await todayQuery
+    todayFixtures = todayData || []
 
-  const assignedSports = assignments?.assigned_sports || []
-  const assignedVenues = assignments?.assigned_venues || []
+    // Get live fixtures with proper filtering
+    let liveQuery = supabase
+      .from('fixtures')
+      .select(`
+        *,
+        sport:sports(id, name, icon),
+        team_a:teams!fixtures_team_a_id_fkey(id, name, logo_url),
+        team_b:teams!fixtures_team_b_id_fkey(id, name, logo_url),
+        updated_by_profile:profiles!fixtures_updated_by_fkey(full_name)
+      `)
+      .eq('status', 'live')
+      .order('scheduled_at', { ascending: true })
+      .limit(5)
+
+    // Apply moderator filtering
+    if (profile.role !== 'admin' && assignedSports.length > 0) {
+      liveQuery = liveQuery.in('sport_id', assignedSports)
+    }
+
+    const { data: liveData } = await liveQuery
+    liveFixtures = liveData || []
+  }
+  // If moderator has no assigned sports, both arrays remain empty
+
+  // Get basic stats (fallback since RPC might not exist)
+  let stats = {
+    updates_today: 0,
+    total_updates: 0,
+    fixtures_updated: 0
+  }
+
+  try {
+    // Try to get stats from match_updates table if it exists
+    const { data: matchUpdates, error: matchUpdatesError } = await supabase
+      .from('match_updates')
+      .select('*', { count: 'exact' })
+      .eq('changed_by', user.id)
+      .gte('change_time', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+
+    if (!matchUpdatesError && matchUpdates) {
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      
+      stats = {
+        updates_today: matchUpdates.filter(update => 
+          new Date(update.change_time) >= today
+        ).length,
+        total_updates: matchUpdates.length,
+        fixtures_updated: new Set(matchUpdates.map(update => update.fixture_id)).size
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching moderator stats:', error)
+  }
 
   return (
     <div className="space-y-6">
@@ -128,7 +199,11 @@ export default async function ModeratorDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{assignedSports.length}</div>
             <p className="text-xs text-muted-foreground">
-              {assignedSports.length === 0 ? 'All sports' : assignedSports.join(', ')}
+              {profile.role === 'admin' 
+                ? 'All sports' 
+                : assignedSports.length === 0 
+                ? 'No sports assigned' 
+                : assignedSports.join(', ')}
             </p>
           </CardContent>
         </Card>
@@ -153,7 +228,13 @@ export default async function ModeratorDashboard() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {liveFixtures && liveFixtures.length > 0 ? (
+            {profile.role !== 'admin' && assignedSports.length === 0 ? (
+              <div className="text-center py-8 text-slate-500">
+                <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="font-medium">No Sports Assigned</p>
+                <p className="text-sm mt-1">Contact an administrator to get sports assignments</p>
+              </div>
+            ) : liveFixtures && liveFixtures.length > 0 ? (
               liveFixtures.map((fixture: any) => (
                 <QuickUpdateCard 
                   key={fixture.fixture_id} 
@@ -187,15 +268,21 @@ export default async function ModeratorDashboard() {
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            {todayFixtures && todayFixtures.length > 0 ? (
+            {profile.role !== 'admin' && assignedSports.length === 0 ? (
+              <div className="text-center py-8 text-slate-500">
+                <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <p className="font-medium">No Sports Assigned</p>
+                <p className="text-sm mt-1">Contact an administrator to get sports assignments</p>
+              </div>
+            ) : todayFixtures && todayFixtures.length > 0 ? (
               todayFixtures.slice(0, 3).map((fixture: any) => (
                 <div key={fixture.fixture_id} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex-1">
                     <div className="font-medium text-sm">
-                      {fixture.team_a_name} vs {fixture.team_b_name}
+                      {fixture.team_a?.name} vs {fixture.team_b?.name}
                     </div>
                     <div className="text-xs text-slate-500">
-                      {fixture.sport_name} • {new Date(fixture.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {fixture.sport?.name} • {new Date(fixture.scheduled_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
                   <Badge variant={fixture.status === 'live' ? 'default' : 'secondary'}>
