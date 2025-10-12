@@ -5,12 +5,25 @@ import { requireAdmin } from "@/lib/auth"
 export async function GET(request: NextRequest) {
   try {
     // Check if user is admin
-    const { isAdmin } = await requireAdmin()
-    if (!isAdmin) {
+    const { isAdmin, user } = await requireAdmin()
+    if (!isAdmin || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const supabase = await getSupabaseServerClient()
+    
+    // Use service role client to bypass RLS for admin operations
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
 
     // Fetch comprehensive data for reports
     const [
@@ -37,48 +50,47 @@ export async function GET(request: NextRequest) {
       // Registration reports
       { data: registrationReports }
     ] = await Promise.all([
-      // User reports
-      supabase.from("profiles")
+      // User reports - Use admin client to bypass RLS
+      supabaseAdmin.from("profiles")
         .select(`
           id,
           full_name,
           email,
-          phone,
           created_at,
           updated_at,
           deleted_at
         `)
-        .eq("deleted_at", null)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false }),
       
-      supabase.from("profiles")
+      supabaseAdmin.from("profiles")
         .select("created_at")
-        .eq("deleted_at", null)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false }),
       
-      // Fixture reports
-      supabase.from("fixtures")
+      // Fixture reports - Use admin client to bypass RLS
+      supabaseAdmin.from("fixtures")
         .select(`
           id,
-          title,
           sport_id,
           status,
-          scheduled_date,
+          scheduled_at,
           created_at,
           updated_at,
           sports(name),
-          teams(name)
+          team_a:teams!fixtures_team_a_id_fkey(name),
+          team_b:teams!fixtures_team_b_id_fkey(name)
         `)
-        .eq("deleted_at", null)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false }),
       
-      supabase.from("fixtures")
+      supabaseAdmin.from("fixtures")
         .select("status, created_at, sport_id, sports(name)")
-        .eq("deleted_at", null)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false }),
       
-      // Quiz reports
-      supabase.from("quizzes")
+      // Quiz reports - Use admin client to bypass RLS
+      supabaseAdmin.from("quizzes")
         .select(`
           id,
           title,
@@ -88,10 +100,10 @@ export async function GET(request: NextRequest) {
           updated_at,
           deleted_at
         `)
-        .eq("deleted_at", null)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false }),
       
-      supabase.from("quiz_attempts")
+      supabaseAdmin.from("quiz_attempts")
         .select(`
           id,
           quiz_id,
@@ -105,8 +117,8 @@ export async function GET(request: NextRequest) {
         `)
         .order("completed_at", { ascending: false }),
       
-      // Tournament reports
-      supabase.from("tournaments")
+      // Tournament reports - Use admin client to bypass RLS
+      supabaseAdmin.from("tournaments")
         .select(`
           id,
           name,
@@ -119,43 +131,41 @@ export async function GET(request: NextRequest) {
           updated_at,
           deleted_at
         `)
-        .eq("deleted_at", null)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false }),
       
-      supabase.from("tournaments")
+      supabaseAdmin.from("tournaments")
         .select("status, tournament_type, created_at")
-        .eq("deleted_at", null)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false }),
       
-      // Team reports
-      supabase.from("teams")
+      // Team reports - Use admin client to bypass RLS (teams table doesn't have deleted_at or sport_id)
+      supabaseAdmin.from("teams")
         .select(`
           id,
           name,
-          description,
-          sport_id,
-          created_at,
-          updated_at,
-          deleted_at,
-          sports(name)
+          logo_url,
+          color,
+          created_at
         `)
-        .eq("deleted_at", null)
         .order("created_at", { ascending: false }),
       
-      supabase.from("team_registrations")
+      supabaseAdmin.from("team_registrations")
         .select(`
           id,
-          team_id,
           user_id,
+          sport_id,
+          team_name,
           status,
           created_at,
-          teams(name),
+          official_team_id,
+          sports(name),
           profiles(full_name)
         `)
         .order("created_at", { ascending: false }),
       
       // Registration reports
-      supabase.from("individual_registrations")
+      supabaseAdmin.from("individual_registrations")
         .select(`
           id,
           user_id,

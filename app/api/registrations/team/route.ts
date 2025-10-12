@@ -139,14 +139,59 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (registrationError) {
-      console.error('Team registration error:', registrationError)
+      console.error('Create team registration error:', registrationError)
       return NextResponse.json(
         { error: 'Failed to create team registration' },
         { status: 500 }
       )
     }
 
-    // Insert team members
+    // Create team in unified teams table
+    const { data: team, error: teamError } = await supabase
+      .from('teams')
+      .insert({
+        name: validatedData.teamName,
+        team_type: 'student_registered',
+        source_type: 'student_registration',
+        sport_id: sportUuid,
+        department: validatedData.department,
+        semester: validatedData.semester,
+        gender: validatedData.gender,
+        captain_name: validatedData.captainName,
+        captain_contact: validatedData.captainContact,
+        captain_email: validatedData.captainEmail,
+        status: 'pending_approval',
+        original_registration_id: registration.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single()
+
+    if (teamError) {
+      console.error('Create team error:', teamError)
+      // Rollback registration
+      await supabase.from('team_registrations').delete().eq('id', registration.id)
+      return NextResponse.json(
+        { error: 'Failed to create team' },
+        { status: 500 }
+      )
+    }
+
+    // Update registration with team reference
+    const { error: updateRegError } = await supabase
+      .from('team_registrations')
+      .update({
+        official_team_id: team.id
+      })
+      .eq('id', registration.id)
+
+    if (updateRegError) {
+      console.error('Update registration error:', updateRegError)
+      // Don't fail the request for this
+    }
+
+    // Insert team members in registration table
     const membersToInsert = validatedData.members.map((memberName, index) => ({
       team_registration_id: registration.id,
       member_name: memberName,
@@ -160,14 +205,38 @@ export async function POST(request: NextRequest) {
 
     if (membersError) {
       console.error('Team members error:', membersError)
-      // Try to cleanup the registration
-      await supabase
-        .from('team_registrations')
-        .delete()
-        .eq('id', registration.id)
-      
+      // Rollback team and registration
+      await supabase.from('teams').delete().eq('id', team.id)
+      await supabase.from('team_registrations').delete().eq('id', registration.id)
       return NextResponse.json(
         { error: 'Failed to register team members' },
+        { status: 500 }
+      )
+    }
+
+    // Insert team members in unified teams table
+    const teamMembersToInsert = validatedData.members.map((memberName, index) => ({
+      team_id: team.id,
+      member_name: memberName,
+      member_order: index + 1,
+      is_captain: index === 0, // First member is captain
+      is_substitute: false,
+      created_at: new Date().toISOString()
+    }))
+
+    const { error: teamMembersError } = await supabase
+      .from('team_members')
+      .insert(teamMembersToInsert)
+
+    if (teamMembersError) {
+      console.error('Team members error:', teamMembersError)
+      // Rollback everything
+      await supabase.from('team_members').delete().eq('team_id', team.id)
+      await supabase.from('team_registration_members').delete().eq('team_registration_id', registration.id)
+      await supabase.from('teams').delete().eq('id', team.id)
+      await supabase.from('team_registrations').delete().eq('id', registration.id)
+      return NextResponse.json(
+        { error: 'Failed to create team members' },
         { status: 500 }
       )
     }
