@@ -23,13 +23,16 @@ export function CreateTeamForm() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/admin/teams', {
+      const response = await fetch('/api/teams', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...formData,
+          team_type: 'official',
+          source_type: 'admin_created',
+          status: 'active',
           logo_url: formData.logo_url || null
         }),
       })
@@ -41,7 +44,7 @@ export function CreateTeamForm() {
 
       notifications.showSuccess({
         title: "Success",
-        description: "Team created successfully"
+        description: "Official team created successfully"
       })
 
       router.push('/admin/teams')

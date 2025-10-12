@@ -27,7 +27,7 @@ import {
   Settings
 } from "lucide-react"
 import { notifications } from "@/lib/notifications"
-import { createClient } from "@/lib/supabase/client"
+import { getSupabaseBrowserClient } from "@/lib/supabase/client"
 
 interface Fixture {
   id: string
@@ -59,7 +59,7 @@ export function LiveMonitorDashboard({
     fixture: null
   })
   const [newScores, setNewScores] = useState({ team_a: 0, team_b: 0 })
-  const supabase = createClient()
+  const supabase = getSupabaseBrowserClient()
 
   // Set up real-time subscription for live fixtures
   useEffect(() => {

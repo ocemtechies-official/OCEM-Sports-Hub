@@ -5,12 +5,25 @@ import { requireAdmin } from "@/lib/auth"
 export async function GET(request: NextRequest) {
   try {
     // Check if user is admin
-    const { isAdmin } = await requireAdmin()
-    if (!isAdmin) {
+    const { isAdmin, user } = await requireAdmin()
+    if (!isAdmin || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const supabase = await getSupabaseServerClient()
+    
+    // Use service role client to bypass RLS for admin operations
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false
+        }
+      }
+    )
 
     // Fetch comprehensive analytics data
     const [
@@ -35,49 +48,49 @@ export async function GET(request: NextRequest) {
       // Recent activity
       { data: recentActivity }
     ] = await Promise.all([
-      // User analytics
-      supabase.from("profiles").select("*", { count: "exact", head: true }).eq("deleted_at", null),
-      supabase.from("profiles")
+      // User analytics - Use admin client to bypass RLS
+      supabaseAdmin.from("profiles").select("*", { count: "exact", head: true }).is("deleted_at", null),
+      supabaseAdmin.from("profiles")
         .select("created_at")
-        .eq("deleted_at", null)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false })
         .limit(30),
       
-      // Fixture analytics
-      supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("deleted_at", null),
-      supabase.from("fixtures")
+      // Fixture analytics - Use admin client to bypass RLS
+      supabaseAdmin.from("fixtures").select("*", { count: "exact", head: true }).is("deleted_at", null),
+      supabaseAdmin.from("fixtures")
         .select("status, created_at")
-        .eq("deleted_at", null)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false })
         .limit(100),
-      supabase.from("fixtures")
+      supabaseAdmin.from("fixtures")
         .select("sport_id, sports(name)")
-        .eq("deleted_at", null)
+        .is("deleted_at", null)
         .limit(100),
       
-      // Quiz analytics
-      supabase.from("quizzes").select("*", { count: "exact", head: true }).eq("deleted_at", null),
-      supabase.from("quiz_attempts")
+      // Quiz analytics - Use admin client to bypass RLS
+      supabaseAdmin.from("quizzes").select("*", { count: "exact", head: true }).is("deleted_at", null),
+      supabaseAdmin.from("quiz_attempts")
         .select("quiz_id, score, completed_at, quizzes(title)")
         .order("completed_at", { ascending: false })
         .limit(100),
-      supabase.from("quiz_attempts")
+      supabaseAdmin.from("quiz_attempts")
         .select("quiz_id, score, quizzes(title)")
         .eq("completed", true)
         .limit(100),
       
-      // Tournament analytics
-      supabase.from("tournaments").select("*", { count: "exact", head: true }).eq("deleted_at", null),
-      supabase.from("tournaments")
+      // Tournament analytics - Use admin client to bypass RLS
+      supabaseAdmin.from("tournaments").select("*", { count: "exact", head: true }).is("deleted_at", null),
+      supabaseAdmin.from("tournaments")
         .select("status, tournament_type, created_at")
-        .eq("deleted_at", null)
+        .is("deleted_at", null)
         .order("created_at", { ascending: false })
         .limit(50),
       
-      // Recent activity (last 7 days)
-      supabase.from("profiles")
+      // Recent activity (last 7 days) - Use admin client to bypass RLS
+      supabaseAdmin.from("profiles")
         .select("created_at")
-        .eq("deleted_at", null)
+        .is("deleted_at", null)
         .gte("created_at", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
     ])
 

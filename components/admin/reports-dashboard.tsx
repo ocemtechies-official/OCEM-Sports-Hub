@@ -31,7 +31,6 @@ interface ReportsData {
       id: string
       full_name: string
       email: string
-      phone: string
       created_at: string
       updated_at: string
       deleted_at: string | null
@@ -41,14 +40,14 @@ interface ReportsData {
   fixtures: {
     reports: Array<{
       id: string
-      title: string
       sport_id: string
       status: string
-      scheduled_date: string
+      scheduled_at: string
       created_at: string
       updated_at: string
       sports: { name: string } | null
-      teams: { name: string } | null
+      team_a: { name: string } | null
+      team_b: { name: string } | null
     }>
     stats: Array<{ status: string; created_at: string; sport_id: string; sports: { name: string } | null }>
   }
@@ -93,20 +92,19 @@ interface ReportsData {
     reports: Array<{
       id: string
       name: string
-      description: string
-      sport_id: string
+      logo_url: string | null
+      color: string | null
       created_at: string
-      updated_at: string
-      deleted_at: string | null
-      sports: { name: string } | null
     }>
     registrations: Array<{
       id: string
-      team_id: string
       user_id: string
+      sport_id: string
+      team_name: string
       status: string
       created_at: string
-      teams: { name: string } | null
+      official_team_id: string | null
+      sports: { name: string } | null
       profiles: { full_name: string } | null
     }>
   }
@@ -593,7 +591,6 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
                     <tr className="border-b">
                       <th className="text-left p-2">Name</th>
                       <th className="text-left p-2">Email</th>
-                      <th className="text-left p-2">Phone</th>
                       <th className="text-left p-2">Created</th>
                       <th className="text-left p-2">Status</th>
                     </tr>
@@ -603,7 +600,6 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
                       <tr key={user.id} className="border-b">
                         <td className="p-2 font-medium">{user.full_name}</td>
                         <td className="p-2">{user.email}</td>
-                        <td className="p-2">{user.phone}</td>
                         <td className="p-2">{new Date(user.created_at).toLocaleDateString()}</td>
                         <td className="p-2">
                           <Badge className={user.deleted_at ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}>
@@ -667,24 +663,26 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left p-2">Title</th>
+                      <th className="text-left p-2">Match</th>
                       <th className="text-left p-2">Sport</th>
                       <th className="text-left p-2">Status</th>
-                      <th className="text-left p-2">Scheduled Date</th>
+                      <th className="text-left p-2">Scheduled At</th>
                       <th className="text-left p-2">Created</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredData.fixtures.reports.slice(0, 10).map((fixture) => (
                       <tr key={fixture.id} className="border-b">
-                        <td className="p-2 font-medium">{fixture.title}</td>
+                        <td className="p-2 font-medium">
+                          {fixture.team_a?.name || 'Team A'} vs {fixture.team_b?.name || 'Team B'}
+                        </td>
                         <td className="p-2">{fixture.sports?.name || 'N/A'}</td>
                         <td className="p-2">
                           <Badge className={getStatusColor(fixture.status)}>
                             {fixture.status}
                           </Badge>
                         </td>
-                        <td className="p-2">{fixture.scheduled_date ? new Date(fixture.scheduled_date).toLocaleDateString() : 'N/A'}</td>
+                        <td className="p-2">{fixture.scheduled_at ? new Date(fixture.scheduled_at).toLocaleDateString() : 'N/A'}</td>
                         <td className="p-2">{new Date(fixture.created_at).toLocaleDateString()}</td>
                       </tr>
                     ))}
@@ -887,24 +885,28 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
                   <thead>
                     <tr className="border-b">
                       <th className="text-left p-2">Name</th>
-                      <th className="text-left p-2">Sport</th>
-                      <th className="text-left p-2">Status</th>
+                      <th className="text-left p-2">Color</th>
                       <th className="text-left p-2">Registrations</th>
                       <th className="text-left p-2">Created</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredData.teams.reports.slice(0, 10).map((team) => {
-                      const teamRegistrations = filteredData.teams.registrations.filter(r => r.team_id === team.id)
+                      const teamRegistrations = filteredData.teams.registrations.filter(r => r.official_team_id === team.id)
                       
                       return (
                         <tr key={team.id} className="border-b">
                           <td className="p-2 font-medium">{team.name}</td>
-                          <td className="p-2">{team.sports?.name || 'N/A'}</td>
                           <td className="p-2">
-                            <Badge className={team.deleted_at ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}>
-                              {team.deleted_at ? 'Inactive' : 'Active'}
-                            </Badge>
+                            {team.color && (
+                              <div className="flex items-center gap-2">
+                                <div 
+                                  className="w-4 h-4 rounded-full border" 
+                                  style={{ backgroundColor: team.color }}
+                                />
+                                <span className="text-sm">{team.color}</span>
+                              </div>
+                            )}
                           </td>
                           <td className="p-2">{teamRegistrations.length}</td>
                           <td className="p-2">{new Date(team.created_at).toLocaleDateString()}</td>
@@ -1002,7 +1004,8 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
                       <thead>
                         <tr className="border-b">
                           <th className="text-left p-2">User</th>
-                          <th className="text-left p-2">Team</th>
+                          <th className="text-left p-2">Team Name</th>
+                          <th className="text-left p-2">Sport</th>
                           <th className="text-left p-2">Status</th>
                           <th className="text-left p-2">Date</th>
                         </tr>
@@ -1011,7 +1014,8 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
                         {filteredData.teams.registrations.slice(0, 5).map((reg) => (
                           <tr key={reg.id} className="border-b">
                             <td className="p-2 font-medium">{reg.profiles?.full_name || 'N/A'}</td>
-                            <td className="p-2">{reg.teams?.name || 'N/A'}</td>
+                            <td className="p-2">{reg.team_name || 'N/A'}</td>
+                            <td className="p-2">{reg.sports?.name || 'N/A'}</td>
                             <td className="p-2">
                               <Badge className={getStatusColor(reg.status)}>
                                 {reg.status}
