@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { 
@@ -11,30 +12,54 @@ import {
   Dribbble,
   Table,
   Brain,
-  MessageSquare
+  MessageSquare,
+  Loader2
 } from "lucide-react";
+
+interface DatabaseSport {
+  id: string;
+  name: string;
+  icon: string | null;
+  is_team_sport: boolean;
+  min_players: number | null;
+  max_players: number | null;
+  description: string | null;
+  is_active: boolean;
+}
 
 interface Sport {
   id: string;
   name: string;
-  icon: any;
+  icon: React.ComponentType<{ className?: string }>;
   type: 'team' | 'individual';
   minPlayers?: number;
   maxPlayers?: number;
   color: string;
 }
 
-const sports: Sport[] = [
-  { id: 'cricket', name: 'Cricket', icon: Dribbble, type: 'team', minPlayers: 11, maxPlayers: 15, color: 'from-blue-500 to-blue-600' },
-  { id: 'football', name: 'Football', icon: Trophy, type: 'team', minPlayers: 9, maxPlayers: 11, color: 'from-green-500 to-green-600' },
-  { id: 'basketball', name: 'Basketball', icon: Target, type: 'team', minPlayers: 5, maxPlayers: 8, color: 'from-orange-500 to-orange-600' },
-  { id: 'volleyball', name: 'Volleyball', icon: Volleyball, type: 'team', minPlayers: 6, maxPlayers: 9, color: 'from-yellow-500 to-yellow-600' },
-  { id: 'tug-of-war', name: 'Tug of War', icon: Users, type: 'team', minPlayers: 8, maxPlayers: 8, color: 'from-purple-500 to-purple-600' },
-  { id: 'table-tennis', name: 'Table Tennis', icon: Table, type: 'individual', color: 'from-red-500 to-red-600' },
-  { id: 'badminton', name: 'Badminton', icon: Dumbbell, type: 'individual', color: 'from-pink-500 to-pink-600' },
-  { id: 'chess', name: 'Chess', icon: Brain, type: 'individual', color: 'from-indigo-500 to-indigo-600' },
-  { id: 'quiz', name: 'Quiz', icon: MessageSquare, type: 'individual', color: 'from-teal-500 to-teal-600' },
-];
+// Icon mapping for database sports
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  'Cricket': Dribbble,
+  'Football': Trophy,
+  'Basketball': Target,
+  'Volleyball': Volleyball,
+  'Badminton': Dumbbell,
+  'Table Tennis': Table,
+  'Chess': Brain,
+  'Quiz': MessageSquare,
+};
+
+// Color mapping for sports
+const colorMap: Record<string, string> = {
+  'Cricket': 'from-blue-500 to-blue-600',
+  'Football': 'from-green-500 to-green-600',
+  'Basketball': 'from-orange-500 to-orange-600',
+  'Volleyball': 'from-yellow-500 to-yellow-600',
+  'Badminton': 'from-pink-500 to-pink-600',
+  'Table Tennis': 'from-red-500 to-red-600',
+  'Chess': 'from-indigo-500 to-indigo-600',
+  'Quiz': 'from-teal-500 to-teal-600',
+};
 
 interface SportsGridProps {
   onSportSelect?: (sport: { id: string; type: 'team' | 'individual' }) => void;
@@ -42,6 +67,50 @@ interface SportsGridProps {
 
 export const SportsGrid = ({ onSportSelect }: SportsGridProps) => {
   const router = useRouter();
+  const [sports, setSports] = useState<Sport[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSports = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('/api/sports?active_only=true');
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch sports');
+        }
+        
+        const data = await response.json();
+        const databaseSports: DatabaseSport[] = data.sports || [];
+        
+        // Convert database sports to display format
+        const displaySports: Sport[] = databaseSports.map(dbSport => {
+          const IconComponent = iconMap[dbSport.name] || Trophy;
+          const color = colorMap[dbSport.name] || 'from-gray-500 to-gray-600';
+          
+          return {
+            id: dbSport.id,
+            name: dbSport.name,
+            icon: IconComponent,
+            type: dbSport.is_team_sport ? 'team' : 'individual',
+            minPlayers: dbSport.min_players || undefined,
+            maxPlayers: dbSport.max_players || undefined,
+            color: color
+          };
+        });
+        
+        setSports(displaySports);
+      } catch (err) {
+        console.error('Error fetching sports:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load sports');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSports();
+  }, []);
 
   const handleSportClick = (sport: Sport) => {
     if (onSportSelect) {
@@ -52,6 +121,45 @@ export const SportsGrid = ({ onSportSelect }: SportsGridProps) => {
       router.push(`/registration?sport=${sport.id}&type=${sport.type}`);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p className="text-gray-600">Loading sports...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-red-600 mb-4">
+          <Trophy className="h-12 w-12 mx-auto mb-2" />
+          <p className="text-lg font-medium">Failed to load sports</p>
+          <p className="text-sm">{error}</p>
+        </div>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
+  if (sports.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <Trophy className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">No sports available</h3>
+        <p className="text-gray-600">No active sports are currently available for registration.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -90,7 +198,7 @@ export const SportsGrid = ({ onSportSelect }: SportsGridProps) => {
               </div>
               
               {/* Player count for team sports */}
-              {sport.type === 'team' && (
+              {sport.type === 'team' && sport.minPlayers && sport.maxPlayers && (
                 <div className="bg-blue-50 group-hover:bg-blue-100 text-blue-700 px-3 py-1 rounded-lg text-sm font-medium mb-4 transition-colors duration-300">
                   {sport.minPlayers}-{sport.maxPlayers} players
                 </div>
