@@ -10,7 +10,7 @@ const approveTeamSchema = z.object({
 
 type ApproveTeamData = z.infer<typeof approveTeamSchema>
 
-// POST /api/teams/unified/[id]/approve - Approve or reject team
+// POST /api/teams/[id]/approve - Approve or reject team
 export async function POST(
   request: NextRequest,
   { params }: { params: { id: string } }

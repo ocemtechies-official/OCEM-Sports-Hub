@@ -23,7 +23,7 @@ export function CreateTeamForm() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/teams/unified', {
+      const response = await fetch('/api/teams', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Plus } from "lucide-react"
-import { UnifiedTeamManagement } from "@/components/admin/unified-team-management"
+import { TeamManagement } from "@/components/admin/team-management"
 
 export default async function AdminTeamsPage() {
   const admin = await isAdmin()
@@ -38,7 +38,7 @@ export default async function AdminTeamsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Unified Team Management</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Team Management</h1>
           <p className="text-slate-600 mt-1">Manage all teams - official and student registrations</p>
         </div>
         <Button asChild>
@@ -49,7 +49,7 @@ export default async function AdminTeamsPage() {
         </Button>
       </div>
 
-      <UnifiedTeamManagement initialTeams={teams || []} />
+      <TeamManagement initialTeams={teams || []} />
     </div>
   )
 }

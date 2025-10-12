@@ -3,7 +3,7 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { getCurrentUser, requireAdmin } from "@/lib/auth"
 import { z } from "zod"
 
-// Unified team schema
+// Team schema
 const teamSchema = z.object({
   name: z.string().min(1, "Team name is required"),
   team_type: z.enum(['official', 'student_registered']).default('official'),
@@ -36,7 +36,7 @@ type TeamData = z.infer<typeof teamSchema>
 type TeamMemberData = z.infer<typeof teamMemberSchema>
 type CreateTeamData = z.infer<typeof createTeamSchema>
 
-// GET /api/teams/unified - Get all teams with filtering
+// GET /api/teams - Get all teams with filtering
 export async function GET(request: NextRequest) {
   try {
     const supabase = await getSupabaseServerClient()
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/teams/unified - Create new team
+// POST /api/teams - Create new team
 export async function POST(request: NextRequest) {
   try {
     const { isAdmin, user } = await requireAdmin()

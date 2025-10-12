@@ -3,24 +3,9 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { getCurrentUser, requireAdmin } from "@/lib/auth"
 import { z } from "zod"
 
-const updateTeamSchema = z.object({
-  name: z.string().min(1, "Team name is required").optional(),
-  sport_id: z.string().uuid().optional(),
-  department: z.string().optional(),
-  semester: z.string().optional(),
-  gender: z.string().optional(),
-  captain_name: z.string().optional(),
-  captain_contact: z.string().optional(),
-  captain_email: z.string().email().optional(),
-  logo_url: z.string().url().optional(),
-  color: z.string().optional(),
-  status: z.enum(['active', 'pending_approval', 'rejected', 'inactive']).optional()
-})
-
 const teamMemberSchema = z.object({
   member_name: z.string().min(1, "Member name is required"),
   member_contact: z.string().optional(),
-  member_email: z.string().email().optional(),
   member_position: z.string().optional(),
   member_order: z.number().int().min(0),
   is_captain: z.boolean().default(false),
@@ -31,10 +16,10 @@ const updateTeamMembersSchema = z.object({
   members: z.array(teamMemberSchema)
 })
 
-type UpdateTeamData = z.infer<typeof updateTeamSchema>
+type TeamMemberData = z.infer<typeof teamMemberSchema>
 type UpdateTeamMembersData = z.infer<typeof updateTeamMembersSchema>
 
-// GET /api/teams/unified/[id] - Get specific team
+// GET /api/teams/[id]/members - Get team members
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -52,33 +37,21 @@ export async function GET(
 
     const teamId = params.id
 
-    const { data: team, error } = await supabase
+    // Check if team exists and user has access
+    const { data: team, error: teamError } = await supabase
       .from('teams')
-      .select(`
-        *,
-        sports:sport_id (
-          id,
-          name,
-          icon
-        ),
-        approved_by_profile:approved_by (
-          id,
-          full_name
-        ),
-        team_members (*)
-      `)
+      .select('id, team_type, status, original_registration_id')
       .eq('id', teamId)
       .single()
 
-    if (error) {
-      console.error('Get team error:', error)
+    if (teamError || !team) {
       return NextResponse.json(
         { error: "Team not found" },
         { status: 404 }
       )
     }
 
-    // Check if user can access this team
+    // Check access permissions
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -111,10 +84,28 @@ export async function GET(
       }
     }
 
-    return NextResponse.json({ team })
+    // Get team members
+    const { data: members, error: membersError } = await supabase
+      .from('team_members')
+      .select('*')
+      .eq('team_id', teamId)
+      .order('member_order', { ascending: true })
+
+    if (membersError) {
+      console.error('Get team members error:', membersError)
+      return NextResponse.json(
+        { error: "Failed to fetch team members" },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({
+      members: members || [],
+      count: members?.length || 0
+    })
 
   } catch (error) {
-    console.error('Get team error:', error)
+    console.error('Get team members error:', error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -122,7 +113,7 @@ export async function GET(
   }
 }
 
-// PUT /api/teams/unified/[id] - Update team
+// PUT /api/teams/[id]/members - Update team members
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -139,115 +130,102 @@ export async function PUT(
 
     const teamId = params.id
     const body = await request.json()
-    const validatedData = updateTeamSchema.parse(body)
+    const validatedData = updateTeamMembersSchema.parse(body)
 
     const supabase = await getSupabaseServerClient()
 
     // Check if team exists
-    const { data: existingTeam, error: fetchError } = await supabase
+    const { data: team, error: teamError } = await supabase
       .from('teams')
       .select('id, team_type')
       .eq('id', teamId)
       .single()
 
-    if (fetchError || !existingTeam) {
+    if (teamError || !team) {
       return NextResponse.json(
         { error: "Team not found" },
         { status: 404 }
       )
     }
 
-    // Update team
-    const { data: team, error: updateError } = await supabase
+    // Delete existing members
+    const { error: deleteError } = await supabase
+      .from('team_members')
+      .delete()
+      .eq('team_id', teamId)
+
+    if (deleteError) {
+      console.error('Delete team members error:', deleteError)
+      return NextResponse.json(
+        { error: "Failed to update team members" },
+        { status: 500 }
+      )
+    }
+
+    // Insert new members
+    if (validatedData.members.length > 0) {
+      const members = validatedData.members.map((member, index) => ({
+        ...member,
+        team_id: teamId,
+        member_order: member.member_order || index,
+        created_at: new Date().toISOString()
+      }))
+
+      const { error: insertError } = await supabase
+        .from('team_members')
+        .insert(members)
+
+      if (insertError) {
+        console.error('Insert team members error:', insertError)
+        return NextResponse.json(
+          { error: "Failed to update team members" },
+          { status: 500 }
+        )
+      }
+    }
+
+    // Update team member count
+    const { error: updateTeamError } = await supabase
       .from('teams')
       .update({
-        ...validatedData,
         updated_at: new Date().toISOString()
       })
       .eq('id', teamId)
-      .select()
-      .single()
 
-    if (updateError) {
-      console.error('Update team error:', updateError)
+    if (updateTeamError) {
+      console.error('Update team error:', updateTeamError)
+      // Don't fail the request for this
+    }
+
+    // Fetch updated members
+    const { data: members, error: fetchError } = await supabase
+      .from('team_members')
+      .select('*')
+      .eq('team_id', teamId)
+      .order('member_order', { ascending: true })
+
+    if (fetchError) {
+      console.error('Fetch team members error:', fetchError)
       return NextResponse.json(
-        { error: "Failed to update team" },
+        { error: "Failed to fetch updated team members" },
         { status: 500 }
       )
     }
 
     return NextResponse.json({
-      team,
-      message: "Team updated successfully"
+      members: members || [],
+      count: members?.length || 0,
+      message: "Team members updated successfully"
     })
 
   } catch (error) {
-    console.error('Update team error:', error)
+    console.error('Update team members error:', error)
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid data", details: error.errors },
         { status: 400 }
       )
     }
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    )
-  }
-}
-
-// DELETE /api/teams/unified/[id] - Delete team
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const { isAdmin, user } = await requireAdmin()
-
-    if (!isAdmin || !user) {
-      return NextResponse.json(
-        { error: "Admin access required" },
-        { status: 401 }
-      )
-    }
-
-    const teamId = params.id
-    const supabase = await getSupabaseServerClient()
-
-    // Check if team exists
-    const { data: existingTeam, error: fetchError } = await supabase
-      .from('teams')
-      .select('id, team_type')
-      .eq('id', teamId)
-      .single()
-
-    if (fetchError || !existingTeam) {
-      return NextResponse.json(
-        { error: "Team not found" },
-        { status: 404 }
-      )
-    }
-
-    // Delete team (cascade will handle team_members)
-    const { error: deleteError } = await supabase
-      .from('teams')
-      .delete()
-      .eq('id', teamId)
-
-    if (deleteError) {
-      console.error('Delete team error:', deleteError)
-      return NextResponse.json(
-        { error: "Failed to delete team" },
-        { status: 500 }
-      )
-    }
-
-    return NextResponse.json({
-      message: "Team deleted successfully"
-    })
-
-  } catch (error) {
-    console.error('Delete team error:', error)
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

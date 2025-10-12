@@ -52,11 +52,11 @@ interface Team {
   }>
 }
 
-interface UnifiedTeamManagementProps {
+interface TeamManagementProps {
   initialTeams?: Team[]
 }
 
-export function UnifiedTeamManagement({ initialTeams = [] }: UnifiedTeamManagementProps) {
+export function TeamManagement({ initialTeams = [] }: TeamManagementProps) {
   const [teams, setTeams] = useState<Team[]>(initialTeams)
   const [loading, setLoading] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
@@ -83,7 +83,7 @@ export function UnifiedTeamManagement({ initialTeams = [] }: UnifiedTeamManageme
   const handleApproveTeam = async (teamId: string) => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/teams/unified/${teamId}/approve`, {
+      const response = await fetch(`/api/teams/${teamId}/approve`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -123,7 +123,7 @@ export function UnifiedTeamManagement({ initialTeams = [] }: UnifiedTeamManageme
   const handleRejectTeam = async (teamId: string, reason?: string) => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/teams/unified/${teamId}/approve`, {
+      const response = await fetch(`/api/teams/${teamId}/approve`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -192,7 +192,7 @@ export function UnifiedTeamManagement({ initialTeams = [] }: UnifiedTeamManageme
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Unified Team Management</h2>
+          <h2 className="text-2xl font-bold text-slate-900">Team Management</h2>
           <p className="text-slate-600 mt-1">Manage all teams - official and student registrations</p>
         </div>
         <div className="flex items-center gap-2">
