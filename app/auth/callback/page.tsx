@@ -12,29 +12,43 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const handleAuthCallback = async () => {
-      // First, try to exchange any OAuth or email OTP code for a session
-      const { error: exchangeError } = await supabase.auth.exchangeCodeForSession()
-      if (exchangeError) {
-        // Not all flows provide a code; continue to check existing session
-        console.warn("Code exchange failed or not applicable:", exchangeError.message)
-      }
+      try {
+        // First, try to exchange any OAuth or email OTP code for a session
+        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession()
+        if (exchangeError) {
+          // Not all flows provide a code; continue to check existing session
+          console.warn("Code exchange failed or not applicable:", exchangeError.message)
+        }
 
-      const { data, error } = await supabase.auth.getSession()
-      
-      if (error) {
-        notifications.showError("Authentication error occurred.")
-        router.push("/auth/login")
-        return
-      }
-      
-      if (data.session) {
-        notifications.showSuccess("You have been signed in successfully.")
+        // Wait a moment for the auth state to propagate
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        const { data, error } = await supabase.auth.getSession()
         
-        // Check if there's a redirect URL
-        const redirectTo = searchParams.get("redirect") || "/"
-        router.push(redirectTo)
-        router.refresh()
-      } else {
+        if (error) {
+          console.error("Session error:", error)
+          notifications.showError({
+            description: "Authentication error occurred."
+          })
+          router.push("/auth/login")
+          return
+        }
+        
+        if (data.session) {
+          notifications.showSuccess("You have been signed in successfully.")
+          
+          // Check if there's a redirect URL
+          const redirectTo = searchParams.get("redirect") || "/"
+          router.push(redirectTo)
+        } else {
+          console.warn("No session found after callback")
+          router.push("/auth/login")
+        }
+      } catch (error) {
+        console.error("Callback error:", error)
+        notifications.showError({
+          description: "Authentication error occurred."
+        })
         router.push("/auth/login")
       }
     }

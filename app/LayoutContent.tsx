@@ -2,7 +2,7 @@
 
 import { Footer } from "@/components/layout/footer";
 import { usePathname } from "next/navigation";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function LayoutContent({
   children,

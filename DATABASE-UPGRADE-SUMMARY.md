@@ -10,7 +10,7 @@ The upgrade adds new fields to the `profiles` table to support the enhanced prof
 
 ### 1. Database Migration Script
 
-**File**: [scripts/07-add-profile-fields.sql](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/07-add-profile-fields.sql)
+**File**: [scripts/07-add-profile-fields.sql](file:///d%3A/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/07-add-profile-fields.sql)
 
 Adds new columns to the profiles table:
 
@@ -34,16 +34,27 @@ Also adds:
 - Trigger to automatically update `updated_at` timestamp
 - Backward compatibility with existing data
 
-### 2. Profile API Route
+### 2. Sports Week Configuration Migration Script
 
-**File**: [app/api/profile/route.ts](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/app/api/profile/route.ts)
+**File**: [scripts/12-sports-week-config.sql](file:///d%3A/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/12-sports-week-config.sql)
+
+Adds a new table to store sports week configuration:
+
+- `sports_week_config` table with start and end dates
+- Support for multiple configurations (active/inactive)
+- Admin management capabilities
+- Row Level Security policies
+
+### 3. Profile API Route
+
+**File**: [app/api/profile/route.ts](file:///d%3A/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/app/api/profile/route.ts)
 
 Updated to handle all new profile fields:
 
 - Added new fields to the request parsing
 - Updated the database update operation to include all new fields
 
-### 3. Documentation Updates
+### 4. Documentation Updates
 
 #### README.md
 
@@ -55,9 +66,31 @@ Updated to include the new migration script in the script order.
 
 ## New Files Created
 
-### 1. Migration Guide
+### 1. Database Migration Script for Sports Week Configuration
 
-**File**: [scripts/MIGRATION-GUIDE.md](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/MIGRATION-GUIDE.md)
+**File**: [scripts/12-sports-week-config.sql](file:///d%3A/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/12-sports-week-config.sql)
+
+Adds a new table to store sports week configuration:
+
+- `sports_week_config` table with:
+  - `start_date` (TIMESTAMPTZ) - The start date of the sports week
+  - `end_date` (TIMESTAMPTZ) - The end date of the sports week
+  - `name` (TEXT) - Name of the sports week event
+  - `description` (TEXT) - Description of the event
+  - `is_active` (BOOLEAN) - Whether this configuration is active
+  - `created_at` (TIMESTAMPTZ) - When the configuration was created
+  - `updated_at` (TIMESTAMPTZ) - When the configuration was last updated
+
+Also adds:
+
+- Indexes for better query performance
+- Trigger to automatically update `updated_at` timestamp
+- Row Level Security policies for admin management
+- Default configuration data
+
+### 2. Migration Guide
+
+**File**: [scripts/MIGRATION-GUIDE.md](file:///d%3A/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/MIGRATION-GUIDE.md)
 
 Comprehensive guide for migrating existing databases to support the new functionality, including:
 
@@ -67,12 +100,12 @@ Comprehensive guide for migrating existing databases to support the new function
 - Troubleshooting guide
 - Rollback instructions
 
-### 2. Test Scripts
+### 3. Test Scripts
 
 **Files**:
 
-- [scripts/test-profile-fields.js](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/test-profile-fields.js)
-- [scripts/test-profile-fields.ts](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/test-profile-fields.ts)
+- [scripts/test-profile-fields.js](file:///d%3A/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/test-profile-fields.js)
+- [scripts/test-profile-fields.ts](file:///d%3A/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/test-profile-fields.ts)
 
 Test scripts to verify the new profile fields work correctly:
 
@@ -92,9 +125,10 @@ This upgrade is fully backward compatible:
 
 ## Migration Steps
 
-1. Run the [07-add-profile-fields.sql](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/07-add-profile-fields.sql) script in your Supabase SQL Editor
-2. No code changes are required in existing applications
-3. The enhanced profile and settings functionality will automatically work
+1. Run the [07-add-profile-fields.sql](file:///d%3A/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/07-add-profile-fields.sql) script in your Supabase SQL Editor
+2. Run the [12-sports-week-config.sql](file:///d%3A/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/12-sports-week-config.sql) script in your Supabase SQL Editor
+3. No code changes are required in existing applications
+4. The enhanced profile and settings functionality will automatically work
 
 ## Testing
 
@@ -118,4 +152,4 @@ To verify the migration:
 
 ## Support
 
-If you encounter any issues with this upgrade, please refer to the [MIGRATION-GUIDE.md](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/MIGRATION-GUIDE.md) or create a GitHub issue with details about the problem.
+If you encounter any issues with this upgrade, please refer to the [MIGRATION-GUIDE.md](file:///d%3A/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/MIGRATION-GUIDE.md) or create a GitHub issue with details about the problem.

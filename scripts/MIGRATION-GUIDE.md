@@ -10,11 +10,11 @@ The enhanced profile and settings features require additional fields in the `pro
 
 ### 1. Run the Migration Script
 
-Execute the [07-add-profile-fields.sql](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/07-add-profile-fields.sql) script in your Supabase SQL Editor:
+Execute the [database/07-add-profile-fields.sql](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/database/07-add-profile-fields.sql) script in your Supabase SQL Editor:
 
 1. Navigate to your Supabase project dashboard
 2. Go to SQL Editor
-3. Copy and paste the contents of [07-add-profile-fields.sql](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/07-add-profile-fields.sql)
+3. Copy and paste the contents of [database/07-add-profile-fields.sql](file:///d:/Web%20Codes/Web%20Application/OCEM%20Sports%20Hub/scripts/database/07-add-profile-fields.sql)
 4. Run the script
 
 ### 2. What This Migration Does

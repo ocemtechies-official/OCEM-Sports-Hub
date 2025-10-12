@@ -11,17 +11,13 @@ interface LoadingButtonProps extends React.ComponentProps<typeof Button> {
   icon?: React.ReactNode
 }
 
-export function LoadingButton({
-  children,
-  loading = false,
-  loadingText,
-  icon,
-  className,
-  disabled,
-  ...props
-}: LoadingButtonProps) {
+export const LoadingButton = React.forwardRef<
+  HTMLButtonElement,
+  LoadingButtonProps
+>(({ children, loading = false, loadingText, icon, className, disabled, ...props }, ref) => {
   return (
     <Button
+      ref={ref}
       className={cn(
         "relative transition-all duration-200",
         className
@@ -44,4 +40,5 @@ export function LoadingButton({
       )}
     </Button>
   )
-}
+})
+LoadingButton.displayName = "LoadingButton"

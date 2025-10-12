@@ -1,7 +1,7 @@
 import React from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Trophy, Clock, CheckCircle } from "lucide-react"
+import { Trophy, Clock, CheckCircle, Zap, Target, Award } from "lucide-react"
 import { format } from "date-fns"
 
 interface Team {
@@ -51,10 +51,10 @@ function MatchCard({ match, roundNumber }: { match: Match; roundNumber: number }
   
   const getMatchStatus = () => {
     if (match.status === 'live') {
-      return <Badge variant="destructive" className="animate-pulse text-xs">LIVE</Badge>
+      return <Badge className="bg-red-100 text-red-800 border-red-200 animate-pulse text-xs font-semibold">LIVE</Badge>
     }
     if (match.status === 'completed') {
-      return <CheckCircle className="h-3 w-3 text-green-500" />
+      return <div className="flex items-center gap-1 text-green-600"><CheckCircle className="h-3 w-3" /> <span className="text-xs font-medium">Done</span></div>
     }
     if (match.scheduled_at) {
       return (
@@ -77,56 +77,75 @@ function MatchCard({ match, roundNumber }: { match: Match; roundNumber: number }
   const winner = getWinner()
 
   return (
-    <Card className={`w-48 transition-all hover:shadow-md ${
-      match.status === 'live' ? 'border-red-500 border-2' : ''
-    } ${match.status === 'completed' ? 'bg-slate-50' : ''}`}>
-      <CardContent className="p-3">
-        {/* Match Status */}
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-xs text-slate-500">Match {match.bracket_position}</span>
+    <Card className={`w-56 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+      match.status === 'live' ? 'border-red-500 border-2 shadow-red-100' : ''
+    } ${match.status === 'completed' ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200' : 'bg-white'}`}>
+      <CardContent className="p-4">
+        {/* Match Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <span className="text-xs font-medium text-slate-600">Match {match.bracket_position}</span>
+          </div>
           {getMatchStatus()}
         </div>
 
         {/* Team A */}
-        <div className={`flex items-center justify-between mb-2 p-2 rounded ${
-          winner?.id === match.team_a?.id ? 'bg-green-100 border border-green-300' : 'bg-slate-50'
+        <div className={`flex items-center justify-between mb-3 p-3 rounded-xl transition-all duration-300 ${
+          winner?.id === match.team_a?.id 
+            ? 'bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 shadow-md' 
+            : 'bg-gradient-to-r from-slate-50 to-slate-100 hover:from-blue-50 hover:to-purple-50'
         }`}>
-          <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             <div
-              className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-lg"
               style={{ backgroundColor: match.team_a?.color || "#6b7280" }}
             >
               {getTeamInitial(match.team_a)}
             </div>
-            <span className="font-medium text-sm truncate">
+            <span className="font-semibold text-sm truncate">
               {match.team_a?.name || "TBD"}
             </span>
           </div>
           {(match.status === 'live' || match.status === 'completed') && match.team_a_score !== undefined && (
-            <span className="font-bold text-lg ml-2">{match.team_a_score}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold text-slate-900">{match.team_a_score}</span>
+              {winner?.id === match.team_a?.id && <Award className="h-4 w-4 text-green-600" />}
+            </div>
           )}
         </div>
 
-        {/* VS or Score Divider */}
-        <div className="text-center text-xs text-slate-400 mb-2">VS</div>
+        {/* VS Divider */}
+        <div className="flex items-center justify-center mb-3">
+          <div className="flex-1 h-px bg-slate-200"></div>
+          <div className="px-3 py-1 bg-slate-100 rounded-full">
+            <span className="text-xs font-semibold text-slate-600">VS</span>
+          </div>
+          <div className="flex-1 h-px bg-slate-200"></div>
+        </div>
 
         {/* Team B */}
-        <div className={`flex items-center justify-between p-2 rounded ${
-          winner?.id === match.team_b?.id ? 'bg-green-100 border border-green-300' : 'bg-slate-50'
+        <div className={`flex items-center justify-between p-3 rounded-xl transition-all duration-300 ${
+          winner?.id === match.team_b?.id 
+            ? 'bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 shadow-md' 
+            : 'bg-gradient-to-r from-slate-50 to-slate-100 hover:from-blue-50 hover:to-purple-50'
         }`}>
-          <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             <div
-              className="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+              className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-lg"
               style={{ backgroundColor: match.team_b?.color || "#6b7280" }}
             >
               {getTeamInitial(match.team_b)}
             </div>
-            <span className="font-medium text-sm truncate">
+            <span className="font-semibold text-sm truncate">
               {match.team_b?.name || "TBD"}
             </span>
           </div>
           {(match.status === 'live' || match.status === 'completed') && match.team_b_score !== undefined && (
-            <span className="font-bold text-lg ml-2">{match.team_b_score}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-2xl font-bold text-slate-900">{match.team_b_score}</span>
+              {winner?.id === match.team_b?.id && <Award className="h-4 w-4 text-green-600" />}
+            </div>
           )}
         </div>
       </CardContent>
@@ -135,20 +154,52 @@ function MatchCard({ match, roundNumber }: { match: Match; roundNumber: number }
 }
 
 function RoundColumn({ round, className }: { round: Round; className?: string }) {
+  const getRoundStatusColor = (status: string) => {
+    switch (status) {
+      case 'active':
+        return 'bg-green-100 text-green-800 border-green-200'
+      case 'completed':
+        return 'bg-blue-100 text-blue-800 border-blue-200'
+      case 'pending':
+        return 'bg-gray-100 text-gray-800 border-gray-200'
+      default:
+        return 'bg-gray-100 text-gray-800 border-gray-200'
+    }
+  }
+
+  const getRoundStatusIcon = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Zap className="h-3 w-3" />
+      case 'completed':
+        return <CheckCircle className="h-3 w-3" />
+      case 'pending':
+        return <Clock className="h-3 w-3" />
+      default:
+        return <Clock className="h-3 w-3" />
+    }
+  }
+
   return (
-    <div className={`flex flex-col gap-4 ${className}`}>
+    <div className={`flex flex-col gap-6 ${className}`}>
       {/* Round Header */}
-      <div className="text-center mb-4">
-        <h3 className="font-bold text-lg text-slate-900">{round.round_name}</h3>
-        <Badge variant={round.status === 'completed' ? 'default' : round.status === 'active' ? 'secondary' : 'outline'}>
-          {round.status}
+      <div className="text-center mb-6">
+        <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-2 rounded-full border border-blue-200 mb-3">
+          <Target className="h-4 w-4 text-blue-600" />
+          <h3 className="font-bold text-lg text-slate-900">{round.round_name}</h3>
+        </div>
+        <Badge className={`px-3 py-1 rounded-full text-xs font-semibold border ${getRoundStatusColor(round.status)} flex items-center gap-1.5 mx-auto`}>
+          {getRoundStatusIcon(round.status)}
+          {round.status.charAt(0).toUpperCase() + round.status.slice(1)}
         </Badge>
       </div>
 
       {/* Round Matches */}
       <div className="flex flex-col gap-6">
-        {round.matches.map((match) => (
-          <MatchCard key={match.id} match={match} roundNumber={round.round_number} />
+        {round.matches.map((match, index) => (
+          <div key={match.id} className="animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+            <MatchCard match={match} roundNumber={round.round_number} />
+          </div>
         ))}
       </div>
     </div>
@@ -159,44 +210,24 @@ export function TournamentBracket({ tournament, className = "" }: TournamentBrac
   const sortedRounds = tournament.rounds.sort((a, b) => a.round_number - b.round_number)
   
   return (
-    <div className={`bg-white rounded-lg border border-slate-200 ${className}`}>
-      {/* Tournament Header */}
-      <div className="p-6 border-b border-slate-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <Trophy className="h-6 w-6 text-yellow-500" />
-              {tournament.name}
-            </h2>
-            {tournament.description && (
-              <p className="text-slate-600 mt-1">{tournament.description}</p>
-            )}
-          </div>
-          <Badge 
-            variant={
-              tournament.status === 'completed' ? 'default' : 
-              tournament.status === 'active' ? 'secondary' : 
-              'outline'
-            }
-            className="text-sm"
-          >
-            {tournament.status.charAt(0).toUpperCase() + tournament.status.slice(1)}
-          </Badge>
-        </div>
-      </div>
-
+    <div className={`bg-white rounded-2xl border-0 shadow-lg overflow-hidden ${className}`}>
       {/* Tournament Bracket */}
-      <div className="p-6">
+      <div className="p-8">
         <div className="overflow-x-auto">
-          <div className="flex gap-8 min-w-max">
+          <div className="flex gap-12 min-w-max">
             {sortedRounds.map((round, index) => (
               <React.Fragment key={round.id}>
                 <RoundColumn round={round} />
-                {/* Connection Lines (visual indicator) */}
+                {/* Enhanced Connection Lines */}
                 {index < sortedRounds.length - 1 && (
-                  <div className="flex items-center justify-center w-8">
-                    <div className="h-px bg-slate-300 w-full"></div>
-                    <div className="absolute w-2 h-2 bg-slate-300 rounded-full"></div>
+                  <div className="flex items-center justify-center w-12 relative">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="h-px bg-gradient-to-r from-blue-300 to-purple-300 w-full"></div>
+                    </div>
+                    <div className="relative z-10 w-4 h-4 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full shadow-lg"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-2 h-2 bg-white rounded-full"></div>
+                    </div>
                   </div>
                 )}
               </React.Fragment>
@@ -207,11 +238,13 @@ export function TournamentBracket({ tournament, className = "" }: TournamentBrac
 
       {/* Tournament Winner */}
       {tournament.status === 'completed' && tournament.winner_id && (
-        <div className="p-6 border-t border-slate-200 bg-gradient-to-r from-yellow-50 to-yellow-100">
+        <div className="p-8 border-t border-slate-100 bg-gradient-to-r from-yellow-50 via-orange-50 to-red-50">
           <div className="text-center">
-            <Trophy className="h-12 w-12 text-yellow-500 mx-auto mb-2" />
-            <h3 className="text-xl font-bold text-slate-900">Tournament Champion!</h3>
-            {/* Winner details would be loaded separately */}
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full shadow-lg mb-4">
+              <Trophy className="h-8 w-8 text-white" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">Tournament Champion!</h3>
+            <p className="text-slate-600">Congratulations to the winner!</p>
           </div>
         </div>
       )}

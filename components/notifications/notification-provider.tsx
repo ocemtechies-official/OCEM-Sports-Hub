@@ -57,16 +57,44 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
                 *,
                 sport:sports(*),
                 team_a:teams!fixtures_team_a_id_fkey(*),
-                team_b:teams!fixtures_team_b_id_fkey(*)
+                team_b:teams!fixtures_team_b_id_fkey(*),
+                updated_by_profile:profiles!fixtures_updated_by_fkey(full_name)
               `,
               )
               .eq("id", payload.new.id)
               .single()
 
             if (fixture) {
+              const updatedBy = fixture.updated_by_profile?.full_name || 'Unknown'
               toast({
                 title: "Match Completed!",
-                description: `${fixture.team_a?.name} ${fixture.team_a_score} - ${fixture.team_b_score} ${fixture.team_b?.name}`,
+                description: `${fixture.team_a?.name} ${fixture.team_a_score} - ${fixture.team_b_score} ${fixture.team_b?.name} (by ${updatedBy})`,
+              })
+            }
+          }
+
+          // Notify on score updates
+          if (oldStatus === "live" && newStatus === "live" && 
+              (payload.old.team_a_score !== payload.new.team_a_score || 
+               payload.old.team_b_score !== payload.new.team_b_score)) {
+            const { data: fixture } = await supabase
+              .from("fixtures")
+              .select(
+                `
+                *,
+                team_a:teams!fixtures_team_a_id_fkey(name),
+                team_b:teams!fixtures_team_b_id_fkey(name),
+                updated_by_profile:profiles!fixtures_updated_by_fkey(full_name)
+              `,
+              )
+              .eq("id", payload.new.id)
+              .single()
+
+            if (fixture) {
+              const updatedBy = fixture.updated_by_profile?.full_name || 'Unknown'
+              toast({
+                title: "Score Updated!",
+                description: `${fixture.team_a?.name} ${fixture.team_a_score} - ${fixture.team_b_score} ${fixture.team_b?.name} (by ${updatedBy})`,
               })
             }
           }

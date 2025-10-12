@@ -11,8 +11,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, Settings, LogOut, Shield, UserCheck } from "lucide-react"
-import { showToast as toast } from "@/components/ui/toast"
+import { User, Settings, LogOut, Shield, UserCheck, UserCog } from "lucide-react"
+import { notifications } from "@/lib/notifications"
 import { useAuth } from "@/components/auth/auth-provider"
 import { cn } from "@/lib/utils"
 
@@ -33,16 +33,10 @@ export function UserNav({ profile }: UserNavProps) {
   const handleSignOut = async () => {
     try {
       await signOut()
-      toast.success({
-        title: "Signed out",
-        description: "You have been signed out successfully.",
-      })
-      // Instead of redirecting, let's just close the dropdown and let the UI update
-      // The page will automatically update due to the auth context
     } catch (error) {
-      toast.error({
+      notifications.showError({
         title: "Sign out failed",
-        description: "There was an error signing you out. Please try again.",
+        description: "There was an error signing you out. Please try again."
       })
     }
   }
@@ -79,6 +73,14 @@ export function UserNav({ profile }: UserNavProps) {
                 </span>
               </div>
             )}
+            {profile.role === "moderator" && (
+              <div className="flex items-center mt-2">
+                <UserCog className="h-3 w-3 text-green-600 mr-1" />
+                <span className="text-xs leading-none text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full">
+                  Moderator
+                </span>
+              </div>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
@@ -103,6 +105,15 @@ export function UserNav({ profile }: UserNavProps) {
           <Settings className="mr-2 h-4 w-4 hover:text-blue-800" />
           Settings
         </DropdownMenuItem>
+        {(profile.role === "moderator" || profile.role === "admin") && (
+          <DropdownMenuItem 
+            onClick={() => router.push("/moderator")}
+            className="cursor-pointer text-slate-700 hover:text-green-600 hover:bg-green-50 py-2 transition-colors duration-300 focus:bg-green-50 focus:text-green-700"
+          >
+            <UserCog className="mr-2 h-4 w-4 hover:text-green-800"/>
+            Moderator Dashboard
+          </DropdownMenuItem>
+        )}
         {profile.role === "admin" && (
           <DropdownMenuItem 
             onClick={() => router.push("/admin")}

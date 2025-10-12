@@ -20,17 +20,18 @@ interface PasswordInputProps
   confirmPasswordSetter?: (value: string) => void;
 }
 
-export function PasswordInput({
-  className,
-  showStrengthIndicator = false,
-  showGenerateButton = false,
-  onPasswordGenerated,
-  fillConfirmPassword = false,
-  confirmPasswordSetter,
-  value,
-  onChange,
-  ...props
-}: PasswordInputProps) {
+export const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
+  ({
+    className,
+    showStrengthIndicator = false,
+    showGenerateButton = false,
+    onPasswordGenerated,
+    fillConfirmPassword = false,
+    confirmPasswordSetter,
+    value,
+    onChange,
+    ...props
+  }, ref) => {
   const [isVisible, setIsVisible] = useState(false);
   const [strength, setStrength] = useState<PasswordStrength | null>(null);
 
@@ -120,6 +121,7 @@ export function PasswordInput({
         </div>
         <Input
           {...props}
+          ref={ref}
           type={isVisible ? "text" : "password"}
           className={cn(
             "pl-10 pr-20 transition-all duration-300",
@@ -202,4 +204,5 @@ export function PasswordInput({
       </div>
     </div>
   );
-}
+})
+PasswordInput.displayName = "PasswordInput"

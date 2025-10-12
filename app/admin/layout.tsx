@@ -2,6 +2,7 @@ import { requireAdmin } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { AdminSidebar } from "@/components/admin/admin-sidebar"
 import { AdminMobileSidebar } from "@/components/admin/admin-mobile-sidebar"
+import { Toaster } from "@/components/ui/sonner"
 
 export default async function AdminLayout({
   children,
@@ -33,6 +34,8 @@ export default async function AdminLayout({
           </main>
         </div>
       </div>
+      
+      <Toaster position="top-right" duration={2500} />
     </>
   )
 }

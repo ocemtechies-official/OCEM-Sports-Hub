@@ -55,15 +55,25 @@ export default async function HomePage() {
     .order("created_at", { ascending: false })
     .limit(5)
 
-  // Get current date for the badge
-  const today = new Date();
-  const options: Intl.DateTimeFormatOptions = { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  };
-  const currentDate = today.toLocaleDateString('en-US', options);
+  // Get sports week configuration
+  const { data: sportsWeekConfig } = await supabase
+    .from("sports_week_config")
+    .select("*")
+    .eq("is_active", true)
+    .single()
+
+  // Format the sports week start date
+  let sportsWeekDate = "Sports Week";
+  if (sportsWeekConfig?.start_date) {
+    const date = new Date(sportsWeekConfig.start_date);
+    const options: Intl.DateTimeFormatOptions = { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    };
+    sportsWeekDate = date.toLocaleDateString('en-US', options);
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -187,7 +197,7 @@ export default async function HomePage() {
                   {/* Playful Date Badge over the countdown */}
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20 animate-bounce">
                     <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-gray-900 font-bold px-4 py-2 rounded-full text-xs shadow-lg whitespace-nowrap">
-                      🎉 {currentDate} 🎉
+                      🎉 {sportsWeekDate} 🎉
                     </div>
                   </div>
                   
