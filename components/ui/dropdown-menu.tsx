@@ -20,25 +20,28 @@ function DropdownMenuPortal({
   )
 }
 
-function DropdownMenuTrigger({
-  ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>) {
+const DropdownMenuTrigger = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Trigger>,
+  React.ComponentProps<typeof DropdownMenuPrimitive.Trigger>
+>(({ ...props }, ref) => {
   return (
     <DropdownMenuPrimitive.Trigger
+      ref={ref}
       data-slot="dropdown-menu-trigger"
       {...props}
     />
   )
-}
+})
+DropdownMenuTrigger.displayName = "DropdownMenuTrigger"
 
-function DropdownMenuContent({
-  className,
-  sideOffset = 4,
-  ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+const DropdownMenuContent = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Content>,
+  React.ComponentProps<typeof DropdownMenuPrimitive.Content>
+>(({ className, sideOffset = 4, ...props }, ref) => {
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
+        ref={ref}
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         className={cn(
@@ -49,7 +52,8 @@ function DropdownMenuContent({
       />
     </DropdownMenuPrimitive.Portal>
   )
-}
+})
+DropdownMenuContent.displayName = "DropdownMenuContent"
 
 function DropdownMenuGroup({
   ...props
@@ -59,17 +63,16 @@ function DropdownMenuGroup({
   )
 }
 
-function DropdownMenuItem({
-  className,
-  inset,
-  variant = 'default',
-  ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
-  inset?: boolean
-  variant?: 'default' | 'destructive'
-}) {
+const DropdownMenuItem = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Item>,
+  React.ComponentProps<typeof DropdownMenuPrimitive.Item> & {
+    inset?: boolean
+    variant?: 'default' | 'destructive'
+  }
+>(({ className, inset, variant = 'default', ...props }, ref) => {
   return (
     <DropdownMenuPrimitive.Item
+      ref={ref}
       data-slot="dropdown-menu-item"
       data-inset={inset}
       data-variant={variant}
@@ -80,7 +83,8 @@ function DropdownMenuItem({
       {...props}
     />
   )
-}
+})
+DropdownMenuItem.displayName = "DropdownMenuItem"
 
 function DropdownMenuCheckboxItem({
   className,

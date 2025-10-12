@@ -1,7 +1,7 @@
 import React from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Trophy, Clock, CheckCircle, Zap, Target, Award } from "lucide-react"
+import { Trophy, Clock, CheckCircle, Zap, Target, Award, Users } from "lucide-react"
 import { format } from "date-fns"
 
 interface Team {
@@ -39,6 +39,7 @@ interface Tournament {
   tournament_type: string
   rounds: Round[]
   winner_id?: string
+  teams?: Team[]
 }
 
 interface TournamentBracketProps {
@@ -46,10 +47,14 @@ interface TournamentBracketProps {
   className?: string
 }
 
-function MatchCard({ match, roundNumber }: { match: Match; roundNumber: number }) {
+function MatchCard({ match, roundNumber, isPlaceholder = false }: { match: Match; roundNumber: number; isPlaceholder?: boolean }) {
   const getTeamInitial = (team?: Team) => team?.name?.charAt(0) || "?"
   
   const getMatchStatus = () => {
+    if (isPlaceholder) {
+      return <Badge variant="outline" className="text-xs">TBD</Badge>
+    }
+    
     if (match.status === 'live') {
       return <Badge className="bg-red-100 text-red-800 border-red-200 animate-pulse text-xs font-semibold">LIVE</Badge>
     }
@@ -78,13 +83,19 @@ function MatchCard({ match, roundNumber }: { match: Match; roundNumber: number }
 
   return (
     <Card className={`w-56 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-      match.status === 'live' ? 'border-red-500 border-2 shadow-red-100' : ''
-    } ${match.status === 'completed' ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200' : 'bg-white'}`}>
+      isPlaceholder 
+        ? 'border-dashed border-2 border-slate-300 bg-slate-50' 
+        : match.status === 'live' 
+          ? 'border-red-500 border-2 shadow-red-100' 
+          : match.status === 'completed' 
+            ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200' 
+            : 'bg-white'
+    }`}>
       <CardContent className="p-4">
         {/* Match Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <div className={`w-2 h-2 rounded-full ${isPlaceholder ? 'bg-slate-400' : 'bg-blue-500'}`}></div>
             <span className="text-xs font-medium text-slate-600">Match {match.bracket_position}</span>
           </div>
           {getMatchStatus()}
@@ -92,22 +103,26 @@ function MatchCard({ match, roundNumber }: { match: Match; roundNumber: number }
 
         {/* Team A */}
         <div className={`flex items-center justify-between mb-3 p-3 rounded-xl transition-all duration-300 ${
-          winner?.id === match.team_a?.id 
-            ? 'bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 shadow-md' 
-            : 'bg-gradient-to-r from-slate-50 to-slate-100 hover:from-blue-50 hover:to-purple-50'
+          isPlaceholder
+            ? 'bg-slate-100 border border-slate-200'
+            : winner?.id === match.team_a?.id 
+              ? 'bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 shadow-md' 
+              : 'bg-gradient-to-r from-slate-50 to-slate-100 hover:from-blue-50 hover:to-purple-50'
         }`}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-lg"
-              style={{ backgroundColor: match.team_a?.color || "#6b7280" }}
+              className={`w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-lg ${
+                isPlaceholder ? 'bg-slate-400' : ''
+              }`}
+              style={{ backgroundColor: isPlaceholder ? '#9ca3af' : (match.team_a?.color || "#6b7280") }}
             >
-              {getTeamInitial(match.team_a)}
+              {isPlaceholder ? '?' : getTeamInitial(match.team_a)}
             </div>
-            <span className="font-semibold text-sm truncate">
-              {match.team_a?.name || "TBD"}
+            <span className={`font-semibold text-sm truncate ${isPlaceholder ? 'text-slate-500' : ''}`}>
+              {isPlaceholder ? 'TBD' : (match.team_a?.name || "TBD")}
             </span>
           </div>
-          {(match.status === 'live' || match.status === 'completed') && match.team_a_score !== undefined && (
+          {!isPlaceholder && (match.status === 'live' || match.status === 'completed') && match.team_a_score !== undefined && (
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-slate-900">{match.team_a_score}</span>
               {winner?.id === match.team_a?.id && <Award className="h-4 w-4 text-green-600" />}
@@ -126,22 +141,26 @@ function MatchCard({ match, roundNumber }: { match: Match; roundNumber: number }
 
         {/* Team B */}
         <div className={`flex items-center justify-between p-3 rounded-xl transition-all duration-300 ${
-          winner?.id === match.team_b?.id 
-            ? 'bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 shadow-md' 
-            : 'bg-gradient-to-r from-slate-50 to-slate-100 hover:from-blue-50 hover:to-purple-50'
+          isPlaceholder
+            ? 'bg-slate-100 border border-slate-200'
+            : winner?.id === match.team_b?.id 
+              ? 'bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 shadow-md' 
+              : 'bg-gradient-to-r from-slate-50 to-slate-100 hover:from-blue-50 hover:to-purple-50'
         }`}>
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <div
-              className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-lg"
-              style={{ backgroundColor: match.team_b?.color || "#6b7280" }}
+              className={`w-8 h-8 rounded-xl flex items-center justify-center text-white text-sm font-bold shadow-lg ${
+                isPlaceholder ? 'bg-slate-400' : ''
+              }`}
+              style={{ backgroundColor: isPlaceholder ? '#9ca3af' : (match.team_b?.color || "#6b7280") }}
             >
-              {getTeamInitial(match.team_b)}
+              {isPlaceholder ? '?' : getTeamInitial(match.team_b)}
             </div>
-            <span className="font-semibold text-sm truncate">
-              {match.team_b?.name || "TBD"}
+            <span className={`font-semibold text-sm truncate ${isPlaceholder ? 'text-slate-500' : ''}`}>
+              {isPlaceholder ? 'TBD' : (match.team_b?.name || "TBD")}
             </span>
           </div>
-          {(match.status === 'live' || match.status === 'completed') && match.team_b_score !== undefined && (
+          {!isPlaceholder && (match.status === 'live' || match.status === 'completed') && match.team_b_score !== undefined && (
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold text-slate-900">{match.team_b_score}</span>
               {winner?.id === match.team_b?.id && <Award className="h-4 w-4 text-green-600" />}
@@ -206,8 +225,97 @@ function RoundColumn({ round, className }: { round: Round; className?: string })
   )
 }
 
+// Helper function to generate tournament bracket structure
+function generateTournamentBracket(teams: Team[], tournamentType: string = 'single_elimination') {
+  const numTeams = teams.length
+  const rounds = []
+  
+  // Calculate number of rounds needed
+  let numRounds = Math.ceil(Math.log2(numTeams))
+  let currentTeams = numTeams
+  
+  // Generate rounds
+  for (let roundNum = 1; roundNum <= numRounds; roundNum++) {
+    const matchesPerRound = Math.ceil(currentTeams / 2)
+    const matches = []
+    
+    for (let matchNum = 1; matchNum <= matchesPerRound; matchNum++) {
+      matches.push({
+        id: `round-${roundNum}-match-${matchNum}`,
+        team_a: null,
+        team_b: null,
+        team_a_score: undefined,
+        team_b_score: undefined,
+        status: 'scheduled' as const,
+        winner_id: undefined,
+        bracket_position: matchNum
+      })
+    }
+    
+    rounds.push({
+      id: `round-${roundNum}`,
+      round_number: roundNum,
+      round_name: getRoundName(roundNum, numRounds),
+      matches,
+      status: roundNum === 1 ? 'active' : 'pending' as const
+    })
+    
+    currentTeams = matchesPerRound
+  }
+  
+  return rounds
+}
+
+function getRoundName(roundNum: number, totalRounds: number) {
+  if (roundNum === totalRounds) return 'Final'
+  if (roundNum === totalRounds - 1) return 'Semi-finals'
+  if (roundNum === totalRounds - 2) return 'Quarter-finals'
+  return `Round ${roundNum}`
+}
+
+// Helper function to populate first round with actual teams
+function populateFirstRound(teams: Team[], matches: Match[]) {
+  const sortedTeams = teams.sort((a, b) => (a as any).seed - (b as any).seed) // Sort by seed if available
+  
+  return matches.map((match, index) => {
+    const teamAIndex = index * 2
+    const teamBIndex = teamAIndex + 1
+    
+    return {
+      ...match,
+      team_a: sortedTeams[teamAIndex] || null,
+      team_b: sortedTeams[teamBIndex] || null,
+    }
+  })
+}
+
 export function TournamentBracket({ tournament, className = "" }: TournamentBracketProps) {
-  const sortedRounds = tournament.rounds.sort((a, b) => a.round_number - b.round_number)
+  // Generate complete bracket structure
+  const teams = tournament.teams || []
+  const generatedRounds = generateTournamentBracket(teams, tournament.tournament_type)
+  
+  // Merge with existing rounds data and populate first round with teams
+  const mergedRounds = generatedRounds.map((generatedRound, roundIndex) => {
+    const existingRound = tournament.rounds.find(r => r.round_number === generatedRound.round_number)
+    
+    if (existingRound) {
+      return {
+        ...generatedRound,
+        ...existingRound,
+        matches: existingRound.matches.length > 0 ? existingRound.matches : generatedRound.matches
+      }
+    }
+    
+    // For first round, populate with actual teams
+    if (roundIndex === 0 && teams.length > 0) {
+      return {
+        ...generatedRound,
+        matches: populateFirstRound(teams, generatedRound.matches)
+      }
+    }
+    
+    return generatedRound
+  })
   
   return (
     <div className={`bg-white rounded-2xl border-0 shadow-lg overflow-hidden ${className}`}>
@@ -215,11 +323,11 @@ export function TournamentBracket({ tournament, className = "" }: TournamentBrac
       <div className="p-8">
         <div className="overflow-x-auto">
           <div className="flex gap-12 min-w-max">
-            {sortedRounds.map((round, index) => (
+            {mergedRounds.map((round, index) => (
               <React.Fragment key={round.id}>
                 <RoundColumn round={round} />
                 {/* Enhanced Connection Lines */}
-                {index < sortedRounds.length - 1 && (
+                {index < mergedRounds.length - 1 && (
                   <div className="flex items-center justify-center w-12 relative">
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="h-px bg-gradient-to-r from-blue-300 to-purple-300 w-full"></div>

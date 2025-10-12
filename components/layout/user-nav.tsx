@@ -32,11 +32,8 @@ export function UserNav({ profile }: UserNavProps) {
 
   const handleSignOut = async () => {
     try {
-      console.log("UserNav: Starting sign out process")
       await signOut()
-      console.log("UserNav: Sign out completed")
     } catch (error) {
-      console.error("UserNav: Sign out error:", error)
       notifications.showError({
         title: "Sign out failed",
         description: "There was an error signing you out. Please try again."

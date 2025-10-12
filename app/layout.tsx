@@ -41,7 +41,7 @@ export default function RootLayout({
       lang="en"
       className={`${GeistSans.variable} ${GeistMono.variable} ${inter.variable}`}
     >
-      <body className="font-sans">
+      <body className="font-sans" suppressHydrationWarning={true}>
         <AuthProvider>
           <NotificationProvider>
             <Suspense fallback={null}>
