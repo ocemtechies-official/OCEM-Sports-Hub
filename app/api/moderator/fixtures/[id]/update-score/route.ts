@@ -6,9 +6,12 @@ import { z } from "zod"
 const updateScoreSchema = z.object({
   team_a_score: z.number().int().min(0),
   team_b_score: z.number().int().min(0),
-  status: z.enum(['scheduled', 'live', 'completed', 'cancelled']),
-  expected_version: z.number().int().min(1),
-  note: z.string().max(500).optional()
+  // Accept both 'completed' and 'finished' for backward compatibility
+  status: z.enum(['scheduled', 'live', 'completed', 'finished', 'cancelled']),
+  expected_version: z.number().int().min(1).optional(),
+  note: z.string().max(500).optional(),
+  // Optional sport-specific payload to merge into fixtures.extra
+  extra: z.record(z.any()).optional()
 })
 
 export async function POST(
@@ -37,7 +40,8 @@ export async function POST(
       team_b_score,
       status,
       expected_version,
-      note
+      note,
+      extra
     } = validatedData
 
     // Try to call the RPC function first (if it exists)
@@ -49,8 +53,8 @@ export async function POST(
           p_fixture: params.id,
           p_team_a_score: team_a_score,
           p_team_b_score: team_b_score,
-          p_status: status,
-          p_expected_version: expected_version,
+          p_status: status === 'completed' ? 'finished' : status,
+          p_expected_version: expected_version ?? null,
           p_note: note || null
         })
       
@@ -106,7 +110,8 @@ export async function POST(
       
       // Direct update fallback
       let winnerId = null
-      if (status === 'completed') {
+      const normalizedStatus = status === 'completed' ? 'finished' : status
+      if (normalizedStatus === 'finished') {
         if (team_a_score > team_b_score) {
           // Get team_a_id for winner
           const { data: fixtureData } = await supabase
@@ -129,7 +134,7 @@ export async function POST(
       const updateData: any = {
         team_a_score,
         team_b_score,
-        status,
+        status: normalizedStatus,
         winner_id: winnerId,
         updated_at: new Date().toISOString()
       }
@@ -146,10 +151,29 @@ export async function POST(
         updateData.updated_by = user.id
       }
       
-      if (columns?.some(col => col.column_name === 'version')) {
+      if (columns?.some(col => col.column_name === 'version') && typeof expected_version === 'number' && expected_version > 0) {
         updateData.version = expected_version + 1
       }
       
+      // Merge sport-specific extra payload if provided
+      if (typeof extra === 'object' && extra !== null) {
+        // Fetch current extra to merge
+        const { data: fx } = await supabase
+          .from('fixtures')
+          .select('extra')
+          .eq('id', params.id)
+          .single()
+        const currentExtra = (fx?.extra as Record<string, any>) || {}
+        updateData.extra = { ...currentExtra, ...extra }
+      }
+
+      // Fetch previous state for audit
+      const { data: prevFx } = await supabase
+        .from('fixtures')
+        .select('team_a_score, team_b_score, status')
+        .eq('id', params.id)
+        .single()
+
       const updateResult = await supabase
         .from('fixtures')
         .update(updateData)
@@ -165,6 +189,24 @@ export async function POST(
       
       updatedFixture = updateResult.data
       error = updateResult.error
+
+      // Best-effort: insert an audit row into match_updates
+      try {
+        await supabase.from('match_updates').insert({
+          fixture_id: params.id,
+          update_type: 'score',
+          note: note || null,
+          prev_team_a_score: prevFx?.team_a_score ?? null,
+          prev_team_b_score: prevFx?.team_b_score ?? null,
+          prev_status: prevFx?.status ?? null,
+          new_team_a_score: team_a_score,
+          new_team_b_score: team_b_score,
+          new_status: normalizedStatus,
+          created_by: user.id
+        })
+      } catch (_) {
+        // ignore audit failure
+      }
     }
 
     if (error) {

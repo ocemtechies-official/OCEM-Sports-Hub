@@ -14,15 +14,26 @@ The OCEM Sports Hub now includes a comprehensive moderator system that allows tr
 - **RPC Functions**: Secure `rpc_update_fixture_score` function with validation and permissions
 - **RLS Policies**: Row-level security policies for moderator permissions
 
+### ✅ New in Moderator Upgrade
+
+- **Incidents/Highlights**: Moderators can post structured incidents with optional media
+- **Undo Support**: 15s window to revert the last score/status change
+- **Viewer Match Page**: Public live view with scoreboard and highlights
+
 ### ✅ Backend API
 
 - **Moderator API Routes**:
   - `GET /api/moderator/fixtures` - Get assigned fixtures for moderator
   - `POST /api/moderator/fixtures/[id]/update-score` - Update fixture score via RPC
+  - `POST /api/moderator/fixtures/[id]/incidents` - Create incident/highlight
+  - `GET /api/moderator/fixtures/[id]/incidents` - List incidents for fixture
+  - `POST /api/moderator/fixtures/[id]/undo` - Revert last score/status change (<=15s)
   - `GET /api/moderator/stats` - Get moderator activity statistics
 - **Admin API Routes**:
   - `POST /api/admin/moderators` - Create new moderator
   - `PUT /api/admin/moderators` - Update moderator role/assignments
+ - **Uploads**:
+   - `POST /api/upload/sign` - Get signed URL for media upload to `match-media` bucket
 
 ### ✅ Frontend Components
 
@@ -31,6 +42,9 @@ The OCEM Sports Hub now includes a comprehensive moderator system that allows tr
 - **Fixtures Management**: Filtered view of assigned fixtures with search
 - **Update History**: Personal activity log with detailed change tracking
 - **Admin Management**: Create, edit, and manage moderators and their assignments
+- **Match Control Panel**: `app/moderator/fixtures/[id]/page.tsx` (scoreboard, incidents, undo)
+- **Incident Components**: `components/moderator/scoreboard-controls.tsx`, `incident-composer.tsx`, `incident-feed.tsx`, `undo-snackbar.tsx`
+- **Viewer Match Page**: `app/match/[id]/page.tsx` with live highlights
 
 ### ✅ Security & Validation
 
@@ -38,6 +52,7 @@ The OCEM Sports Hub now includes a comprehensive moderator system that allows tr
 - **Permission Validation**: Server-side checks for sport/venue assignments
 - **Rate Limiting**: 20 updates per fixture per 5 minutes
 - **Optimistic Locking**: Version-based conflict resolution
+- **RLS Tightening**: Incidents insert allowed only for admins or assigned moderators (by sport/venue)
 - **Audit Logging**: Complete change history with user attribution
 
 ### ✅ Real-time Integration
@@ -57,6 +72,14 @@ To implement the moderator system, run these SQL scripts in order:
    - Creates audit triggers
 
 2. **`scripts/11-moderator-rls-policies.sql`**
+3. **`scripts/database/32-moderator-incidents.sql`**
+   - Creates/augments `match_updates`, indexes, RLS, and `v_fixture_incidents`
+
+4. **`scripts/database/33-moderator-undo.sql`**
+   - Adds `rpc_revert_last_fixture_update(p_fixture uuid)` (15s undo window)
+
+5. **`scripts/database/36-moderator-rls-tightening.sql`**
+   - Enforces sport/venue assignment for incidents insert
    - Sets up Row Level Security policies
    - Creates helper functions for moderator queries
    - Enables secure access patterns
@@ -106,6 +129,37 @@ To implement the moderator system, run these SQL scripts in order:
 ## API Usage Examples
 
 ### Get Moderator Fixtures
+### Create Incident
+```typescript
+await fetch(`/api/moderator/fixtures/${fixtureId}/incidents`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ note: "Goal by Aayush (12')", type: 'goal' })
+})
+```
+
+### Undo Last Update (<= 15s)
+```typescript
+await fetch(`/api/moderator/fixtures/${fixtureId}/undo`, { method: 'POST' })
+```
+
+### Signed Upload URL (media)
+```typescript
+const res = await fetch('/api/upload/sign', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ fileName: 'photo.jpg', contentType: 'image/jpeg' })
+})
+```
+
+## End-to-End Test Checklist
+
+1) As Admin: assign moderator to a sport/venue.
+2) As Moderator: open `/moderator/fixtures/[id]`, update score and post an incident.
+3) Verify viewer sees updates at `/match/[id]` and via live fixtures grid.
+4) Use Undo within 15s and confirm scores revert and audit row is added.
+5) Try posting incident for non-assigned sport/venue (should be blocked by RLS).
+
 
 ```typescript
 const response = await fetch('/api/moderator/fixtures?status=live&sport=Football')

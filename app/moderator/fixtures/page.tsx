@@ -31,17 +31,7 @@ export default async function ModeratorFixturesPage({
   const supabase = await getSupabaseServerClient()
 
   // Get fixtures using the API route (which has proper fallback logic)
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
-  const fixturesResponse = await fetch(`${baseUrl}/api/moderator/fixtures?${new URLSearchParams({
-    status: params.status || 'all',
-    sport: params.sport || 'all',
-    limit: '50',
-    offset: '0'
-  })}`, {
-    headers: {
-      'Cookie': `sb-access-token=${user.id}` // This won't work in server components, need different approach
-    }
-  })
+  // Note: API route call removed to avoid auth/header issues in server component; using direct DB fallback below
 
   // Fallback: Use direct database query with proper filtering
   let fixtures = []
@@ -61,18 +51,12 @@ export default async function ModeratorFixturesPage({
       canManageAllSports = profile.role === 'admin' || assignedSports.length === 0
     }
 
-    console.log('Moderator assignments:', { 
-      userId: user.id, 
-      role: profile.role, 
-      assignedSports, 
-      canManageAllSports 
-    })
+    // assignments loaded
 
     // For moderators (non-admins), check if they have assignments
     if (profile.role !== 'admin') {
       if (assignedSports.length === 0) {
         // If moderator has no assigned sports, return empty result
-        console.log('Moderator has no assigned sports, returning empty fixtures')
         fixtures = []
       } else {
         // Build query based on moderator assignments
@@ -100,7 +84,6 @@ export default async function ModeratorFixturesPage({
 
         const { data: fixturesData } = await query
         fixtures = fixturesData || []
-        console.log('Moderator fixtures found:', fixtures.length)
       }
     } else {
       // Admin can see all fixtures
@@ -127,11 +110,10 @@ export default async function ModeratorFixturesPage({
 
       const { data: fixturesData } = await query
       fixtures = fixturesData || []
-      console.log('Admin fixtures found:', fixtures.length)
     }
 
   } catch (error) {
-    console.error('Error fetching moderator fixtures:', error)
+    // Swallow errors and show empty state
     fixtures = []
   }
 
@@ -206,7 +188,7 @@ export default async function ModeratorFixturesPage({
           <CardContent className="space-y-4">
             {fixturesByStatus.live.map((fixture: any) => (
               <QuickUpdateCard 
-                key={fixture.fixture_id} 
+                key={fixture.id || fixture.fixture_id}
                 fixture={fixture}
               />
             ))}
@@ -226,7 +208,7 @@ export default async function ModeratorFixturesPage({
           <CardContent className="space-y-4">
             {fixturesByStatus.scheduled.map((fixture: any) => (
               <QuickUpdateCard 
-                key={fixture.fixture_id} 
+                key={fixture.id || fixture.fixture_id}
                 fixture={fixture}
               />
             ))}
@@ -246,7 +228,7 @@ export default async function ModeratorFixturesPage({
           <CardContent className="space-y-4">
             {fixturesByStatus.completed.map((fixture: any) => (
               <QuickUpdateCard 
-                key={fixture.fixture_id} 
+                key={fixture.id || fixture.fixture_id}
                 fixture={fixture}
               />
             ))}
@@ -266,7 +248,7 @@ export default async function ModeratorFixturesPage({
           <CardContent className="space-y-4">
             {fixturesByStatus.cancelled.map((fixture: any) => (
               <QuickUpdateCard 
-                key={fixture.fixture_id} 
+                key={fixture.id || fixture.fixture_id}
                 fixture={fixture}
               />
             ))}

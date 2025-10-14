@@ -77,7 +77,9 @@ export function LiveFixturesRealtime({ initialFixtures }: LiveFixturesRealtimePr
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {fixtures.map((fixture) => (
-        <FixtureCard key={fixture.id} fixture={fixture} isLive />
+        <a key={fixture.id} href={`/match/${fixture.id}`}>
+          <FixtureCard fixture={fixture} isLive />
+        </a>
       ))}
     </div>
   )
