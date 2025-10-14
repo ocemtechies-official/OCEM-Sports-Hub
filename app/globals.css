@@ -205,3 +205,35 @@
 .destructive-button:focus {
   @apply bg-red-100 text-red-700 ring-2 ring-red-200;
 }
+
+/* Fixture Card Enhancements */
+.fixture-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fixture-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.fixture-card-team-highlight {
+  transition: all 0.2s ease-in-out;
+}
+
+.fixture-card-team-highlight:hover {
+  transform: scale(1.02);
+}
+
+.fixture-card-vs-divider {
+  position: relative;
+}
+
+.fixture-card-vs-divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+}

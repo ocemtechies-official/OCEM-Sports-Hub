@@ -114,6 +114,20 @@ export function DesktopNav() {
         </DropdownMenuContent>
       </DropdownMenu>
 
+      {/* Matches direct link */}
+      <Link
+        href="/match"
+        className={cn(
+          "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300",
+          isActive("/match")
+            ? "nav-active"
+            : "nav-hover"
+        )}
+      >
+        <Calendar className="h-4 w-4" />
+        Matches
+      </Link>
+
       <Link
         href="/register"
         className={cn(
