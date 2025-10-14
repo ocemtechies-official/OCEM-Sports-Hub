@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, Settings, LogOut, Shield, UserCheck, UserCog } from "lucide-react"
+import { User, Settings, LogOut, Shield, UserCheck, UserCog, Crown } from "lucide-react"
 import { notifications } from "@/lib/notifications"
 import { useAuth } from "@/components/auth/auth-provider"
 import { cn } from "@/lib/utils"
@@ -97,6 +97,13 @@ export function UserNav({ profile }: UserNavProps) {
         >
           <UserCheck className="mr-2 h-4 w-4 hover:text-blue-800" />
           My Registrations
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={() => router.push("/profile/my-team")}
+            className="cursor-pointer text-slate-700 hover:text-yellow-600 hover:bg-yellow-50 py-2 transition-colors duration-300 focus:bg-yellow-50 focus:text-yellow-700"
+        >
+          <Crown className="mr-2 h-4 w-4 hover:text-yellow-800" />
+          My Team
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => router.push("/settings")}
