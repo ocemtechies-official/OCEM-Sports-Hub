@@ -241,7 +241,14 @@ AS $$
   FROM public.v_leaderboard_tournament v
   WHERE v.tournament_id = p_tournament
     AND (p_gender IS NULL OR v.gender = p_gender)
-  ORDER BY v.points DESC NULLS LAST, v.nrr DESC NULLS LAST, v.goal_diff DESC NULLS LAST
+  ORDER BY 
+    -- Cricket
+    CASE WHEN lower((SELECT name FROM public.sports s WHERE s.id = v.sport_id)) = 'cricket' THEN 0 ELSE 1 END,
+    v.points DESC NULLS LAST,
+    v.nrr DESC NULLS LAST,
+    v.goal_diff DESC NULLS LAST,
+    -- Football/Soccer secondary tiebreakers
+    CASE WHEN lower((SELECT name FROM public.sports s WHERE s.id = v.sport_id)) IN ('football','soccer') THEN v.goal_diff END DESC NULLS LAST
   OFFSET p_offset LIMIT p_limit
 $$;
 
@@ -263,7 +270,12 @@ AS $$
   WHERE v.sport_id = p_sport
     AND (p_gender IS NULL OR v.gender = p_gender)
     AND (p_season IS NULL OR v.season_key = p_season)
-  ORDER BY v.points DESC NULLS LAST, v.nrr DESC NULLS LAST, v.goal_diff DESC NULLS LAST
+  ORDER BY 
+    CASE WHEN lower((SELECT name FROM public.sports s WHERE s.id = v.sport_id)) = 'cricket' THEN 0 ELSE 1 END,
+    v.points DESC NULLS LAST,
+    v.nrr DESC NULLS LAST,
+    v.goal_diff DESC NULLS LAST,
+    CASE WHEN lower((SELECT name FROM public.sports s WHERE s.id = v.sport_id)) IN ('football','soccer') THEN v.goal_diff END DESC NULLS LAST
   OFFSET p_offset LIMIT p_limit
 $$;
 
