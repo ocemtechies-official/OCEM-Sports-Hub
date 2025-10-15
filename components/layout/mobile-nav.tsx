@@ -82,20 +82,20 @@ export function MobileNav({ profile }: { profile: any }) {
     <div className="md:hidden">
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="text-slate-600 hover:bg-slate-100 rounded-lg transition-colors duration-300">
+          <Button variant="ghost" size="icon" className="text-slate-600 hover:bg-slate-100 rounded-xl transition-colors duration-300">
             <Menu className="h-6 w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="right" className="w-64 p-0 bg-white border-l border-slate-200">
+        <SheetContent side="right" className="w-72 p-0 bg-white border-l border-slate-200">
           <div className="flex flex-col h-full">
             {/* Mobile Header */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-200">
+            <div className="flex items-center justify-between p-5 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50">
               <Link 
                 href="/" 
                 className="flex items-center gap-2 font-bold text-xl"
                 onClick={() => setIsOpen(false)}
               >
-                <div className="bg-white p-1 rounded-lg transition-all duration-300">
+                <div className="bg-white p-1.5 rounded-xl transition-all duration-300 shadow-sm">
                   <img src="/logo.png" alt="OCEM Sports Hub Logo" className="h-8 w-8 object-contain" />
                 </div>
                 <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
@@ -106,7 +106,7 @@ export function MobileNav({ profile }: { profile: any }) {
                 variant="ghost" 
                 size="icon" 
                 onClick={() => setIsOpen(false)}
-                className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors duration-300"
+                className="text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-xl transition-colors duration-300"
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -123,10 +123,10 @@ export function MobileNav({ profile }: { profile: any }) {
                       href={item.href}
                       onClick={() => setIsOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 px-3 py-2.5 text-base font-medium rounded-lg transition-all duration-300",
+                        "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl transition-all duration-300 transform hover:scale-[1.02]",
                         isActive(item.href)
-                          ? "nav-active"
-                          : "nav-hover"
+                          ? "nav-active shadow-md"
+                          : "nav-hover shadow-sm hover:shadow-md"
                       )}
                     >
                       <Icon className="h-5 w-5" />
@@ -141,10 +141,10 @@ export function MobileNav({ profile }: { profile: any }) {
                     <Button 
                       variant="ghost" 
                       className={cn(
-                        "w-full flex justify-between items-center gap-3 px-3 py-2.5 text-base font-medium rounded-lg transition-all duration-300",
+                        "w-full flex justify-between items-center gap-3 px-4 py-3 text-base font-medium rounded-xl transition-all duration-300 transform hover:scale-[1.02]",
                         isGroupActive(navGroups[0].items)
-                          ? "dropdown-trigger-active"
-                          : "dropdown-trigger-hover"
+                          ? "dropdown-trigger-active shadow-md"
+                          : "dropdown-trigger-hover shadow-sm hover:shadow-md"
                       )}
                       onClick={() => toggleMenu('competitions')}
                     >
@@ -164,10 +164,10 @@ export function MobileNav({ profile }: { profile: any }) {
                           href={item.href}
                           onClick={() => setIsOpen(false)}
                           className={cn(
-                            "flex items-center gap-3 px-3 py-2.5 text-base font-medium rounded-lg transition-all duration-200",
+                            "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl transition-all duration-200 transform hover:scale-[1.02]",
                             isActive(item.href)
-                              ? "dropdown-item-active"
-                              : "dropdown-item-hover"
+                              ? "dropdown-item-active shadow-sm"
+                              : "dropdown-item-hover shadow-sm hover:shadow-md"
                           )}
                         >
                           <Icon className="h-5 w-5" />
@@ -184,10 +184,10 @@ export function MobileNav({ profile }: { profile: any }) {
                     <Button 
                       variant="ghost" 
                       className={cn(
-                        "w-full flex justify-between items-center gap-3 px-3 py-2.5 text-base font-medium rounded-lg transition-all duration-300",
+                        "w-full flex justify-between items-center gap-3 px-4 py-3 text-base font-medium rounded-xl transition-all duration-300 transform hover:scale-[1.02]",
                         isGroupActive(navGroups[1].items)
-                          ? "dropdown-trigger-active"
-                          : "dropdown-trigger-hover"
+                          ? "dropdown-trigger-active shadow-md"
+                          : "dropdown-trigger-hover shadow-sm hover:shadow-md"
                       )}
                       onClick={() => toggleMenu('activities')}
                     >
@@ -207,10 +207,10 @@ export function MobileNav({ profile }: { profile: any }) {
                           href={item.href}
                           onClick={() => setIsOpen(false)}
                           className={cn(
-                            "flex items-center gap-3 px-3 py-2.5 text-base font-medium rounded-lg transition-all duration-200",
+                            "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl transition-all duration-200 transform hover:scale-[1.02]",
                             isActive(item.href)
-                              ? "dropdown-item-active"
-                              : "dropdown-item-hover"
+                              ? "dropdown-item-active shadow-sm"
+                              : "dropdown-item-hover shadow-sm hover:shadow-md"
                           )}
                         >
                           <Icon className="h-5 w-5" />
@@ -225,14 +225,14 @@ export function MobileNav({ profile }: { profile: any }) {
             
             {/* Mobile Auth */}
             {!profile && (
-              <div className="p-4 border-t border-slate-200">
-                <div className="flex flex-col gap-2">
-                  <Button asChild className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300">
+              <div className="p-5 border-t border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100">
+                <div className="flex flex-col gap-3">
+                  <Button asChild className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300 rounded-xl py-3 shadow-lg hover:shadow-xl transform hover:scale-[1.02]">
                     <Link href="/auth/signup" onClick={() => setIsOpen(false)}>
                       Sign Up
                     </Link>
                   </Button>
-                  <Button variant="outline" asChild className="w-full border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors duration-300">
+                  <Button variant="outline" asChild className="w-full border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors duration-300 rounded-xl py-3 shadow-sm hover:shadow-md transform hover:scale-[1.02]">
                     <Link href="/auth/login" onClick={() => setIsOpen(false)}>
                       Sign In
                     </Link>

@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { User, Settings, LogOut, Shield, UserCheck, UserCog } from "lucide-react"
+import { User, Settings, LogOut, Shield, UserCheck, UserCog, Crown } from "lucide-react"
 import { notifications } from "@/lib/notifications"
 import { useAuth } from "@/components/auth/auth-provider"
 import { cn } from "@/lib/utils"
@@ -51,85 +51,92 @@ export function UserNav({ profile }: UserNavProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:bg-slate-100 transition-colors duration-300">
-          <Avatar className="h-10 w-10 ring-2 ring-transparent hover:ring-blue-500 transition-all duration-300">
+        <Button variant="ghost" className="relative h-11 w-11 rounded-xl hover:bg-slate-100 transition-all duration-300 transform hover:scale-105">
+          <Avatar className="h-11 w-11 ring-2 ring-transparent hover:ring-blue-500 transition-all duration-300">
             <AvatarImage src={profile.avatar_url || undefined} alt={profile.full_name || profile.email} />
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-medium">
+            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white font-medium text-lg">
               {initials}
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64 border border-slate-200 shadow-lg rounded-lg" align="end" forceMount>
-        <DropdownMenuLabel className="font-normal py-3">
-          <div className="flex flex-col space-y-1">
-            <p className="text-sm font-semibold leading-none">{profile.full_name || "User"}</p>
-            <p className="text-xs leading-none text-muted-foreground">{profile.email}</p>
+      <DropdownMenuContent className="w-72 border border-slate-200 shadow-xl rounded-xl p-2" align="end" forceMount>
+        <DropdownMenuLabel className="font-normal py-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="flex flex-col space-y-2">
+            <p className="text-lg font-bold leading-none">{profile.full_name || "User"}</p>
+            <p className="text-sm leading-none text-muted-foreground">{profile.email}</p>
             {profile.role === "admin" && (
               <div className="flex items-center mt-2">
-                <Shield className="h-3 w-3 text-blue-600 mr-1" />
-                <span className="text-xs leading-none text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full">
+                <Shield className="h-4 w-4 text-blue-600 mr-1.5" />
+                <span className="text-sm leading-none text-blue-600 font-semibold bg-blue-100 px-2.5 py-1 rounded-full">
                   Admin
                 </span>
               </div>
             )}
             {profile.role === "moderator" && (
               <div className="flex items-center mt-2">
-                <UserCog className="h-3 w-3 text-green-600 mr-1" />
-                <span className="text-xs leading-none text-green-600 font-medium bg-green-50 px-2 py-0.5 rounded-full">
+                <UserCog className="h-4 w-4 text-green-600 mr-1.5" />
+                <span className="text-sm leading-none text-green-600 font-semibold bg-green-100 px-2.5 py-1 rounded-full">
                   Moderator
                 </span>
               </div>
             )}
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="my-2" />
         <DropdownMenuItem 
           onClick={() => router.push("/profile")}
-            className="cursor-pointer text-slate-700 hover:text-blue-600 hover:bg-blue-50 py-2 transition-colors duration-300 focus:bg-blue-50 focus:text-blue-700"
+            className="cursor-pointer text-slate-700 hover:text-blue-600 hover:bg-blue-50 py-3 rounded-lg transition-all duration-300 focus:bg-blue-50 focus:text-blue-700 transform hover:scale-[1.02]"
         >
-          <User className="mr-2 h-4 w-4 hover:text-blue-800" />
-          Profile
+          <User className="mr-3 h-5 w-5 hover:text-blue-800" />
+          <span className="font-medium">Profile</span>
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => router.push("/profile/registrations")}
-            className="cursor-pointer text-slate-700 hover:text-blue-600 hover:bg-blue-50 py-2 transition-colors duration-300 focus:bg-blue-50 focus:text-blue-700"
+            className="cursor-pointer text-slate-700 hover:text-blue-600 hover:bg-blue-50 py-3 rounded-lg transition-all duration-300 focus:bg-blue-50 focus:text-blue-700 transform hover:scale-[1.02]"
         >
-          <UserCheck className="mr-2 h-4 w-4 hover:text-blue-800" />
-          My Registrations
+          <UserCheck className="mr-3 h-5 w-5 hover:text-blue-800" />
+          <span className="font-medium">My Registrations</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          onClick={() => router.push("/profile/my-team")}
+            className="cursor-pointer text-slate-700 hover:text-yellow-600 hover:bg-yellow-50 py-3 rounded-lg transition-all duration-300 focus:bg-yellow-50 focus:text-yellow-700 transform hover:scale-[1.02]"
+        >
+          <Crown className="mr-3 h-5 w-5 hover:text-yellow-800" />
+          <span className="font-medium">My Team</span>
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => router.push("/settings")}
-            className="cursor-pointer text-slate-700 hover:text-blue-600 hover:bg-blue-50 py-2 transition-colors duration-300 focus:bg-blue-50 focus:text-blue-700"
+            className="cursor-pointer text-slate-700 hover:text-blue-600 hover:bg-blue-50 py-3 rounded-lg transition-all duration-300 focus:bg-blue-50 focus:text-blue-700 transform hover:scale-[1.02]"
         >
-          <Settings className="mr-2 h-4 w-4 hover:text-blue-800" />
-          Settings
+          <Settings className="mr-3 h-5 w-5 hover:text-blue-800" />
+          <span className="font-medium">Settings</span>
         </DropdownMenuItem>
         {(profile.role === "moderator" || profile.role === "admin") && (
           <DropdownMenuItem 
             onClick={() => router.push("/moderator")}
-            className="cursor-pointer text-slate-700 hover:text-green-600 hover:bg-green-50 py-2 transition-colors duration-300 focus:bg-green-50 focus:text-green-700"
+            className="cursor-pointer text-slate-700 hover:text-green-600 hover:bg-green-50 py-3 rounded-lg transition-all duration-300 focus:bg-green-50 focus:text-green-700 transform hover:scale-[1.02]"
           >
-            <UserCog className="mr-2 h-4 w-4 hover:text-green-800"/>
-            Moderator Dashboard
+            <UserCog className="mr-3 h-5 w-5 hover:text-green-800"/>
+            <span className="font-medium">Moderator Dashboard</span>
           </DropdownMenuItem>
         )}
         {profile.role === "admin" && (
           <DropdownMenuItem 
             onClick={() => router.push("/admin")}
-            className="cursor-pointer text-slate-700 hover:text-blue-600 hover:bg-blue-50 py-2 transition-colors duration-300 focus:bg-blue-50 focus:text-blue-700"
+            className="cursor-pointer text-slate-700 hover:text-blue-600 hover:bg-blue-50 py-3 rounded-lg transition-all duration-300 focus:bg-blue-50 focus:text-blue-700 transform hover:scale-[1.02]"
           >
-            <Shield className="mr-2 h-4 w-4 hover:text-blue-800 "/>
-            Admin Panel
+            <Shield className="mr-3 h-5 w-5 hover:text-blue-800 "/>
+            <span className="font-medium">Admin Panel</span>
           </DropdownMenuItem>
         )}
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="my-2" />
         <DropdownMenuItem 
           onClick={handleSignOut}
-          className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 py-2 transition-colors duration-200 focus:bg-red-50 focus:text-red-700"
+          className="cursor-pointer text-red-600 hover:text-red-700 hover:bg-red-50 py-3 rounded-lg transition-all duration-200 focus:bg-red-50 focus:text-red-700 transform hover:scale-[1.02]"
         >
-          <LogOut className="mr-2 h-4 w-4" />
-          Sign Out
+          <LogOut className="mr-3 h-5 w-5" />
+          <span className="font-medium">Sign Out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

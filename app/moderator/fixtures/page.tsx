@@ -48,18 +48,16 @@ export default async function ModeratorFixturesPage({
 
     if (profileData) {
       assignedSports = profileData.assigned_sports || []
-      canManageAllSports = profile.role === 'admin' || assignedSports.length === 0
+      // Null means global access; empty array means none assigned
+      canManageAllSports = profile.role === 'admin' || profileData.assigned_sports === null
     }
 
     // assignments loaded
 
     // For moderators (non-admins), check if they have assignments
     if (profile.role !== 'admin') {
-      if (assignedSports.length === 0) {
-        // If moderator has no assigned sports, return empty result
-        fixtures = []
-      } else {
-        // Build query based on moderator assignments
+      if (profileData?.assigned_sports === null) {
+        // Global access: see all fixtures
         let query = supabase
           .from('fixtures')
           .select(`
@@ -69,7 +67,41 @@ export default async function ModeratorFixturesPage({
             team_b:teams!fixtures_team_b_id_fkey(id, name, logo_url),
             updated_by_profile:profiles!fixtures_updated_by_fkey(full_name)
           `)
-          .in('sport_id', assignedSports)
+          .order('scheduled_at', { ascending: true })
+
+        if (params.status && params.status !== 'all') {
+          query = query.eq('status', params.status)
+        }
+        if (params.sport && params.sport !== 'all') {
+          query = query.eq('sport_id', params.sport)
+        }
+
+        const { data: fixturesData } = await query
+        fixtures = fixturesData || []
+      } else if (assignedSports.length === 0) {
+        // If moderator has no assigned sports, return empty result
+        fixtures = []
+      } else {
+        // Build query based on moderator assignments (by sport name -> map to IDs)
+        const { data: sportsMap } = await supabase
+          .from('sports')
+          .select('id, name')
+          .in('name', assignedSports)
+
+        const assignedSportIds = (sportsMap || [])
+          .filter((s: any) => assignedSports.includes(s.name))
+          .map((s: any) => s.id)
+
+        let query = supabase
+          .from('fixtures')
+          .select(`
+            *,
+            sport:sports(id, name, icon),
+            team_a:teams!fixtures_team_a_id_fkey(id, name, logo_url),
+            team_b:teams!fixtures_team_b_id_fkey(id, name, logo_url),
+            updated_by_profile:profiles!fixtures_updated_by_fkey(full_name)
+          `)
+          .in('sport_id', assignedSportIds)
           .order('scheduled_at', { ascending: true })
 
         // Apply status filter

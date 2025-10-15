@@ -17,6 +17,7 @@ import {
   UserCheck,
   UserCog,
   Target,
+  UserPlus,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -90,6 +91,11 @@ const navigation: NavigationSection[] = [
         name: "Teams", 
         href: "/admin/teams", 
         icon: Shield 
+      },
+      { 
+        name: "Team Changes", 
+        href: "/admin/team-change-requests", 
+        icon: UserPlus 
       },
       { 
         name: "Sports", 

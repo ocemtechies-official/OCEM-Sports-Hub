@@ -38,7 +38,7 @@ interface Team {
   color: string | null
   logo_url: string | null
   created_at: string
-  players?: { count: number }[]
+  team_members?: { count: number }[]
 }
 
 interface EnhancedTeamTableProps {
@@ -69,7 +69,7 @@ export function EnhancedTeamTable({ teams }: EnhancedTeamTableProps) {
           comparison = a.name.localeCompare(b.name)
           break
         case "players":
-          comparison = (a.players?.[0]?.count || 0) - (b.players?.[0]?.count || 0)
+          comparison = (a.team_members?.[0]?.count || 0) - (b.team_members?.[0]?.count || 0)
           break
         case "date":
           comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
@@ -90,7 +90,7 @@ export function EnhancedTeamTable({ teams }: EnhancedTeamTableProps) {
   )
 
   // Stats
-  const totalPlayers = teams.reduce((sum, t) => sum + (t.players?.[0]?.count || 0), 0)
+  const totalPlayers = teams.reduce((sum, t) => sum + (t.team_members?.[0]?.count || 0), 0)
   const avgPlayersPerTeam = teams.length > 0 ? Math.round(totalPlayers / teams.length) : 0
 
   // Selection handlers
@@ -119,7 +119,7 @@ export function EnhancedTeamTable({ teams }: EnhancedTeamTableProps) {
       ["Team Name", "Players", "Color", "Created"],
       ...selectedTeamData.map(t => [
         t.name,
-        t.players?.[0]?.count || 0,
+        t.team_members?.[0]?.count || 0,
         t.color || "N/A",
         new Date(t.created_at).toLocaleDateString()
       ])
@@ -270,7 +270,7 @@ export function EnhancedTeamTable({ teams }: EnhancedTeamTableProps) {
           <TableBody>
             {paginatedTeams.length > 0 ? (
               paginatedTeams.map((team) => {
-                const playerCount = team.players?.[0]?.count || 0
+                const playerCount = team.team_members?.[0]?.count || 0
 
                 return (
                   <TableRow key={team.id}>

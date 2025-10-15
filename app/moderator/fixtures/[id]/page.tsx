@@ -53,6 +53,7 @@ export default async function ModeratorFixtureControlPage({ params }: { params: 
               teamAScore={fixture.team_a_score}
               teamBScore={fixture.team_b_score}
               status={fixture.status}
+              sportName={fixture.sport?.name}
             />
           </CardContent>
         </Card>

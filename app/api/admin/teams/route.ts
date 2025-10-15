@@ -2,19 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/auth'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
-    const { isAdmin } = await requireAdmin()
-    
-    if (!isAdmin) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const supabase = await getSupabaseServerClient()
     
     const { data: teams, error } = await supabase
       .from('teams')
-      .select('*, players(count)')
+      .select('*, team_members(count)')
       .order('name')
 
     if (error) {

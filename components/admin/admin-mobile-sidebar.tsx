@@ -20,6 +20,7 @@ import {
   Settings,
   UserCheck,
   UserCog,
+  UserPlus,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -80,6 +81,11 @@ const navigation = [
         name: "Teams", 
         href: "/admin/teams", 
         icon: Shield 
+      },
+      { 
+        name: "Team Changes", 
+        href: "/admin/team-change-requests", 
+        icon: UserPlus 
       },
     ],
   },

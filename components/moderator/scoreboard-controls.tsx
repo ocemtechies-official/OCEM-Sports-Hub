@@ -19,6 +19,7 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
   const [localStatus, setLocalStatus] = useState(status)
   const [isSaving, setIsSaving] = useState(false)
   const [extra, setExtra] = useState<any>({})
+  const sport = (sportName || '').toLowerCase()
 
   const applyUpdate = async (nextA: number, nextB: number, nextStatus: string) => {
     setIsSaving(true)
@@ -49,7 +50,7 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
           <div className="text-4xl font-bold">{localB}</div>
         </div>
       </div>
-      {sportName && sportName.toLowerCase() === 'cricket' && (
+      {sport === 'cricket' && (
         <div className="mt-4 grid grid-cols-2 gap-3">
           <div>
             <label className="block text-sm text-slate-600 mb-1">{teamAName} Runs</label>
@@ -70,6 +71,48 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
             <label className="block text-sm text-slate-600 mb-1">{teamBName} Overs</label>
             <input className="w-full border rounded px-3 py-2" type="number" step={0.1} min={0}
               onChange={(e) => setExtra((p: any) => ({ ...p, overs_b: Number(e.target.value) }))} />
+          </div>
+        </div>
+      )}
+      {(sport === 'volleyball' || sport === 'tennis' || sport === 'badminton') && (
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm text-slate-600 mb-1">{teamAName} Sets Won</label>
+            <input className="w-full border rounded px-3 py-2" type="number" min={0}
+              onChange={(e) => setExtra((p: any) => ({ ...p, sets_a: Number(e.target.value) }))} />
+          </div>
+          <div>
+            <label className="block text-sm text-slate-600 mb-1">{teamBName} Sets Won</label>
+            <input className="w-full border rounded px-3 py-2" type="number" min={0}
+              onChange={(e) => setExtra((p: any) => ({ ...p, sets_b: Number(e.target.value) }))} />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-sm text-slate-600 mb-1">Set Scores (comma-separated pairs, e.g. 25-18,25-22,22-25)</label>
+            <input className="w-full border rounded px-3 py-2" placeholder="e.g. 25-18,25-22,22-25"
+              onChange={(e) => {
+                const txt = e.target.value.trim()
+                const parts = txt.length ? txt.split(',') : []
+                const parsed = parts.map(p => p.split('-').map(n => Number(n)))
+                setExtra((prev: any) => ({ ...prev, set_scores: parsed }))
+              }} />
+          </div>
+        </div>
+      )}
+      {sport === 'football' && (
+        <div className="mt-4 grid grid-cols-2 gap-3">
+          <div className="col-span-2 flex items-center gap-2">
+            <input id="went_to_penalties" type="checkbox" onChange={(e) => setExtra((p: any) => ({ ...p, went_to_penalties: e.target.checked }))} />
+            <label htmlFor="went_to_penalties" className="text-sm text-slate-700">Decided by penalties</label>
+          </div>
+          <div>
+            <label className="block text-sm text-slate-600 mb-1">{teamAName} Pens</label>
+            <input className="w-full border rounded px-3 py-2" type="number" min={0}
+              onChange={(e) => setExtra((p: any) => ({ ...p, pens_a: Number(e.target.value) }))} />
+          </div>
+          <div>
+            <label className="block text-sm text-slate-600 mb-1">{teamBName} Pens</label>
+            <input className="w-full border rounded px-3 py-2" type="number" min={0}
+              onChange={(e) => setExtra((p: any) => ({ ...p, pens_b: Number(e.target.value) }))} />
           </div>
         </div>
       )}

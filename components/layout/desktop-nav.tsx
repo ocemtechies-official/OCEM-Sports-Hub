@@ -64,10 +64,10 @@ export function DesktopNav() {
       <Link
         href="/"
         className={cn(
-          "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300",
+          "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 transform hover:scale-105",
           isActive("/")
-            ? "nav-active"
-            : "nav-hover"
+            ? "nav-active shadow-md"
+            : "nav-hover shadow-sm hover:shadow-md"
         )}
       >
         <Home className="h-4 w-4" />
@@ -80,10 +80,10 @@ export function DesktopNav() {
           <Button 
             variant="ghost" 
             className={cn(
-              "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300",
+              "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 transform hover:scale-105",
               isGroupActive(navGroups[0].items)
-                ? "dropdown-trigger-active"
-                : "dropdown-trigger-hover"
+                ? "dropdown-trigger-active shadow-md"
+                : "dropdown-trigger-hover shadow-sm hover:shadow-md"
             )}
           >
             <TrophyIcon className="h-4 w-4" />
@@ -91,7 +91,7 @@ export function DesktopNav() {
             <ChevronDown className="h-4 w-4 transition-transform duration-300 group-data-[state=open]:rotate-180" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-48 border border-slate-200 shadow-lg rounded-lg mt-1">
+        <DropdownMenuContent align="start" className="w-52 border border-slate-200 shadow-xl rounded-xl mt-2 p-2">
           {navGroups[0].items.map((item) => {
             const Icon = item.icon
             return (
@@ -99,9 +99,9 @@ export function DesktopNav() {
                 <Link 
                   href={item.href} 
                   className={cn(
-                    "flex items-center gap-2 cursor-pointer rounded-md px-2 py-1.5 transition-colors duration-200",
+                    "flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 transition-all duration-200 transform hover:scale-[1.02]",
                     isActive(item.href)
-                      ? "dropdown-item-active"
+                      ? "dropdown-item-active shadow-sm"
                       : "dropdown-item-hover"
                   )}
                 >
@@ -118,10 +118,10 @@ export function DesktopNav() {
       <Link
         href="/match"
         className={cn(
-          "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300",
+          "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 transform hover:scale-105",
           isActive("/match")
-            ? "nav-active"
-            : "nav-hover"
+            ? "nav-active shadow-md"
+            : "nav-hover shadow-sm hover:shadow-md"
         )}
       >
         <Calendar className="h-4 w-4" />
@@ -131,10 +131,10 @@ export function DesktopNav() {
       <Link
         href="/register"
         className={cn(
-          "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300",
+          "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 transform hover:scale-105",
           isActive("/register")
-            ? "nav-active"
-            : "nav-hover"
+            ? "nav-active shadow-md"
+            : "nav-hover shadow-sm hover:shadow-md"
         )}
       >
         <Users2 className="h-4 w-4" />
@@ -147,10 +147,10 @@ export function DesktopNav() {
           <Button 
             variant="ghost" 
             className={cn(
-              "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-300",
+              "flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-300 transform hover:scale-105",
               isGroupActive(navGroups[1].items)
-                ? "dropdown-trigger-active"
-                : "dropdown-trigger-hover"
+                ? "dropdown-trigger-active shadow-md"
+                : "dropdown-trigger-hover shadow-sm hover:shadow-md"
             )}
           >
             <Brain className="h-4 w-4" />
@@ -158,7 +158,7 @@ export function DesktopNav() {
             <ChevronDown className="h-4 w-4 transition-transform duration-300 group-data-[state=open]:rotate-180" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-48 border border-slate-200 shadow-lg rounded-lg mt-1">
+        <DropdownMenuContent align="start" className="w-52 border border-slate-200 shadow-xl rounded-xl mt-2 p-2">
           {navGroups[1].items.map((item) => {
             const Icon = item.icon
             return (
@@ -166,9 +166,9 @@ export function DesktopNav() {
                 <Link 
                   href={item.href} 
                   className={cn(
-                    "flex items-center gap-2 cursor-pointer rounded-md px-2 py-1.5 transition-colors duration-200",
+                    "flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 transition-all duration-200 transform hover:scale-[1.02]",
                     isActive(item.href)
-                      ? "dropdown-item-active"
+                      ? "dropdown-item-active shadow-sm"
                       : "dropdown-item-hover"
                   )}
                 >

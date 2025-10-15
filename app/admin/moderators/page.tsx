@@ -23,33 +23,24 @@ export default async function AdminModeratorsPage() {
   const supabase = await getSupabaseServerClient()
 
   // Get all moderators
-  const { data: moderators } = await supabase
+  const { data: moderators, error: moderatorsError } = await supabase
     .from('profiles')
-    .select(`
-      *,
-      match_updates(count)
-    `)
+    .select('*')
     .in('role', ['moderator', 'admin'])
     .order('created_at', { ascending: false })
 
-  // Get moderator stats
+  // Get moderator stats (last 7 days) using actual columns from match_updates
   const { data: moderatorStats } = await supabase
     .from('match_updates')
-    .select(`
-      changed_by,
-      change_time,
-      profiles!match_updates_changed_by_fkey(full_name, role)
-    `)
-    .gte('change_time', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+    .select('created_by, created_at')
+    .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
 
   // Calculate stats
   const totalModerators = moderators?.length || 0
-  const activeModerators = moderatorStats?.reduce((acc, update) => {
-    if (!acc.includes(update.changed_by)) {
-      acc.push(update.changed_by)
-    }
-    return acc
-  }, [] as string[]).length || 0
+  const activeModerators = (moderatorStats || [])
+    .map((u: any) => u.created_by)
+    .filter(Boolean)
+    .reduce((acc: string[], uid: string) => (acc.includes(uid) ? acc : [...acc, uid]), []).length
   const totalUpdates = moderatorStats?.length || 0
 
   return (
