@@ -12,7 +12,10 @@ const createModeratorSchema = z.object({
 
 const updateModeratorSchema = z.object({
   userId: z.string().uuid(),
-  role: z.enum(['moderator', 'viewer'])
+  role: z.enum(['admin','moderator','viewer']).optional(),
+  assignedSports: z.array(z.string()).nullable().optional(),
+  assignedVenues: z.array(z.string()).nullable().optional(),
+  moderatorNotes: z.string().nullable().optional()
 })
 
 export async function POST(request: NextRequest) {
@@ -72,7 +75,7 @@ export async function POST(request: NextRequest) {
     if (updateError) {
       console.error("Error updating user to moderator:", updateError)
       return NextResponse.json(
-        { error: "Failed to create moderator" },
+        { error: "Failed to create moderator", details: updateError.message },
         { status: 500 }
       )
     }
@@ -125,7 +128,7 @@ export async function PUT(request: NextRequest) {
     // Validate request body
     const validatedData = updateModeratorSchema.parse(body)
     
-    const { userId, role } = validatedData
+    const { userId, role, assignedSports, assignedVenues, moderatorNotes } = validatedData
 
     // Check if user exists
     const { data: targetUser, error: userError } = await supabase
@@ -141,14 +144,14 @@ export async function PUT(request: NextRequest) {
       )
     }
 
-    // Prevent demoting the last admin
-    if (targetUser.role === 'admin' && role !== 'admin') {
-      const { data: adminCount } = await supabase
+    // Prevent demoting the last admin only when changing role away from admin
+    if (role && targetUser.role === 'admin' && role !== 'admin') {
+      const { count, error: countError } = await supabase
         .from('profiles')
-        .select('id', { count: 'exact' })
+        .select('id', { count: 'exact', head: true })
         .eq('role', 'admin')
 
-      if (adminCount && adminCount.length <= 1) {
+      if (!countError && typeof count === 'number' && count <= 1) {
         return NextResponse.json(
           { error: "Cannot demote the last admin" },
           { status: 400 }
@@ -157,12 +160,13 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update user role
-    const updateData: any = {
-      role,
-      updated_at: new Date().toISOString()
-    }
+    const updateData: any = { updated_at: new Date().toISOString() }
+    if (role) updateData.role = role
+    if (validatedData.hasOwnProperty('assignedSports')) updateData.assigned_sports = assignedSports ?? null
+    if (validatedData.hasOwnProperty('assignedVenues')) updateData.assigned_venues = assignedVenues ?? null
+    if (validatedData.hasOwnProperty('moderatorNotes')) updateData.moderator_notes = moderatorNotes ?? null
 
-    // Clear moderator-specific fields if demoting to viewer
+    // If role explicitly set to viewer, clear moderator-specific fields as safety
     if (role === 'viewer') {
       updateData.assigned_sports = null
       updateData.assigned_venues = null
@@ -177,19 +181,22 @@ export async function PUT(request: NextRequest) {
     if (updateError) {
       console.error("Error updating user role:", updateError)
       return NextResponse.json(
-        { error: "Failed to update user role" },
+        { error: "Failed to update user role", details: updateError.message },
         { status: 500 }
       )
     }
 
     return NextResponse.json({
       success: true,
-      message: "User role updated successfully",
+      message: "Moderator updated successfully",
       user: {
         id: userId,
         email: targetUser.email,
         full_name: targetUser.full_name,
-        role
+        role: updateData.role ?? targetUser.role,
+        assigned_sports: updateData.assigned_sports ?? targetUser.assigned_sports,
+        assigned_venues: updateData.assigned_venues ?? targetUser.assigned_venues,
+        moderator_notes: updateData.moderator_notes ?? targetUser.moderator_notes
       }
     })
   } catch (error) {
