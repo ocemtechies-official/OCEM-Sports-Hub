@@ -125,6 +125,37 @@
   }
 }
 
+/* Animation utilities */
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
+}
+
 /* Custom Navbar Styles */
 .navbar-hover-effect {
   position: relative;
@@ -158,7 +189,7 @@
 
 /* Active state for navigation items - filled background with white text */
 .nav-active {
-  @apply text-white bg-blue-600 font-semibold;
+  @apply text-white bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold;
 }
 
 .nav-active svg {
@@ -181,7 +212,7 @@
 
 /* Active dropdown trigger */
 .dropdown-trigger-active {
-  @apply text-white bg-blue-600 font-semibold;
+  @apply text-white bg-gradient-to-r from-blue-600 to-indigo-600 font-semibold;
 }
 
 .dropdown-trigger-active svg {
@@ -236,4 +267,110 @@
   right: 0;
   height: 1px;
   background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+}
+
+/* Tab Container Fix - Ensures tabs stay within bounds */
+.tab-container {
+  overflow: hidden;
+}
+
+.tab-list {
+  position: relative;
+  overflow: hidden;
+}
+
+.tab-trigger {
+  position: relative;
+  /* Remove any overflow that might cause the tab to extend beyond container */
+  overflow: hidden;
+}
+
+.tab-trigger[data-state='active'] {
+  /* Ensure active tab doesn't extend beyond container */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Enhanced Navbar Styles */
+.navbar-link {
+  @apply px-4 py-2.5 rounded-lg transition-all duration-300 transform hover:scale-105 font-medium;
+}
+
+.navbar-link-active {
+  @apply text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md font-semibold;
+}
+
+.navbar-link-hover {
+  @apply text-slate-600 hover:text-blue-600 hover:bg-blue-50 shadow-sm hover:shadow-md;
+}
+
+/* Enhanced Dropdown Styles */
+.dropdown-content {
+  @apply border border-slate-200 shadow-xl rounded-xl mt-2 p-2 w-52;
+}
+
+.dropdown-item {
+  @apply flex items-center gap-3 cursor-pointer rounded-lg px-3 py-2.5 transition-all duration-200 transform hover:scale-[1.02];
+}
+
+.dropdown-item-active-enhanced {
+  @apply text-blue-600 bg-blue-50 shadow-sm font-medium;
+}
+
+.dropdown-item-hover-enhanced {
+  @apply text-slate-700 hover:text-blue-600 hover:bg-blue-50;
+}
+
+/* Enhanced Mobile Navigation Styles */
+.mobile-nav-sheet {
+  @apply w-72 p-0 bg-white border-l border-slate-200;
+}
+
+.mobile-nav-header {
+  @apply flex items-center justify-between p-5 border-b border-slate-200 bg-gradient-to-r from-blue-50 to-indigo-50;
+}
+
+.mobile-nav-content {
+  @apply flex-1 overflow-y-auto p-4;
+}
+
+.mobile-nav-item {
+  @apply flex items-center gap-3 px-4 py-3 text-base font-medium rounded-xl transition-all duration-300 transform hover:scale-[1.02];
+}
+
+.mobile-nav-item-active {
+  @apply text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md font-semibold;
+}
+
+.mobile-nav-item-hover {
+  @apply text-slate-600 hover:text-blue-600 hover:bg-blue-50 shadow-sm hover:shadow-md;
+}
+
+.mobile-auth-section {
+  @apply p-5 border-t border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100;
+}
+
+/* Enhanced User Dropdown Styles */
+.user-dropdown-trigger {
+  @apply relative h-11 w-11 rounded-xl hover:bg-slate-100 transition-all duration-300 transform hover:scale-105;
+}
+
+.user-avatar {
+  @apply h-11 w-11 ring-2 ring-transparent hover:ring-blue-500 transition-all duration-300;
+}
+
+.user-dropdown-content {
+  @apply w-72 border border-slate-200 shadow-xl rounded-xl p-2;
+}
+
+.user-dropdown-label {
+  @apply font-normal py-4 rounded-lg bg-gradient-to-r from-blue-50 to-indigo-50;
+}
+
+.user-dropdown-item {
+  @apply cursor-pointer py-3 rounded-lg transition-all duration-300 transform hover:scale-[1.02];
+}
+
+.user-dropdown-item-text {
+  @apply font-medium;
 }
