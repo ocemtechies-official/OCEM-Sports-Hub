@@ -17,7 +17,7 @@ export async function Navbar() {
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 font-bold text-xl group">
-            <div className="bg-white p-1 rounded-lg group-hover:bg-gray-50 transition-all duration-300 transform group-hover:scale-105">
+            <div className="bg-white p-1 rounded-lg group-hover:bg-gray-50 transition-all duration-300 transform group-hover:scale-105 shadow-sm">
               <img src="/logo.png" alt="OCEM Sports Hub Logo" className="h-10 w-10 object-contain" />
             </div>
             <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-indigo-700 transition-all duration-300">
@@ -34,10 +34,10 @@ export async function Navbar() {
               <UserNav profile={profile} />
             ) : (
               <div className="hidden md:flex items-center gap-2">
-                <Button variant="ghost" asChild className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-300">
+                <Button variant="ghost" asChild className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-300 rounded-lg px-4">
                   <Link href="/auth/login">Sign In</Link>
                 </Button>
-                <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
+                <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300 transform hover:scale-105 hover:shadow-lg rounded-lg px-4">
                   <Link href="/auth/signup">Sign Up</Link>
                 </Button>
               </div>
