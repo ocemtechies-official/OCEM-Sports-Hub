@@ -5,11 +5,17 @@ import { Button } from "@/components/ui/button"
 import { Edit, Trash2, Users } from "lucide-react"
 import Link from "next/link"
 
-interface TeamManagementTableProps {
-  teams: any[]
+interface TeamWithMembers {
+  id: string
+  name: string
+  color: string
+  team_members: {
+    id: string
+    user_id: string
+  }[]
 }
 
-export function TeamManagementTable({ teams }: TeamManagementTableProps) {
+export function TeamManagementTable({ teams }: { teams: TeamWithMembers[] }) {
   if (teams.length === 0) {
     return <p className="text-center text-slate-500 py-8">No teams created yet</p>
   }
@@ -26,7 +32,7 @@ export function TeamManagementTable({ teams }: TeamManagementTableProps) {
       </TableHeader>
       <TableBody>
         {teams.map((team) => {
-          const playerCount = team.players?.[0]?.count || 0
+          const playerCount = team.team_members?.length || 0
 
           return (
             <TableRow key={team.id}>

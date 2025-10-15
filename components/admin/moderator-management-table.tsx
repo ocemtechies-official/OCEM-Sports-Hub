@@ -143,32 +143,32 @@ export function ModeratorManagementTable({ moderators }: ModeratorManagementTabl
                 
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
-                    {moderator.assigned_sports && moderator.assigned_sports.length > 0 ? (
+                    {moderator.assigned_sports === null ? (
+                      <span className="text-sm text-slate-500">All sports</span>
+                    ) : moderator.assigned_sports && moderator.assigned_sports.length > 0 ? (
                       moderator.assigned_sports.map((sport: string) => (
                         <Badge key={sport} variant="outline" className="text-xs text-gray-700 border-gray-300">
                           {sport}
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-sm text-slate-500">
-                        {moderator.role === 'admin' ? 'All sports' : 'None assigned'}
-                      </span>
+                      <span className="text-sm text-slate-500">None assigned</span>
                     )}
                   </div>
                 </TableCell>
                 
                 <TableCell>
                   <div className="flex flex-wrap gap-1">
-                    {moderator.assigned_venues && moderator.assigned_venues.length > 0 ? (
+                    {moderator.assigned_venues === null ? (
+                      <span className="text-sm text-slate-500">All venues</span>
+                    ) : moderator.assigned_venues && moderator.assigned_venues.length > 0 ? (
                       moderator.assigned_venues.map((venue: string) => (
                         <Badge key={venue} variant="outline" className="text-xs text-gray-700 border-gray-300">
                           {venue}
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-sm text-slate-500">
-                        {moderator.role === 'admin' ? 'All venues' : 'None assigned'}
-                      </span>
+                      <span className="text-sm text-slate-500">None assigned</span>
                     )}
                   </div>
                 </TableCell>
