@@ -12,15 +12,19 @@ export async function Navbar() {
   const profile = await getCurrentProfile()
 
   return (
-    <nav className="border-b bg-white/90 backdrop-blur-sm sticky top-0 z-50 shadow-sm">
+    <nav className="border-b bg-white/80 backdrop-blur-xl sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 font-bold text-xl group">
-            <div className="bg-white p-1 rounded-lg group-hover:bg-gray-50 transition-all duration-300 transform group-hover:scale-105 shadow-sm">
-              <img src="/logo.png" alt="OCEM Sports Hub Logo" className="h-10 w-10 object-contain" />
+          <Link href="/" className="flex items-center gap-2.5 group focus:outline-none">
+            <div className="group-hover:opacity-90 transition-all duration-300">
+              <img 
+                src="/logo.png" 
+                alt="OCEM Sports Hub Logo" 
+                className="h-10 w-10 object-contain transition-transform duration-300 transform group-hover:scale-105" 
+              />
             </div>
-            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-indigo-700 transition-all duration-300">
+            <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-bold text-lg tracking-tight group-hover:from-blue-700 group-hover:to-indigo-700 transition-all duration-300">
               OCEM Sports Hub
             </span>
           </Link>
@@ -34,10 +38,17 @@ export async function Navbar() {
               <UserNav profile={profile} />
             ) : (
               <div className="hidden md:flex items-center gap-2">
-                <Button variant="ghost" asChild className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-300 rounded-lg px-4">
+                <Button 
+                  variant="ghost" 
+                  asChild 
+                  className="text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all duration-300 rounded-lg px-3.5 py-2 text-sm font-medium"
+                >
                   <Link href="/auth/login">Sign In</Link>
                 </Button>
-                <Button asChild className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-300 transform hover:scale-105 hover:shadow-lg rounded-lg px-4">
+                <Button 
+                  asChild 
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white transition-all duration-500 transform hover:scale-105 hover:shadow-lg rounded-lg px-4 py-2 text-sm font-medium shadow-sm"
+                >
                   <Link href="/auth/signup">Sign Up</Link>
                 </Button>
               </div>
