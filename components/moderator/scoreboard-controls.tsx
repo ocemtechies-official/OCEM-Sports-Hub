@@ -18,6 +18,7 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
   const [localB, setLocalB] = useState(teamBScore)
   const [localStatus, setLocalStatus] = useState(status)
   const [isSaving, setIsSaving] = useState(false)
+  const [hasPermission, setHasPermission] = useState(true)
   const [extra, setExtra] = useState<any>({})
   const sport = (sportName || '').toLowerCase()
 
@@ -117,17 +118,17 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
         </div>
       )}
       <div className="mt-4 flex justify-center gap-3">
-        <Button size="sm" disabled={isSaving} onClick={() => { const v = localA + 1; setLocalA(v); applyUpdate(v, localB, localStatus) }}>+ {teamAName}</Button>
-        <Button size="sm" variant="secondary" disabled={isSaving} onClick={() => { const v = Math.max(0, localA - 1); setLocalA(v); applyUpdate(v, localB, localStatus) }}>- {teamAName}</Button>
-        <Button size="sm" disabled={isSaving} onClick={() => { const v = localB + 1; setLocalB(v); applyUpdate(localA, v, localStatus) }}>+ {teamBName}</Button>
-        <Button size="sm" variant="secondary" disabled={isSaving} onClick={() => { const v = Math.max(0, localB - 1); setLocalB(v); applyUpdate(localA, v, localStatus) }}>- {teamBName}</Button>
+        <Button size="sm" disabled={!hasPermission || isSaving} onClick={() => { const v = localA + 1; setLocalA(v); applyUpdate(v, localB, localStatus) }}>+ {teamAName}</Button>
+        <Button size="sm" variant="secondary" disabled={!hasPermission || isSaving} onClick={() => { const v = Math.max(0, localA - 1); setLocalA(v); applyUpdate(v, localB, localStatus) }}>- {teamAName}</Button>
+        <Button size="sm" disabled={!hasPermission || isSaving} onClick={() => { const v = localB + 1; setLocalB(v); applyUpdate(localA, v, localStatus) }}>+ {teamBName}</Button>
+        <Button size="sm" variant="secondary" disabled={!hasPermission || isSaving} onClick={() => { const v = Math.max(0, localB - 1); setLocalB(v); applyUpdate(localA, v, localStatus) }}>- {teamBName}</Button>
       </div>
       <div className="mt-4 flex justify-center gap-2">
-        <Button size="sm" variant={localStatus === 'live' ? 'default' : 'outline'} disabled={isSaving}
+        <Button size="sm" variant={localStatus === 'live' ? 'default' : 'outline'} disabled={!hasPermission || isSaving}
           onClick={() => { setLocalStatus('live'); applyUpdate(localA, localB, 'live') }}>Live</Button>
-        <Button size="sm" variant={localStatus === 'scheduled' ? 'default' : 'outline'} disabled={isSaving}
+        <Button size="sm" variant={localStatus === 'scheduled' ? 'default' : 'outline'} disabled={!hasPermission || isSaving}
           onClick={() => { setLocalStatus('scheduled'); applyUpdate(localA, localB, 'scheduled') }}>Scheduled</Button>
-        <Button size="sm" variant={localStatus === 'finished' || localStatus === 'completed' ? 'default' : 'outline'} disabled={isSaving}
+        <Button size="sm" variant={localStatus === 'finished' || localStatus === 'completed' ? 'default' : 'outline'} disabled={!hasPermission || isSaving}
           onClick={() => { setLocalStatus('finished'); applyUpdate(localA, localB, 'finished') }}>Finished</Button>
       </div>
     </div>
