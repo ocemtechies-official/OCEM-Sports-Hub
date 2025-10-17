@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import SparkleNavbar from "@/components/ui/sparkle-navbar"
 
 // Define grouped navigation for dropdowns
 const navGroups = [
@@ -59,20 +60,19 @@ export function DesktopNav() {
     return items.some(item => isActive(item.href))
   }
 
+  // Define main navigation items
+  const mainNavItems = [
+    { href: "/", label: "Home" },
+    { href: "/match", label: "Matches" },
+    { href: "/register", label: "Register" },
+  ]
+
   return (
     <div className="hidden md:flex items-center gap-1 ml-auto mr-6">
-      <Link
-        href="/"
-        className={cn(
-          "flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-300",
-          isActive("/")
-            ? "text-blue-600 bg-blue-50 shadow-sm"
-            : "text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
-        )}
-      >
-        <Home className="h-4 w-4" />
-        Home
-      </Link>
+      {/* Main Navigation with Sparkle Effect */}
+      <div className="flex items-center">
+        <SparkleNavbar items={mainNavItems} color="#2563eb" />
+      </div>
 
       {/* Competitions Dropdown */}
       <DropdownMenu>
@@ -116,33 +116,6 @@ export function DesktopNav() {
           })}
         </DropdownMenuContent>
       </DropdownMenu>
-
-      {/* Matches direct link */}
-      <Link
-        href="/match"
-        className={cn(
-          "flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-300",
-          isActive("/match")
-            ? "text-blue-600 bg-blue-50 shadow-sm"
-            : "text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
-        )}
-      >
-        <Calendar className="h-4 w-4" />
-        Matches
-      </Link>
-
-      <Link
-        href="/register"
-        className={cn(
-          "flex items-center gap-2 px-3.5 py-2 text-sm font-medium rounded-lg transition-all duration-300",
-          isActive("/register")
-            ? "text-blue-600 bg-blue-50 shadow-sm"
-            : "text-slate-600 hover:text-blue-600 hover:bg-blue-50/50"
-        )}
-      >
-        <Users2 className="h-4 w-4" />
-        Register
-      </Link>
 
       {/* Activities Dropdown */}
       <DropdownMenu>
