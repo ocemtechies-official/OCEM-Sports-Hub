@@ -176,8 +176,14 @@ export default function MyRegistrationsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-blue-50/30 to-purple-50/20 flex items-center justify-center">
-        <div className="text-center">
+      <div className="min-h-screen bg-gradient-to-br from-background via-blue-50/30 to-purple-50/20 flex items-center justify-center relative overflow-hidden">
+        {/* Background Decorations */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-blue-200/20 to-purple-200/20 blur-3xl animate-float"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-1/2 left-1/2 w-60 h-60 rounded-full bg-gradient-to-br from-yellow-200/10 to-orange-200/10 blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
+        </div>
+        <div className="text-center relative z-10">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your registrations...</p>
         </div>
@@ -186,8 +192,14 @@ export default function MyRegistrationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 md:p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-background via-blue-50/30 to-purple-50/20 relative overflow-hidden">
+      {/* Background Decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-blue-200/20 to-purple-200/20 blur-3xl animate-float"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-60 h-60 rounded-full bg-gradient-to-br from-yellow-200/10 to-orange-200/10 blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
+      </div>
+      <div className="max-w-6xl mx-auto space-y-6 relative z-10">
         {/* Header */}
         <div className="text-center mb-8 animate-fade-in">
           <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-full mb-4 shadow-lg">

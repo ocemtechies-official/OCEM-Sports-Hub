@@ -689,31 +689,39 @@ export default function CustomerProfilePage() {
   // Show loading state while checking auth and loading profile data
   if (isLoading) {
     return (
-      <div className="container py-6 max-w-7xl mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="space-y-8"
-        >
-          {/* Header Skeleton */}
-          <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            <Skeleton className="h-32 w-32 rounded-full" />
-            <div className="flex-1 space-y-4">
-              <Skeleton className="h-8 w-64" />
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-48" />
-                <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-4 w-40" />
+      <div className="min-h-screen bg-gradient-to-br from-background via-blue-50/30 to-purple-50/20 flex items-center justify-center relative overflow-hidden">
+        {/* Background Decorations */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-blue-200/20 to-purple-200/20 blur-3xl animate-float"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-1/2 left-1/2 w-60 h-60 rounded-full bg-gradient-to-br from-yellow-200/10 to-orange-200/10 blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
+        </div>
+        <div className="container py-6 max-w-7xl mx-auto px-4 relative z-10">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-8"
+          >
+            {/* Header Skeleton */}
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
+              <Skeleton className="h-32 w-32 rounded-full" />
+              <div className="flex-1 space-y-4">
+                <Skeleton className="h-8 w-64" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-40" />
+                </div>
               </div>
             </div>
-          </div>
-          
-          {/* Content Skeleton */}
-          <div className="space-y-6">
-            <Skeleton className="h-96 w-full" />
-            <Skeleton className="h-64 w-full" />
-          </div>
-        </motion.div>
+            
+            {/* Content Skeleton */}
+            <div className="space-y-6">
+              <Skeleton className="h-96 w-full" />
+              <Skeleton className="h-64 w-full" />
+            </div>
+          </motion.div>
+        </div>
       </div>
     )
   }
@@ -721,20 +729,28 @@ export default function CustomerProfilePage() {
   // Show error state if we don't have user data
   if (!user) {
     return (
-      <div className="container py-6 max-w-7xl mx-auto px-4">
-        <Card className="p-8 text-center">
-          <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Authentication Required</h3>
-          <p className="text-muted-foreground mb-4">Please sign in to view your profile.</p>
-          <div className="flex justify-center gap-4">
-            <Link href="/auth/login">
-              <Button>Login</Button>
-            </Link>
-            <Link href="/auth/signup">
-              <Button variant="outline">Sign Up</Button>
-            </Link>
-          </div>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-background via-blue-50/30 to-purple-50/20 flex items-center justify-center relative overflow-hidden">
+        {/* Background Decorations */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-blue-200/20 to-purple-200/20 blur-3xl animate-float"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-1/2 left-1/2 w-60 h-60 rounded-full bg-gradient-to-br from-yellow-200/10 to-orange-200/10 blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
+        </div>
+        <div className="container py-6 max-w-7xl mx-auto px-4 relative z-10">
+          <Card className="p-8 text-center">
+            <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Authentication Required</h3>
+            <p className="text-muted-foreground mb-4">Please sign in to view your profile.</p>
+            <div className="flex justify-center gap-4">
+              <Link href="/auth/login">
+                <Button>Login</Button>
+              </Link>
+              <Link href="/auth/signup">
+                <Button variant="outline">Sign Up</Button>
+              </Link>
+            </div>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -742,13 +758,21 @@ export default function CustomerProfilePage() {
   // Show error state if profile data failed to load
   if (!profileData) {
     return (
-      <div className="container py-6 max-w-7xl mx-auto px-4">
-        <Card className="p-8 text-center">
-          <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold mb-2">Failed to load profile</h3>
-          <p className="text-muted-foreground mb-4">There was an error loading your profile data.</p>
-          <Button onClick={() => window.location.reload()}>Try Again</Button>
-        </Card>
+      <div className="min-h-screen bg-gradient-to-br from-background via-blue-50/30 to-purple-50/20 flex items-center justify-center relative overflow-hidden">
+        {/* Background Decorations */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-blue-200/20 to-purple-200/20 blur-3xl animate-float"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+          <div className="absolute top-1/2 left-1/2 w-60 h-60 rounded-full bg-gradient-to-br from-yellow-200/10 to-orange-200/10 blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
+        </div>
+        <div className="container py-6 max-w-7xl mx-auto px-4 relative z-10">
+          <Card className="p-8 text-center">
+            <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Failed to load profile</h3>
+            <p className="text-muted-foreground mb-4">There was an error loading your profile data.</p>
+            <Button onClick={() => window.location.reload()}>Try Again</Button>
+          </Card>
+        </div>
       </div>
     )
   }
@@ -758,8 +782,14 @@ export default function CustomerProfilePage() {
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="container py-6 max-w-7xl mx-auto px-4"
+      className="min-h-screen bg-gradient-to-br from-background via-blue-50/30 to-purple-50/20 relative overflow-hidden"
     >
+      {/* Background Decorations */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full bg-gradient-to-br from-blue-200/20 to-purple-200/20 blur-3xl animate-float"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full bg-gradient-to-br from-green-200/20 to-blue-200/20 blur-3xl animate-float" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-60 h-60 rounded-full bg-gradient-to-br from-yellow-200/10 to-orange-200/10 blur-3xl animate-float" style={{ animationDelay: '4s' }}></div>
+      </div>
       {/* Enhanced Profile Header with Social Features */}
       <motion.div variants={cardVariants} className="mb-8">
         <Card className="overflow-hidden">
