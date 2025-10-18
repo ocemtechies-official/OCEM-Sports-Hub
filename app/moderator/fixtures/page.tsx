@@ -168,7 +168,8 @@ export default async function ModeratorFixturesPage({
   const fixturesByStatus = {
     live: filteredFixtures?.filter((f: any) => f.status === 'live') || [],
     scheduled: filteredFixtures?.filter((f: any) => f.status === 'scheduled') || [],
-    completed: filteredFixtures?.filter((f: any) => f.status === 'completed') || [],
+    // Treat 'finished' as 'completed' for compatibility
+    completed: filteredFixtures?.filter((f: any) => f.status === 'completed' || f.status === 'finished') || [],
     cancelled: filteredFixtures?.filter((f: any) => f.status === 'cancelled') || [],
   }
 

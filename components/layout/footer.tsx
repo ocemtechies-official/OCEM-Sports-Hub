@@ -1,38 +1,69 @@
 import Link from "next/link"
-import { Trophy, Github, Twitter, Mail, Facebook, Instagram, Youtube } from "lucide-react"
+import { Github, Twitter, Mail, Facebook, Instagram, Youtube } from "lucide-react"
+import ParticlesBackground from "@/components/ui/particles-background"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
 
   return (
-    <footer className="bg-slate-900 text-slate-300 border-t border-slate-800">
-      <div className="container mx-auto px-4 py-12">
+    <footer className="relative bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-950 text-slate-300 border-t border-slate-800/50 overflow-hidden">     
+      {/* Particles Background */}
+      <ParticlesBackground 
+        colors={['#67e8f9', '#a78bfa', '#22d3ee']} 
+        size={2.5}
+        countDesktop={50}
+        countTablet={40}
+        countMobile={30}
+        zIndex={0}
+        height="100%" 
+      />
+      
+      {/* Subtle animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse animation-delay-2000"></div>
+        
+        {/* Floating particles as per project specification */}
+        <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-cyan-400 rounded-full opacity-30 animate-particle"></div>
+        <div className="absolute top-1/3 right-1/3 w-1.5 h-1.5 bg-emerald-400 rounded-full opacity-40 animate-particle animation-delay-1000"></div>
+        <div className="absolute bottom-1/4 left-1/3 w-1 h-1 bg-white rounded-full opacity-20 animate-particle animation-delay-2000"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-2 h-2 bg-cyan-300 rounded-full opacity-30 animate-particle animation-delay-3000"></div>
+        <div className="absolute top-1/2 left-1/2 w-1 h-1 bg-emerald-300 rounded-full opacity-25 animate-particle animation-delay-1500"></div>
+      </div>
+      
+      <div className="container mx-auto px-4 py-16 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand */}
           <div className="lg:col-span-1">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="bg-gradient-to-br from-blue-600 to-indigo-600 p-3 rounded-xl">
-                <Trophy className="h-8 w-8 text-white" />
+            <div className="flex items-center gap-3 mb-6 group">
+              <div className="group-hover:opacity-90 transition-all duration-300 transform group-hover:scale-105">
+                <img 
+                  src="/logo.png" 
+                  alt="OCEM Sports Hub Logo" 
+                  className="h-12 w-12 object-contain" 
+                />
               </div>
-              <span className="text-2xl font-bold text-white">OCEM Sports Hub</span>
+              <span className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent group-hover:from-cyan-300 group-hover:to-emerald-300 transition-all duration-300">
+                OCEM Sports Hub
+              </span>
             </div>
-            <p className="text-slate-400 mb-6">
+            <p className="text-slate-400 mb-6 leading-relaxed">
               The ultimate multi-sport tournament platform featuring live scores, interactive quizzes, and competitive chess matches.
             </p>
-            <div className="flex gap-3">
-              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-3 rounded-full transition-all">
+            <div className="flex gap-4">
+              <a href="#" className="bg-slate-800/50 backdrop-blur-sm p-3 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:bg-blue-500 hover:text-white hover:shadow-blue-500/30 border border-slate-700 hover:border-blue-400 hover:scale-110 glow-on-hover">
                 <Facebook className="h-5 w-5" />
               </a>
-              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-3 rounded-full transition-all">
+              <a href="#" className="bg-slate-800/50 backdrop-blur-sm p-3 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:bg-sky-400 hover:text-white hover:shadow-sky-400/30 border border-slate-700 hover:border-sky-300 hover:scale-110 glow-on-hover">
                 <Twitter className="h-5 w-5" />
               </a>
-              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-3 rounded-full transition-all">
+              <a href="#" className="bg-slate-800/50 backdrop-blur-sm p-3 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 hover:text-white hover:shadow-pink-500/30 border border-slate-700 hover:border-pink-400 hover:scale-110 glow-on-hover">
                 <Instagram className="h-5 w-5" />
               </a>
-              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-3 rounded-full transition-all">
+              <a href="#" className="bg-slate-800/50 backdrop-blur-sm p-3 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:bg-red-500 hover:text-white hover:shadow-red-500/30 border border-slate-700 hover:border-red-400 hover:scale-110 glow-on-hover">
                 <Youtube className="h-5 w-5" />
               </a>
-              <a href="#" className="bg-slate-800 hover:bg-blue-600 hover:text-white p-3 rounded-full transition-all">
+              <a href="https://github.com/FarhanAlam-Official" target="_blank" rel="noopener noreferrer" className="bg-slate-800/50 backdrop-blur-sm p-3 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:bg-white hover:text-black hover:shadow-white/30 border border-slate-700 hover:border-white hover:scale-110 glow-on-hover">
                 <Github className="h-5 w-5" />
               </a>
             </div>
@@ -40,31 +71,44 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white font-semibold mb-6 text-lg">Quick Links</h3>
+            <h3 className="text-white font-semibold mb-6 text-lg relative inline-block group">
+              Quick Links
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
+            </h3>
             <ul className="space-y-4">
               <li>
-                <Link href="/teams" className="hover:text-blue-400 transition-colors">
-                  Teams
+                <Link href="/teams" className="hover:text-cyan-400 transition-colors duration-300 inline-block relative group py-1 footer-link-hover">
+                  <span className="relative z-10">Teams</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               </li>
               <li>
-                <Link href="/leaderboard" className="hover:text-blue-400 transition-colors">
-                  Leaderboard
+                <Link href="/leaderboard" className="hover:text-cyan-400 transition-colors duration-300 inline-block relative group py-1 footer-link-hover">
+                  <span className="relative z-10">Leaderboard</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               </li>
               <li>
-                <Link href="/quiz" className="hover:text-blue-400 transition-colors">
-                  Quizzes
+                <Link href="/quiz" className="hover:text-cyan-400 transition-colors duration-300 inline-block relative group py-1 footer-link-hover">
+                  <span className="relative z-10">Quizzes</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               </li>
               <li>
-                <Link href="/chess" className="hover:text-blue-400 transition-colors">
-                  Chess
+                <Link href="/chess" className="hover:text-cyan-400 transition-colors duration-300 inline-block relative group py-1 footer-link-hover">
+                  <span className="relative z-10">Chess</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               </li>
               <li>
-                <Link href="/fixtures" className="hover:text-blue-400 transition-colors">
-                  Fixtures
+                <Link href="/fixtures" className="hover:text-cyan-400 transition-colors duration-300 inline-block relative group py-1 footer-link-hover">
+                  <span className="relative z-10">Fixtures</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               </li>
             </ul>
@@ -72,31 +116,44 @@ export function Footer() {
 
           {/* Sports */}
           <div>
-            <h3 className="text-white font-semibold mb-6 text-lg">Sports</h3>
+            <h3 className="text-white font-semibold mb-6 text-lg relative inline-block group">
+              Sports
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
+            </h3>
             <ul className="space-y-4">
               <li>
-                <Link href="/teams?sport=cricket" className="hover:text-blue-400 transition-colors">
-                  Cricket
+                <Link href="/teams?sport=cricket" className="hover:text-cyan-400 transition-colors duration-300 inline-block relative group py-1 footer-link-hover">
+                  <span className="relative z-10">Cricket</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               </li>
               <li>
-                <Link href="/teams?sport=football" className="hover:text-blue-400 transition-colors">
-                  Football
+                <Link href="/teams?sport=football" className="hover:text-cyan-400 transition-colors duration-300 inline-block relative group py-1 footer-link-hover">
+                  <span className="relative z-10">Football</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               </li>
               <li>
-                <Link href="/teams?sport=basketball" className="hover:text-blue-400 transition-colors">
-                  Basketball
+                <Link href="/teams?sport=basketball" className="hover:text-cyan-400 transition-colors duration-300 inline-block relative group py-1 footer-link-hover">
+                  <span className="relative z-10">Basketball</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               </li>
               <li>
-                <Link href="/teams?sport=badminton" className="hover:text-blue-400 transition-colors">
-                  Badminton
+                <Link href="/teams?sport=badminton" className="hover:text-cyan-400 transition-colors duration-300 inline-block relative group py-1 footer-link-hover">
+                  <span className="relative z-10">Badminton</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               </li>
               <li>
-                <Link href="/teams?sport=table-tennis" className="hover:text-blue-400 transition-colors">
-                  Table Tennis
+                <Link href="/teams?sport=table-tennis" className="hover:text-cyan-400 transition-colors duration-300 inline-block relative group py-1 footer-link-hover">
+                  <span className="relative z-10">Table Tennis</span>
+                  <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
                 </Link>
               </li>
             </ul>
@@ -104,45 +161,76 @@ export function Footer() {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-white font-semibold mb-6 text-lg">Contact Us</h3>
-            <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <Mail className="h-5 w-5 text-blue-400 mt-0.5" />
-                <span>support@ocemsportshub.com</span>
-              </li>
-              <li className="flex items-start gap-3">
-                <div className="h-5 w-5 text-blue-400 mt-0.5 flex items-center justify-center">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+            <h3 className="text-white font-semibold mb-6 text-lg relative inline-block group">
+              Contact Us
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
+            </h3>
+            <ul className="space-y-5">
+              <li className="flex items-start gap-4 group">
+                <div className="mt-1 p-2 bg-cyan-500/10 rounded-lg border border-cyan-500/20 transition-all duration-300 group-hover:bg-cyan-500/20 glow-on-hover">
+                  <Mail className="h-5 w-5 text-cyan-400 flex-shrink-0 transform group-hover:scale-110 transition-transform duration-300" />
                 </div>
-                <span>OCEM Sports Complex<br />Main Campus<br />City, State 12345</span>
+                <div>
+                  <p className="font-medium text-white">Email</p>
+                  <span className="group-hover:text-cyan-300 transition-colors duration-300">
+                    support@ocemsportshub.com
+                  </span>
+                </div>
+              </li>
+              <li className="flex items-start gap-4 group">
+                <div className="mt-1 p-2 bg-cyan-500/10 rounded-lg border border-cyan-500/20 transition-all duration-300 group-hover:bg-cyan-500/20 glow-on-hover">
+                  <div className="h-5 w-5 text-cyan-400 flex items-center justify-center flex-shrink-0">
+                    <div className="w-2 h-2 bg-cyan-400 rounded-full group-hover:animate-pulse transition-all duration-300"></div>
+                  </div>
+                </div>
+                <div>
+                  <p className="font-medium text-white">Address</p>
+                  <span className="group-hover:text-cyan-300 transition-colors duration-300">
+                    OCEM Sports Complex<br />Main Campus<br />City, State 12345
+                  </span>
+                </div>
               </li>
             </ul>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
+        <div className="pt-10 border-t border-slate-800/50 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <p className="text-sm text-slate-400">© {currentYear} OCEM Sports Hub. All rights reserved.</p>
             <div className="hidden sm:block w-1 h-1 bg-slate-600 rounded-full"></div>
             <div className="flex gap-6 text-sm">
-              <Link href="#" className="hover:text-blue-400 transition-colors">
-                Privacy Policy
+              <Link href="#" className="hover:text-cyan-400 transition-colors duration-300 relative group py-1 footer-link-hover">
+                <span className="relative z-10">Privacy Policy</span>
+                <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <Link href="#" className="hover:text-blue-400 transition-colors">
-                Terms of Service
+              <Link href="#" className="hover:text-cyan-400 transition-colors duration-300 relative group py-1 footer-link-hover">
+                <span className="relative z-10">Terms of Service</span>
+                <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <Link href="#" className="hover:text-blue-400 transition-colors">
-                Contact
+              <Link href="#" className="hover:text-cyan-400 transition-colors duration-300 relative group py-1 footer-link-hover">
+                <span className="relative z-10">Contact</span>
+                <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
+                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-slate-400">Powered by</span>
-            <span className="text-sm font-semibold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              OCEM Sports Hub
-            </span>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-slate-400">Designed and Developed with</span>
+            <span className="text-red-500 animate-pulse">❤️</span>
+            <span className="text-slate-400">by</span>
+            <a 
+              href="https://github.com/FarhanAlam-Official" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="font-semibold bg-gradient-to-r from-cyan-400 to-emerald-400 bg-clip-text text-transparent hover:from-cyan-300 hover:to-emerald-300 transition-all duration-300"
+            >
+              Farhan Alam
+            </a>
+            <span className="text-slate-400">and team</span>
           </div>
         </div>
       </div>
