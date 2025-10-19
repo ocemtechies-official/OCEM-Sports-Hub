@@ -2,6 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { requireModerator } from "@/lib/auth"
 import { z } from "zod"
+import { 
+  FixtureUpdateError, 
+  ERROR_CODES, 
+  createSpecificError, 
+  validateSportData,
+  handleDatabaseError 
+} from "@/lib/errors/fixture-update-errors"
+import { generateScoringMessage, generateCricketScoringMessage } from "@/lib/utils/sport-scoring"
 
 const updateScoreSchema = z.object({
   team_a_score: z.number().int().min(0),
@@ -23,9 +31,14 @@ export async function POST(
     const { user, profile, isModerator } = await requireModerator()
     
     if (!user || !isModerator) {
+      const error = createSpecificError(ERROR_CODES.UNAUTHORIZED)
       return NextResponse.json(
-        { error: "Unauthorized - Moderator access required" },
-        { status: 401 }
+        { 
+          error: error.userMessage,
+          errorCode: error.code,
+          errorType: 'AUTHENTICATION'
+        },
+        { status: error.httpStatus }
       )
     }
 
@@ -44,8 +57,49 @@ export async function POST(
       note,
       extra
     } = validatedData
+    
+    // Validate scores
+    if (team_a_score < 0 || team_b_score < 0) {
+      const error = createSpecificError(ERROR_CODES.INVALID_SCORE)
+      return NextResponse.json(
+        { 
+          error: error.userMessage,
+          errorCode: error.code,
+          errorType: 'VALIDATION'
+        },
+        { status: error.httpStatus }
+      )
+    }
+    
     // Normalize to 'completed' for DB consistency
     const normalizedStatusGlobal = status === 'finished' ? 'completed' : status
+
+    // Validate sport-specific data if provided
+    if (extra) {
+      try {
+        // Get fixture sport for validation
+        const { data: fixture } = await supabase
+          .from('fixtures')
+          .select('sport:sports(name)')
+          .eq('id', id)
+          .single()
+        
+        if (fixture?.sport && Array.isArray(fixture.sport) && fixture.sport[0]?.name) {
+          validateSportData(fixture.sport[0].name, extra)
+        }
+      } catch (validationError) {
+        if (validationError instanceof FixtureUpdateError) {
+          return NextResponse.json(
+            { 
+              error: validationError.userMessage,
+              errorCode: validationError.code,
+              errorType: 'VALIDATION'
+            },
+            { status: validationError.httpStatus }
+          )
+        }
+      }
+    }
 
     // Skip RPC and use direct update for reliability
     let updatedFixture: any, error
@@ -57,14 +111,19 @@ export async function POST(
         // For moderators, check if they're assigned to this fixture's sport
         const { data: fixture } = await supabase
           .from('fixtures')
-          .select('sport_id, venue')
+          .select('sport_id, venue, sport:sports(name)')
           .eq('id', id)
           .single()
         
         if (!fixture) {
+          const error = createSpecificError(ERROR_CODES.FIXTURE_NOT_FOUND)
           return NextResponse.json(
-            { error: "Fixture not found" },
-            { status: 404 }
+            { 
+              error: error.userMessage,
+              errorCode: error.code,
+              errorType: 'NOT_FOUND'
+            },
+            { status: error.httpStatus }
           )
         }
         
@@ -88,17 +147,42 @@ export async function POST(
             const assignedSportIds = (sportsMap || []).map((s: any) => s.id)
 
             if (!assignedSportIds.includes(fixture.sport_id)) {
+              const sportName = Array.isArray(fixture.sport) ? fixture.sport[0]?.name : 'this sport'
+              const error = createSpecificError(ERROR_CODES.SPORT_NOT_ASSIGNED, { 
+                sport: sportName,
+                assignedSports 
+              })
               return NextResponse.json(
-                { error: "You are not authorized to update this fixture" },
-                { status: 403 }
+                { 
+                  error: error.userMessage,
+                  errorCode: error.code,
+                  errorType: 'PERMISSION',
+                  details: {
+                    sport: sportName,
+                    assignedSports
+                  }
+                },
+                { status: error.httpStatus }
               )
             }
           }
           
           if (assignedVenues.length > 0 && !assignedVenues.includes(fixture.venue)) {
+            const error = createSpecificError(ERROR_CODES.VENUE_NOT_ASSIGNED, { 
+              venue: fixture.venue,
+              assignedVenues 
+            })
             return NextResponse.json(
-              { error: "You are not authorized to update this fixture" },
-              { status: 403 }
+              { 
+                error: error.userMessage,
+                errorCode: error.code,
+                errorType: 'PERMISSION',
+                details: {
+                  venue: fixture.venue,
+                  assignedVenues
+                }
+              },
+              { status: error.httpStatus }
             )
           }
         }
@@ -169,7 +253,7 @@ export async function POST(
       // Fetch previous state for audit
       const { data: prevFx } = await supabase
         .from('fixtures')
-        .select('team_a_score, team_b_score, status')
+        .select('team_a_score, team_b_score, status, extra')
         .eq('id', id)
         .maybeSingle()
 
@@ -313,24 +397,92 @@ export async function POST(
 
         const highlightRows: any[] = []
         if (deltaA > 0) {
-          const pts = deltaA === 1 ? '1 point' : `${deltaA} points`
           const name = teamAName || 'Team A'
+          // Extract sport name from updatedFixture which has the sport relation
+          const sportName = updatedFixture?.sport?.name || 'Unknown'
+          
+          let message: string
+          if (sportName.toLowerCase() === 'cricket') {
+            // Check if this is a cricket-specific event from extra data
+            const cricketData = extra?.cricket
+            if (cricketData?.team_a) {
+              const teamAData = cricketData.team_a
+              const prevTeamAData = prevFx?.extra?.cricket?.team_a || {}
+              
+              // Check for specific cricket events
+              const foursDelta = (teamAData.fours || 0) - (prevTeamAData.fours || 0)
+              const sixesDelta = (teamAData.sixes || 0) - (prevTeamAData.sixes || 0)
+              const wicketsDelta = (teamAData.wickets || 0) - (prevTeamAData.wickets || 0)
+              const widesDelta = (teamAData.wides || 0) - (prevTeamAData.wides || 0)
+              
+              if (sixesDelta > 0) {
+                message = generateCricketScoringMessage(name, 6, { isSix: true })
+              } else if (foursDelta > 0) {
+                message = generateCricketScoringMessage(name, 4, { isBoundary: true })
+              } else if (wicketsDelta > 0) {
+                message = generateCricketScoringMessage(name, 0, { isWicket: true })
+              } else if (widesDelta > 0) {
+                message = generateCricketScoringMessage(name, widesDelta, { isExtra: true, extraType: 'wide' })
+              } else {
+                message = generateScoringMessage(name, deltaA, sportName)
+              }
+            } else {
+              message = generateScoringMessage(name, deltaA, sportName)
+            }
+          } else {
+            message = generateScoringMessage(name, deltaA, sportName)
+          }
+          
           highlightRows.push({
             fixture_id: id,
             update_type: 'incident',
             change_type: 'score_increase',
-            note: `${name} gained ${pts}`,
+            note: message,
             created_by: user.id
           })
         }
         if (deltaB > 0) {
-          const pts = deltaB === 1 ? '1 point' : `${deltaB} points`
           const name = teamBName || 'Team B'
+          // Extract sport name from updatedFixture which has the sport relation
+          const sportName = updatedFixture?.sport?.name || 'Unknown'
+          
+          let message: string
+          if (sportName.toLowerCase() === 'cricket') {
+            // Check if this is a cricket-specific event from extra data
+            const cricketData = extra?.cricket
+            if (cricketData?.team_b) {
+              const teamBData = cricketData.team_b
+              const prevTeamBData = prevFx?.extra?.cricket?.team_b || {}
+              
+              // Check for specific cricket events
+              const foursDelta = (teamBData.fours || 0) - (prevTeamBData.fours || 0)
+              const sixesDelta = (teamBData.sixes || 0) - (prevTeamBData.sixes || 0)
+              const wicketsDelta = (teamBData.wickets || 0) - (prevTeamBData.wickets || 0)
+              const widesDelta = (teamBData.wides || 0) - (prevTeamBData.wides || 0)
+              
+              if (sixesDelta > 0) {
+                message = generateCricketScoringMessage(name, 6, { isSix: true })
+              } else if (foursDelta > 0) {
+                message = generateCricketScoringMessage(name, 4, { isBoundary: true })
+              } else if (wicketsDelta > 0) {
+                message = generateCricketScoringMessage(name, 0, { isWicket: true })
+              } else if (widesDelta > 0) {
+                message = generateCricketScoringMessage(name, widesDelta, { isExtra: true, extraType: 'wide' })
+              } else {
+                message = generateScoringMessage(name, deltaB, sportName)
+              }
+            } else {
+              message = generateScoringMessage(name, deltaB, sportName)
+            }
+          } else {
+            message = generateScoringMessage(name, deltaB, sportName)
+          }
+          
           highlightRows.push({
             fixture_id: id,
             update_type: 'incident',
             change_type: 'score_increase',
-            note: `${name} gained ${pts}`,
+            note: message,
             created_by: user.id
           })
         }
@@ -416,40 +568,20 @@ export async function POST(
     if (error) {
       console.error("Error updating fixture score:", error)
       
-      const errorMessage = (error as any)?.message || String(error) || 'Unknown error'
-      
-      // Handle specific error cases
-      if (errorMessage.includes('version_mismatch') || errorMessage.includes('Version mismatch')) {
-        return NextResponse.json(
-          { error: "Fixture was updated by another user. Please refresh and try again." },
-          { status: 409 }
-        )
-      }
-      
-      if (errorMessage.includes('Rate limit exceeded')) {
-        return NextResponse.json(
-          { error: "Too many updates. Please wait a few minutes before updating again." },
-          { status: 429 }
-        )
-      }
-      
-      if (errorMessage.includes('Not authorized')) {
-        return NextResponse.json(
-          { error: "You are not authorized to update this fixture." },
-          { status: 403 }
-        )
-      }
-      
-      if (errorMessage.includes('Insufficient permissions')) {
-        return NextResponse.json(
-          { error: "Insufficient permissions to update fixtures." },
-          { status: 403 }
-        )
-      }
+      // Use enhanced error handling
+      const specificError = handleDatabaseError(error, { 
+        fixtureId: id, 
+        userId: user.id
+      })
       
       return NextResponse.json(
-        { error: "Failed to update fixture score: " + errorMessage },
-        { status: 500 }
+        { 
+          error: specificError.userMessage,
+          errorCode: specificError.code,
+          errorType: 'DATABASE',
+          details: specificError.technicalDetails
+        },
+        { status: specificError.httpStatus }
       )
     }
 
@@ -475,16 +607,58 @@ export async function POST(
   } catch (error) {
     console.error("Error in update score API:", error)
     
+    // Handle Zod validation errors
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: "Invalid request data", details: error.errors },
+        { 
+          error: "Invalid request data. Please check your input values.",
+          errorCode: ERROR_CODES.INVALID_SCORE,
+          errorType: 'VALIDATION',
+          details: error.errors
+        },
         { status: 400 }
       )
     }
     
+    // Handle our custom errors
+    if (error instanceof FixtureUpdateError) {
+      return NextResponse.json(
+        { 
+          error: error.userMessage,
+          errorCode: error.code,
+          errorType: 'APPLICATION',
+          details: error.technicalDetails
+        },
+        { status: error.httpStatus }
+      )
+    }
+    
+    // Handle network/connection errors
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      const networkError = createSpecificError(ERROR_CODES.NETWORK_ERROR)
+      return NextResponse.json(
+        { 
+          error: networkError.userMessage,
+          errorCode: networkError.code,
+          errorType: 'NETWORK'
+        },
+        { status: networkError.httpStatus }
+      )
+    }
+    
+    // Generic error fallback
+    const genericError = createSpecificError(ERROR_CODES.UNKNOWN_ERROR, { 
+      originalError: error instanceof Error ? error.message : String(error)
+    })
+    
     return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
+      { 
+        error: genericError.userMessage,
+        errorCode: genericError.code,
+        errorType: 'SYSTEM',
+        details: genericError.technicalDetails
+      },
+      { status: genericError.httpStatus }
     )
   }
 }

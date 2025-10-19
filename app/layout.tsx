@@ -2,7 +2,6 @@ import type React from "react";
 import type { Metadata } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { NotificationProvider } from "@/components/notifications/notification-provider";
 import { AuthProvider } from "@/components/auth/auth-provider";
@@ -12,10 +11,11 @@ import { Navbar } from "@/components/layout/navbar";
 import "./globals.css";
 import "../styles/animations.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-});
+// Remove the Inter font import that was causing issues with Turbopack
+// const inter = Inter({
+//   subsets: ["latin"],
+//   variable: "--font-inter",
+// });
 
 export const metadata: Metadata = {
   title: "OCEM Sports Hub 2025 - Live Scores & Fixtures",
@@ -39,7 +39,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} ${GeistMono.variable} ${inter.variable}`}
+      className={`${GeistSans.variable} ${GeistMono.variable}`}
     >
       <body className="font-sans" suppressHydrationWarning={true}>
         <AuthProvider>
