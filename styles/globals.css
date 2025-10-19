@@ -123,3 +123,24 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Footer responsive enhancements */
+.footer-link-hover {
+  padding: 0.25rem 0;
+}
+
+@media (max-width: 768px) {
+  .footer-link-hover {
+    padding: 0.5rem 0.75rem;
+  }
+  
+  .footer-link-hover span:last-child {
+    height: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-link-hover {
+    padding: 0.5rem;
+  }
+}

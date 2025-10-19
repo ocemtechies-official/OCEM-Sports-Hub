@@ -1,12 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Menu, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   LayoutDashboard,
   Users,
@@ -21,12 +21,28 @@ import {
   UserCheck,
   UserCog,
   UserPlus,
+  Menu,
+  LogOut,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Separator } from "@/components/ui/separator"
+import { useAuth } from "@/components/auth/auth-provider"
 
-const navigation = [
+interface NavigationItem {
+  name: string
+  href: string
+  icon: React.ComponentType<any>
+  exact?: boolean
+  badge?: string
+}
+
+interface NavigationSection {
+  title: string
+  items: NavigationItem[]
+}
+
+const navigation: NavigationSection[] = [
   {
     title: "Dashboard",
     items: [
@@ -112,14 +128,27 @@ const navigation = [
   },
 ]
 
-export function AdminMobileSidebar() {
+interface AdminMobileSidebarProps {
+  user: any
+  profile: any
+}
+
+export function AdminMobileSidebar({ user, profile }: AdminMobileSidebarProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
+  const { signOut } = useAuth()
 
-  // Close sidebar when route changes
-  useEffect(() => {
-    setOpen(false)
-  }, [pathname])
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (profile?.full_name) {
+      return profile.full_name
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+    }
+    return user?.email?.[0]?.toUpperCase() || "U"
+  }
 
   const isActive = (href: string, exact?: boolean) => {
     if (exact) {
@@ -129,25 +158,39 @@ export function AdminMobileSidebar() {
   }
 
   return (
-    <div className="lg:hidden fixed top-16 left-0 right-0 z-40 bg-white border-b px-4 py-2 shadow-sm">
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button variant="outline" size="sm" className="w-full justify-start">
-            <Menu className="h-4 w-4 mr-2" />
-            Admin Menu
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-72 p-0">
-          <SheetHeader className="p-6 pb-4 border-b">
-            <SheetTitle className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center">
-                <span className="text-white font-bold text-sm">OS</span>
-              </div>
-              <span className="font-semibold text-lg">Admin Panel</span>
-            </SheetTitle>
-          </SheetHeader>
-          
-          <ScrollArea className="h-[calc(100vh-8rem)] px-3">
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button
+          variant="outline"
+          size="sm"
+          className="fixed top-20 left-4 z-50 md:hidden bg-white shadow-lg border-slate-200 hover:bg-slate-50 transition-all duration-300 transform hover:scale-105 rounded-lg"
+        >
+          <Menu className="h-5 w-5 text-slate-700" />
+        </Button>
+      </SheetTrigger>
+      <SheetContent side="left" className="w-64 p-0 bg-gradient-to-b from-background via-blue-50/30 to-purple-50/20 text-slate-800 border-r border-slate-200">
+        <SheetTitle className="sr-only">Admin Navigation</SheetTitle>
+        <div className="flex flex-col h-full">
+          {/* Header */}
+          <div className="flex items-center gap-3 p-6 border-b border-slate-200">
+            <Avatar className="h-10 w-10 ring-2 ring-blue-500/30">
+              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || user?.email || "User"} />
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
+                {getUserInitials()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-900 truncate">
+                {profile?.full_name || user?.email}
+              </p>
+              <p className="text-xs text-slate-500 truncate">
+                Admin
+              </p>
+            </div>
+          </div>
+
+          {/* Navigation */}
+          <ScrollArea className="flex-1 px-3">
             <div className="space-y-6 py-4">
               {navigation.map((section) => (
                 <div key={section.title}>
@@ -165,16 +208,18 @@ export function AdminMobileSidebar() {
                           href={item.href}
                           onClick={() => setOpen(false)}
                           className={cn(
-                            "group flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                            "group flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-300",
                             active
-                              ? "bg-indigo-50 text-indigo-600"
-                              : "text-slate-700 hover:bg-slate-100 hover:text-slate-900"
+                              ? "bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md hover:from-blue-700 hover:to-indigo-800 shadow-blue-500/30"
+                              : "text-slate-800 hover:text-blue-700 hover:bg-blue-100",
+                            "px-3 py-2"
                           )}
                         >
                           <div className="flex items-center gap-3">
                             <Icon className={cn(
                               "h-5 w-5 flex-shrink-0",
-                              active ? "text-indigo-600" : "text-slate-400 group-hover:text-slate-600"
+                              active ? "text-white" : "text-slate-800 group-hover:text-blue-600",
+                              "mr-3"
                             )} />
                             <span>{item.name}</span>
                           </div>
@@ -195,32 +240,22 @@ export function AdminMobileSidebar() {
             </div>
           </ScrollArea>
 
-          <Separator className="my-4" />
-
-          {/* Quick Stats Footer */}
-          <div className="px-6 pb-6">
-            <div className="rounded-lg bg-gradient-to-br from-indigo-50 to-blue-50 p-4 border border-indigo-100">
-              <div className="text-xs font-medium text-slate-600 mb-3">
-                Quick Stats
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-slate-600">Active Users</span>
-                  <span className="text-sm font-bold text-slate-900">1,234</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-slate-600">Live Fixtures</span>
-                  <span className="text-sm font-bold text-green-600">3</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-slate-600">Pending</span>
-                  <span className="text-sm font-bold text-orange-600">12</span>
-                </div>
-              </div>
-            </div>
+          {/* Footer */}
+          <div className="p-4 border-t border-slate-200 space-y-2">
+            <Button
+              variant="ghost"
+              className="w-full justify-start transition-all duration-300 text-slate-800 hover:text-red-700 hover:bg-red-100 px-4 py-2"
+              onClick={() => {
+                setOpen(false)
+                signOut()
+              }}
+            >
+              <LogOut className="mr-3 h-5 w-5" />
+              <span className="font-medium">Sign Out</span>
+            </Button>
           </div>
-        </SheetContent>
-      </Sheet>
-    </div>
+        </div>
+      </SheetContent>
+    </Sheet>
   )
 }

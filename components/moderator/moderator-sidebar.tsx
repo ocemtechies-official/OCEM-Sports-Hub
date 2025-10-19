@@ -4,15 +4,20 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { 
   LayoutDashboard, 
   Calendar, 
   History, 
   Settings,
   LogOut,
-  User
+  User,
+  PanelLeft,
+  PanelRight
 } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
+import { useState, useEffect, useRef } from "react"
+import { useSidebar } from "@/components/moderator/sidebar-context"
 
 interface ModeratorSidebarProps {
   user: any
@@ -40,21 +45,72 @@ const navigation = [
 export function ModeratorSidebar({ user, profile }: ModeratorSidebarProps) {
   const pathname = usePathname()
   const { signOut } = useAuth()
+  const { collapsed, setCollapsed, isHovering, setIsHovering } = useSidebar()
+  const sidebarRef = useRef<HTMLDivElement>(null)
+
+  // Set default state to collapsed
+  useEffect(() => {
+    setCollapsed(true)
+  }, [setCollapsed])
+
+  const handleMouseEnter = () => {
+    setIsHovering(true)
+  }
+
+  const handleMouseLeave = () => {
+    setIsHovering(false)
+  }
+
+  // When collapsed, show expanded on hover
+  const isExpandedOnHover = collapsed && isHovering
+
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (profile?.full_name) {
+      return profile.full_name
+        .split(" ")
+        .map((n: string) => n[0])
+        .join("")
+        .toUpperCase()
+    }
+    return user?.email?.[0]?.toUpperCase() || "U"
+  }
 
   return (
-    <div className="flex flex-col h-full bg-white border-r border-slate-200">
+    <div 
+      ref={sidebarRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className={cn(
+        "flex flex-col h-full bg-gradient-to-b from-background via-blue-50/30 to-purple-50/20 text-slate-800 border-r border-slate-200 transition-all duration-300 ease-in-out shadow-lg",
+        collapsed && !isHovering ? "md:w-20" : "md:w-64"
+      )}
+    >
       {/* Header */}
-      <div className="flex items-center gap-3 p-6 border-b border-slate-200">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-white">
-          <User className="h-5 w-5" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-slate-900 truncate">
-            {profile?.full_name || user.email}
-          </p>
-          <p className="text-xs text-slate-500 truncate">
-            {profile?.role === 'admin' ? 'Admin' : 'Moderator'}
-          </p>
+      <div className={cn(
+        "flex items-center gap-3 p-4 border-b border-slate-200 transition-all duration-300",
+        collapsed && !isHovering ? "justify-center px-2" : "justify-between"
+      )}>
+        <div className={cn(
+          "flex items-center gap-3",
+          collapsed && !isHovering ? "ml-2" : ""
+        )}>
+          <Avatar className="h-10 w-10 ring-2 ring-blue-500/30 flex-shrink-0">
+            <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || user?.email || "User"} />
+            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-medium">
+              {getUserInitials()}
+            </AvatarFallback>
+          </Avatar>
+          {!(collapsed && !isHovering) && (
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-slate-900 truncate">
+                {profile?.full_name || user?.email}
+              </p>
+              <p className="text-xs text-slate-500 truncate">
+                {profile?.role === 'admin' ? 'Admin' : 'Moderator'}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -65,14 +121,17 @@ export function ModeratorSidebar({ user, profile }: ModeratorSidebarProps) {
           return (
             <Link key={item.name} href={item.href}>
               <Button
-                variant={isActive ? "default" : "ghost"}
+                variant={isActive ? "secondary" : "ghost"}
                 className={cn(
-                  "w-full justify-start",
-                  isActive && "bg-slate-900 text-white hover:bg-slate-800"
+                  "w-full justify-start transition-all duration-300",
+                  isActive 
+                    ? "bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md hover:from-blue-700 hover:to-indigo-800 shadow-blue-500/30" 
+                    : "text-slate-600 hover:text-blue-700 hover:bg-blue-50/80",
+                  (collapsed && !isHovering) ? "justify-center px-2 py-6" : "px-4 py-6"
                 )}
               >
-                <item.icon className="mr-3 h-4 w-4" />
-                {item.name}
+                <item.icon className={cn("h-5 w-5", (collapsed && !isHovering) ? "" : "mr-3")} />
+                {!(collapsed && !isHovering) && <span className="font-medium">{item.name}</span>}
               </Button>
             </Link>
           )
@@ -82,18 +141,29 @@ export function ModeratorSidebar({ user, profile }: ModeratorSidebarProps) {
       {/* Footer */}
       <div className="p-4 border-t border-slate-200 space-y-2">
         <Link href="/profile">
-          <Button variant="ghost" className="w-full justify-start">
-            <Settings className="mr-3 h-4 w-4" />
-            Profile Settings
+          <Button 
+            variant="ghost" 
+            className={cn(
+              "w-full justify-start transition-all duration-300",
+              "text-slate-600 hover:text-blue-700 hover:bg-blue-50/80",
+              (collapsed && !isHovering) ? "justify-center px-2 py-6" : "px-4 py-6"
+            )}
+          >
+            <Settings className={cn("h-5 w-5", (collapsed && !isHovering) ? "" : "mr-3")} />
+            {!(collapsed && !isHovering) && <span className="font-medium">Profile Settings</span>}
           </Button>
         </Link>
         <Button
           variant="ghost"
-          className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+          className={cn(
+            "w-full justify-start transition-all duration-300",
+            "text-red-500 hover:text-red-700 hover:bg-red-50/80",
+            (collapsed && !isHovering) ? "justify-center px-2 py-6" : "px-4 py-6"
+          )}
           onClick={() => signOut()}
         >
-          <LogOut className="mr-3 h-4 w-4" />
-          Sign Out
+          <LogOut className={cn("h-5 w-5", (collapsed && !isHovering) ? "" : "mr-3")} />
+          {!(collapsed && !isHovering) && <span className="font-medium">Sign Out</span>}
         </Button>
       </div>
     </div>

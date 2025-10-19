@@ -1,0 +1,411 @@
+/* Enhanced Mobile UX Styles for OCEM Sports Hub Moderator Components */
+
+/* Mobile-first responsive breakpoints */
+@media (max-width: 480px) {
+  /* QuickUpdateCard Mobile Optimizations */
+  .quick-update-card {
+    padding: 0.75rem !important;
+  }
+  
+  .quick-update-buttons {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important;
+    width: 100% !important;
+  }
+  
+  .quick-update-buttons button {
+    min-height: 48px !important; /* Touch target minimum */
+    font-size: 0.75rem !important;
+    padding: 0.5rem !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  
+  /* Score display optimization */
+  .score-display {
+    font-size: 2rem !important;
+  }
+  
+  .team-name {
+    font-size: 0.875rem !important;
+    line-height: 1.2 !important;
+  }
+  
+  /* Status buttons */
+  .status-buttons {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.25rem !important;
+    justify-content: center !important;
+  }
+  
+  .status-buttons button {
+    min-height: 44px !important;
+    min-width: 70px !important;
+    font-size: 0.75rem !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+}
+
+/* Landscape mode optimizations */
+@media (max-height: 500px) and (orientation: landscape) {
+  .scoreboard-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1rem !important;
+    max-height: 90vh !important;
+    overflow-y: auto !important;
+  }
+  
+  .main-scoreboard {
+    grid-column: 1 / -1 !important;
+  }
+  
+  .sport-specific-controls {
+    max-height: 300px !important;
+    overflow-y: auto !important;
+  }
+  
+  .control-buttons {
+    position: sticky !important;
+    bottom: 0 !important;
+    background: white !important;
+    padding: 0.5rem !important;
+    border-top: 1px solid #e5e7eb !important;
+  }
+  
+  /* Compact form inputs */
+  .sport-input {
+    height: 32px !important;
+    font-size: 0.875rem !important;
+  }
+  
+  .sport-label {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+}
+
+/* Small screen optimizations */
+@media (max-width: 360px) {
+  .team-name {
+    max-width: 80px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  
+  .score-grid {
+    gap: 0.5rem !important;
+  }
+  
+  .quick-update-buttons {
+    grid-template-columns: 1fr !important;
+    gap: 0.25rem !important;
+  }
+  
+  .quick-update-buttons button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+  
+  /* Tabs for sport controls */
+  .sport-tabs {
+    font-size: 0.75rem !important;
+  }
+  
+  .sport-tabs button {
+    padding: 0.375rem 0.5rem !important;
+    min-height: 36px !important;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (pointer: coarse) {
+  button, input, select, textarea {
+    min-height: 44px !important;
+  }
+  
+  .increment-button {
+    min-width: 60px !important;
+    min-height: 48px !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+  }
+  
+  .increment-button:active {
+    transform: scale(0.98) !important;
+    transition: transform 0.1s !important;
+  }
+  
+  /* Better spacing for touch */
+  .button-group {
+    gap: 0.75rem !important;
+  }
+  
+  .form-group {
+    margin-bottom: 1rem !important;
+  }
+  
+  /* Larger tap targets for checkboxes and radio buttons */
+  input[type="checkbox"], 
+  input[type="radio"] {
+    width: 20px !important;
+    height: 20px !important;
+    margin-right: 0.5rem !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .score-display {
+    border: 2px solid currentColor !important;
+    padding: 0.25rem !important;
+  }
+  
+  button {
+    border: 2px solid currentColor !important;
+  }
+  
+  .status-live {
+    background: #000 !important;
+    color: #fff !important;
+  }
+  
+  .status-completed {
+    background: #000 !important;
+    color: #fff !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .increment-button:active {
+    transform: none !important;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  .sport-card {
+    background: #1f2937 !important;
+    border-color: #374151 !important;
+  }
+  
+  .sport-input {
+    background: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #f9fafb !important;
+  }
+  
+  .sport-label {
+    color: #d1d5db !important;
+  }
+}
+
+/* Focus improvements for keyboard navigation */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 3px solid #3b82f6 !important;
+  outline-offset: 2px !important;
+}
+
+/* Loading states */
+.button-loading {
+  position: relative !important;
+  color: transparent !important;
+}
+
+.button-loading::after {
+  content: "" !important;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  width: 16px !important;
+  height: 16px !important;
+  border: 2px solid currentColor !important;
+  border-top: 2px solid transparent !important;
+  border-radius: 50% !important;
+  animation: spin 1s linear infinite !important;
+}
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg) !important;
+  }
+}
+
+/* Error state styling */
+.error-input {
+  border-color: #ef4444 !important;
+  background-color: #fef2f2 !important;
+}
+
+.error-text {
+  color: #ef4444 !important;
+  font-size: 0.75rem !important;
+  margin-top: 0.25rem !important;
+}
+
+/* Success state styling */
+.success-input {
+  border-color: #10b981 !important;
+  background-color: #f0fdf4 !important;
+}
+
+/* Grid layout improvements for different screen sizes */
+.responsive-grid {
+  display: grid !important;
+}
+
+@media (min-width: 640px) {
+  .responsive-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .responsive-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .responsive-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+/* Overflow handling for long team names */
+.team-name-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 2rem !important;
+}
+
+.team-name-truncated {
+  max-width: 100px !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  text-align: center !important;
+}
+
+@media (min-width: 480px) {
+  .team-name-truncated {
+    max-width: 150px !important;
+  }
+}
+
+/* Improved spacing and typography */
+.mobile-optimized {
+  line-height: 1.4 !important;
+  letter-spacing: 0.025em !important;
+}
+
+.mobile-title {
+  font-size: 1.125rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+@media (min-width: 640px) {
+  .mobile-title {
+    font-size: 1.25rem !important;
+  }
+}
+
+/* Safe area handling for devices with notches */
+@supports (padding: max(0px)) {
+  .safe-area-top {
+    padding-top: max(1rem, env(safe-area-inset-top)) !important;
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom)) !important;
+  }
+  
+  .safe-area-left {
+    padding-left: max(1rem, env(safe-area-inset-left)) !important;
+  }
+  
+  .safe-area-right {
+    padding-right: max(1rem, env(safe-area-inset-right)) !important;
+  }
+}
+
+/* Footer mobile optimizations */
+@media (max-width: 768px) {
+  .footer-link-hover {
+    padding: 0.25rem 0.5rem !important;
+  }
+  
+  .footer-link-hover span:last-child {
+    height: 1px !important;
+  }
+  
+  .footer-social-icon {
+    min-width: 40px !important;
+    min-height: 40px !important;
+  }
+  
+  .footer-contact-item {
+    flex-direction: row !important;
+    align-items: center !important;
+  }
+  
+  .footer-contact-icon {
+    margin-bottom: 0 !important;
+    margin-right: 0.75rem !important;
+  }
+  
+  .footer-bottom-links {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+  
+  .footer-copyright {
+    text-align: center !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+  
+  .footer-brand-section {
+    text-align: center !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  
+  .footer-social-icons {
+    justify-content: center !important;
+  }
+  
+  .footer-bottom-bar {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 1rem !important;
+  }
+  
+  .footer-developer-info {
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 0.25rem !important;
+  }
+}

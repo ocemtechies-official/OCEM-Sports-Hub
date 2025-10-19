@@ -421,3 +421,48 @@
 .glow-on-hover:hover {
   filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.5));
 }
+
+/* Sidebar specific animations */
+@keyframes sidebar-expand {
+  0% {
+    width: 5rem;
+  }
+  100% {
+    width: 16rem;
+  }
+}
+
+@keyframes sidebar-collapse {
+  0% {
+    width: 16rem;
+  }
+  100% {
+    width: 5rem;
+  }
+}
+
+.sidebar-expand-animation {
+  animation: sidebar-expand 0.3s ease-out forwards;
+}
+
+.sidebar-collapse-animation {
+  animation: sidebar-collapse 0.3s ease-out forwards;
+}
+
+/* Enhanced button hover effects */
+.btn-sidebar {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-sidebar:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient text effect */
+.gradient-text {
+  background: linear-gradient(90deg, #4f46e5, #7c3aed, #0ea5e9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
