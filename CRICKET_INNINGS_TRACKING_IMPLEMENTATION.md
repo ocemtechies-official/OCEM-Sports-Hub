@@ -25,7 +25,7 @@ interface CricketMatchConfig {
   elected_to?: 'bat' | 'bowl'
   batting_first?: 'team_a' | 'team_b'  // Which team is batting first
 }
-```
+``` bash
 
 #### Extended `CricketTeamData` Interface
 
@@ -36,7 +36,7 @@ interface CricketTeamData {
   innings?: 1 | 2                 // Which innings (1st or 2nd)
   is_batting?: boolean            // Currently batting
 }
-```
+``` bash
 
 **Backward Compatibility**: All new fields are optional (`?`) to ensure old match data continues to work.
 
@@ -55,7 +55,7 @@ const [matchConfig, setMatchConfig] = useState<CricketMatchConfig>({
   elected_to: 'bat',
   batting_first: 'team_a'    // Default team A batting first
 })
-```
+``` bash
 
 **Features**:
 
@@ -242,7 +242,7 @@ Shows batting status for each team:
 
 Changed from simple `"15"` to professional format:
 
-```
+```bash
 15.4/20.0
 ```
 
@@ -256,7 +256,7 @@ Shows:
 
 Displays below main score:
 
-```
+```bash
 4.2 overs remaining
 ```
 
@@ -266,7 +266,7 @@ Calculated in real-time as balls are bowled.
 
 Shows the chase rate for the batting team:
 
-```
+```bash
 Required RR: 8.50
 ```
 
@@ -276,7 +276,7 @@ Required RR: 8.50
 
 **Calculation Example**:
 
-```
+```bash
 Target: 151
 Current: 100
 Overs Remaining: 10.0
@@ -289,7 +289,7 @@ Required RR: (151 - 100) / 10.0 = 5.10
 
 ### Before
 
-```
+```bash
 Team A              120/5
 ┌─────────────────────────┐
 │ Runs: 120               │
@@ -300,7 +300,7 @@ Team A              120/5
 
 ### After
 
-```
+```bash
 Team A  🟢 Batting (1st)    120/5
 ┌─────────────────────────────────┐
 │ Runs: 120  Overs: 15.4/20.0  W: 5 │
@@ -327,7 +327,7 @@ Team A  🟢 Batting (1st)    120/5
 
 #### Initial Setup
 
-```
+```bash
 Match Type: T20
 Total Overs: 20
 Current Innings: 1st
@@ -338,7 +338,7 @@ Batting First: Team A
 
 1. **Moderator clicks "+1" for Team A**
 
-   ```
+   ```bash
    Before: overs=0, balls=0
    After:  overs=0, balls=1
    Display: "0.1/20.0" (0 overs, 1 ball)
@@ -346,7 +346,7 @@ Batting First: Team A
 
 2. **Moderator clicks "+4" (5 times more)**
 
-   ```
+   ```bash
    After 6 balls:
    Before: overs=0, balls=5
    After:  overs=1, balls=0  ← Auto-increment!
@@ -355,7 +355,7 @@ Batting First: Team A
 
 3. **Moderator clicks "Wide"**
 
-   ```
+   ```bash
    Wide doesn't count as legal ball:
    Before: overs=1, balls=0
    After:  overs=1, balls=0  ← Unchanged
@@ -365,14 +365,14 @@ Batting First: Team A
 
 4. **Moderator clicks "+1" (continue)**
 
-   ```
+   ```bash
    After: overs=1, balls=1
    Display: "1.1/20.0"
    ```
 
 #### Mid-Innings Status
 
-```
+```bash
 Team A: 85/3 in 10.4 overs
 - Overs Remaining: 9.2
 - Run Rate: 8.00
@@ -380,7 +380,7 @@ Team A: 85/3 in 10.4 overs
 
 #### Innings Switch
 
-```
+```bash
 Moderator changes:
 - Current Innings: 2nd
 - Batting First: Team B
@@ -388,7 +388,7 @@ Moderator changes:
 
 #### 2nd Innings Chase
 
-```
+```bash
 Team B: 60/2 in 8.0 overs
 - Target: 86 (Team A's total + 1)
 - Required RR: 6.50
@@ -402,7 +402,7 @@ Team B: 60/2 in 8.0 overs
 
 ### 1. User Interaction
 
-```
+```bash
 Moderator clicks "+4" button
     ↓
 quickScoreUpdate('a', 4) called
@@ -550,7 +550,7 @@ UI updates with new values
 
 #### 1. Over Completion Test
 
-```
+```bash
 1. Start new T20 match
 2. Click "+1" six times for Team A
 3. Verify: overs changes from 0 to 1
@@ -560,7 +560,7 @@ UI updates with new values
 
 #### 2. Wide/No-Ball Test
 
-```
+```bash
 1. Bowl 5 legal balls (overs=0, balls=5)
 2. Click "Wide" button
 3. Verify: overs stays 0, balls stays 5
@@ -571,7 +571,7 @@ UI updates with new values
 
 #### 3. Innings Switch Test
 
-```
+```bash
 1. Complete Team A innings (20 overs)
 2. Click "2nd Innings" button
 3. Change batting team to Team B
@@ -581,7 +581,7 @@ UI updates with new values
 
 #### 4. Backward Compatibility Test
 
-```
+```bash
 1. Load old match without new fields
 2. Verify: defaults to 0 balls in current over
 3. Verify: scoring still works
@@ -590,7 +590,7 @@ UI updates with new values
 
 #### 5. Required Run Rate Test
 
-```
+```bash
 1. Set Team A total: 150 runs
 2. Set Team B: 100 runs in 15 overs
 3. Verify RRR = (150-100+1) / 5.0 = 10.20
@@ -663,7 +663,7 @@ UI updates with new values
 
 ### Run Rate Calculation
 
-```
+```bash
 Run Rate = (Total Runs / Total Overs)
 Example: 120 runs in 15.4 overs
 = 120 / 15.67 = 7.66
@@ -671,7 +671,7 @@ Example: 120 runs in 15.4 overs
 
 ### Required Run Rate Calculation
 
-```
+```bash
 Required RR = (Target - Current Runs) / Overs Remaining
 Example: Need 51 runs in 4.2 overs
 = 51 / 4.33 = 11.78
@@ -715,4 +715,4 @@ If you encounter any issues:
 
 ---
 
-**Implementation Complete! 🎯🏏**
+**Implementation Complete! 🎯🏏*

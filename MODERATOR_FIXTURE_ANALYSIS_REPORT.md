@@ -13,6 +13,7 @@ DROP POLICY IF EXISTS "moderators can update fixtures via RPC" ON public.fixture
 ```
 
 **Current State**: Only admins can update fixtures due to the remaining policy:
+
 ```sql
 CREATE POLICY "fixtures_admin_policy"
   ON public.fixtures FOR ALL
@@ -26,6 +27,7 @@ CREATE POLICY "fixtures_admin_policy"
 **File**: `app/api/moderator/fixtures/[id]/update-score/route.ts`
 
 **Issues Found**:
+
 - Line 47: `shouldFallbackToDirectUpdate = true` bypasses RPC but still hits RLS
 - Lines 208-215: Error handling suggests RLS blocking but doesn't provide clear user feedback
 - Permission checks work correctly but are overridden by missing RLS policy
@@ -35,6 +37,7 @@ CREATE POLICY "fixtures_admin_policy"
 **File**: `components/moderator/quick-update-card.tsx`
 
 **Issues Found**:
+
 - Lines 114-125: Error handling reverts optimistic updates but doesn't distinguish RLS vs permission errors
 - Line 108: Expected version handling may cause conflicts in concurrent scenarios
 - Status change logic (lines 78-82) doesn't provide user feedback for specific failures
@@ -42,6 +45,7 @@ CREATE POLICY "fixtures_admin_policy"
 ### 4. **Database Schema Status**
 
 **Missing Components**:
+
 - Moderator-specific RLS policies for fixtures table
 - Proper error messages for permission failures
 - Audit trail for failed update attempts
@@ -49,6 +53,7 @@ CREATE POLICY "fixtures_admin_policy"
 ## 🔍 Detailed Analysis
 
 ### API Flow Analysis
+
 1. Frontend calls `/api/moderator/fixtures/${id}/update-score`
 2. API validates moderator permissions ✅ (works)
 3. API attempts direct database update ❌ (fails at RLS)
@@ -56,13 +61,15 @@ CREATE POLICY "fixtures_admin_policy"
 5. API returns generic error, frontend shows "failed to update"
 
 ### Current RLS Policies Status
+
 - ✅ `fixtures_admin_policy` - Admins can update
 - ❌ Missing moderator policy for fixtures
 - ✅ `match_updates_insert_strict` - Audit logging works
 - ⚠️ Permission checks in API work but are bypassed by RLS
 
 ### Error Propagation Chain
-```
+
+```bash
 Database RLS Block → API Generic Error → Frontend Generic Toast → User Confusion
 ```
 
@@ -110,11 +117,13 @@ WITH CHECK (
 ### Phase 2: Improve Error Handling (30 minutes)
 
 **Update API Route** (`app/api/moderator/fixtures/[id]/update-score/route.ts`):
+
 - Add specific RLS error detection
 - Return detailed error codes for frontend
 - Add better logging for debugging
 
 **Update Frontend Component** (`components/moderator/quick-update-card.tsx`):
+
 - Handle specific error types (RLS, permission, network)
 - Show appropriate user messages
 - Add retry mechanism for transient failures
@@ -122,6 +131,7 @@ WITH CHECK (
 ### Phase 3: Add Debugging Tools (15 minutes)
 
 **Create debug endpoint**: `/api/debug/moderator-permissions`
+
 - Check user role and assignments
 - Verify RLS policies exist
 - Test fixture update permissions
@@ -129,6 +139,7 @@ WITH CHECK (
 ### Phase 4: Testing & Validation (30 minutes)
 
 **Test Cases**:
+
 1. Moderator with sport assignment updates fixture ✅
 2. Moderator without assignment blocked ❌
 3. Admin can update any fixture ✅
@@ -138,6 +149,7 @@ WITH CHECK (
 ## 🚀 Quick Fix Implementation
 
 ### Immediate Fix (5 minutes)
+
 Run this SQL to restore basic moderator update capability:
 
 ```sql
@@ -161,17 +173,20 @@ USING (
 ## 📋 Files to Modify
 
 ### Critical Priority
+
 - `scripts/database/41-restore-moderator-fixture-policy.sql` (new)
 - `app/api/moderator/fixtures/[id]/update-score/route.ts`
 - `components/moderator/quick-update-card.tsx`
 
 ### Secondary Priority
+
 - `app/api/debug/moderator-permissions/route.ts` (new)
 - `components/moderator/scoreboard-controls.tsx`
 
 ## 🎯 Expected Outcomes
 
 After implementing the fixes:
+
 - ✅ Moderators can change fixture status from scheduled to live
 - ✅ Score updates work properly for assigned sports/venues  
 - ✅ Clear error messages when permissions are insufficient
