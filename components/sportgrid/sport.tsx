@@ -62,7 +62,7 @@ const colorMap: Record<string, string> = {
 };
 
 interface SportsGridProps {
-  onSportSelect?: (sport: { id: string; type: 'team' | 'individual' }) => void;
+  onSportSelect?: (sport: { id: string; name: string; type: 'team' | 'individual' }) => void;
 }
 
 export const SportsGrid = ({ onSportSelect }: SportsGridProps) => {
@@ -115,7 +115,7 @@ export const SportsGrid = ({ onSportSelect }: SportsGridProps) => {
   const handleSportClick = (sport: Sport) => {
     if (onSportSelect) {
       // Use callback for consolidated page
-      onSportSelect({ id: sport.id, type: sport.type });
+      onSportSelect({ id: sport.id, name: sport.name, type: sport.type });
     } else {
       // Navigate using Next.js router with query parameters (fallback)
       router.push(`/registration?sport=${sport.id}&type=${sport.type}`);

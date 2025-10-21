@@ -74,7 +74,7 @@ export const IndividualRegistrationForm = ({ sportId, sportName, onBackToSelecti
 
       notifications.showSuccess({
         title: "Registration Complete ✅",
-        description: `You're registered for ${sportName}. Pending approval.`
+        description: `You're registered for ${sportName || 'the selected sport'}. Pending approval.`
       });
 
       // Clear form and go back to sports selection

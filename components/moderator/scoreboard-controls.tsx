@@ -28,6 +28,12 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
   const [extra, setExtra] = useState<any>({})
   const sport = (sportName || '').toLowerCase()
 
+  // Function to calculate run rate
+  const calculateRunRate = (runs: number, overs: number) => {
+    if (overs <= 0) return 0;
+    return Number((runs / overs).toFixed(2));
+  }
+
   // Enhanced Cricket state
   const [cricketData, setCricketData] = useState({
     runs_a: 0, runs_b: 0,
@@ -57,6 +63,43 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
   const applyUpdate = async (nextA: number, nextB: number, nextStatus: string, enhancedData?: any) => {
     setIsSaving(true)
     try {
+      // For cricket, we need to structure the data properly
+      let cricketExtra = {}
+      if (sport === 'cricket') {
+        cricketExtra = {
+          cricket: {
+            team_a: {
+              runs: cricketData.runs_a,
+              wickets: cricketData.wickets_a,
+              overs: cricketData.overs_a,
+              extras: cricketData.extras_a,
+              balls_faced: cricketData.balls_faced_a,
+              fours: cricketData.fours_a,
+              sixes: cricketData.sixes_a,
+              wides: cricketData.wides_a,
+              no_balls: cricketData.no_balls_a,
+              byes: cricketData.byes_a,
+              leg_byes: cricketData.leg_byes_a,
+              run_rate: cricketData.run_rate_a
+            },
+            team_b: {
+              runs: cricketData.runs_b,
+              wickets: cricketData.wickets_b,
+              overs: cricketData.overs_b,
+              extras: cricketData.extras_b,
+              balls_faced: cricketData.balls_faced_b,
+              fours: cricketData.fours_b,
+              sixes: cricketData.sixes_b,
+              wides: cricketData.wides_b,
+              no_balls: cricketData.no_balls_b,
+              byes: cricketData.byes_b,
+              leg_byes: cricketData.leg_byes_b,
+              run_rate: cricketData.run_rate_b
+            }
+          }
+        }
+      }
+
       const updateData = { 
         team_a_score: nextA, 
         team_b_score: nextB, 
@@ -65,7 +108,7 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
           ...extra, 
           ...enhancedData,
           // Include sport-specific data
-          ...(sport === 'cricket' && { cricket: cricketData }),
+          ...(sport === 'cricket' ? cricketExtra : {}),
           ...(sport === 'basketball' && { basketball: basketballData })
         }
       }
@@ -139,10 +182,14 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
                           min={0} 
                           value={cricketData.runs_a || ''}
                           className="h-8 text-sm"
-                          onChange={(e) => setCricketData(prev => ({ 
-                            ...prev, 
-                            runs_a: Number(e.target.value) || 0 
-                          }))}
+                          onChange={(e) => {
+                            const runs = Number(e.target.value) || 0;
+                            setCricketData(prev => ({ 
+                              ...prev, 
+                              runs_a: runs,
+                              run_rate_a: calculateRunRate(runs, prev.overs_a)
+                            }))
+                          }}
                         />
                       </div>
                       <div>
@@ -153,10 +200,14 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
                           min={0} 
                           value={cricketData.overs_a || ''}
                           className="h-8 text-sm"
-                          onChange={(e) => setCricketData(prev => ({ 
-                            ...prev, 
-                            overs_a: Number(e.target.value) || 0 
-                          }))}
+                          onChange={(e) => {
+                            const overs = Number(e.target.value) || 0;
+                            setCricketData(prev => ({ 
+                              ...prev, 
+                              overs_a: overs,
+                              run_rate_a: calculateRunRate(prev.runs_a, overs)
+                            }))
+                          }}
                         />
                       </div>
                     </div>
@@ -172,10 +223,14 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
                           min={0} 
                           value={cricketData.runs_b || ''}
                           className="h-8 text-sm"
-                          onChange={(e) => setCricketData(prev => ({ 
-                            ...prev, 
-                            runs_b: Number(e.target.value) || 0 
-                          }))}
+                          onChange={(e) => {
+                            const runs = Number(e.target.value) || 0;
+                            setCricketData(prev => ({ 
+                              ...prev, 
+                              runs_b: runs,
+                              run_rate_b: calculateRunRate(runs, prev.overs_b)
+                            }))
+                          }}
                         />
                       </div>
                       <div>
@@ -186,10 +241,14 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
                           min={0} 
                           value={cricketData.overs_b || ''}
                           className="h-8 text-sm"
-                          onChange={(e) => setCricketData(prev => ({ 
-                            ...prev, 
-                            overs_b: Number(e.target.value) || 0 
-                          }))}
+                          onChange={(e) => {
+                            const overs = Number(e.target.value) || 0;
+                            setCricketData(prev => ({ 
+                              ...prev, 
+                              overs_b: overs,
+                              run_rate_b: calculateRunRate(prev.runs_b, overs)
+                            }))
+                          }}
                         />
                       </div>
                     </div>
@@ -328,13 +387,20 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => {
-                            setCricketData(prev => ({
-                              ...prev,
-                              runs_a: prev.runs_a + 1,
-                              balls_faced_a: prev.balls_faced_a + 1
-                            }))
-                            applyUpdate(localA + 1, localB, localStatus)
+                          onClick={async () => {
+                            const newRuns = cricketData.runs_a + 1;
+                            const runRate = calculateRunRate(newRuns, cricketData.overs_a);
+                            const newData = {
+                              ...cricketData,
+                              runs_a: newRuns,
+                              balls_faced_a: cricketData.balls_faced_a + 1,
+                              run_rate_a: runRate
+                            }
+                            setCricketData(newData)
+                            await applyUpdate(localA + 1, localB, localStatus, { cricket: {
+                              team_a: { ...newData },
+                              team_b: cricketData
+                            }})
                           }}
                           className="text-xs h-8"
                         >
@@ -343,14 +409,21 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => {
-                            setCricketData(prev => ({
-                              ...prev,
-                              runs_a: prev.runs_a + 4,
-                              fours_a: prev.fours_a + 1,
-                              balls_faced_a: prev.balls_faced_a + 1
-                            }))
-                            applyUpdate(localA + 4, localB, localStatus)
+                          onClick={async () => {
+                            const newRuns = cricketData.runs_a + 4;
+                            const runRate = calculateRunRate(newRuns, cricketData.overs_a);
+                            const newData = {
+                              ...cricketData,
+                              runs_a: newRuns,
+                              fours_a: cricketData.fours_a + 1,
+                              balls_faced_a: cricketData.balls_faced_a + 1,
+                              run_rate_a: runRate
+                            }
+                            setCricketData(newData)
+                            await applyUpdate(localA + 4, localB, localStatus, { cricket: {
+                              team_a: { ...newData },
+                              team_b: cricketData
+                            }})
                           }}
                           className="text-xs h-8 bg-blue-50 border-blue-200 text-blue-700"
                         >
@@ -359,14 +432,21 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => {
-                            setCricketData(prev => ({
-                              ...prev,
-                              runs_a: prev.runs_a + 6,
-                              sixes_a: prev.sixes_a + 1,
-                              balls_faced_a: prev.balls_faced_a + 1
-                            }))
-                            applyUpdate(localA + 6, localB, localStatus)
+                          onClick={async () => {
+                            const newRuns = cricketData.runs_a + 6;
+                            const runRate = calculateRunRate(newRuns, cricketData.overs_a);
+                            const newData = {
+                              ...cricketData,
+                              runs_a: newRuns,
+                              sixes_a: cricketData.sixes_a + 1,
+                              balls_faced_a: cricketData.balls_faced_a + 1,
+                              run_rate_a: runRate
+                            }
+                            setCricketData(newData)
+                            await applyUpdate(localA + 6, localB, localStatus, { cricket: {
+                              team_a: { ...newData },
+                              team_b: cricketData
+                            }})
                           }}
                           className="text-xs h-8 bg-purple-50 border-purple-200 text-purple-700"
                         >
@@ -381,13 +461,20 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => {
-                            setCricketData(prev => ({
-                              ...prev,
-                              runs_b: prev.runs_b + 1,
-                              balls_faced_b: prev.balls_faced_b + 1
-                            }))
-                            applyUpdate(localA, localB + 1, localStatus)
+                          onClick={async () => {
+                            const newRuns = cricketData.runs_b + 1;
+                            const runRate = calculateRunRate(newRuns, cricketData.overs_b);
+                            const newData = {
+                              ...cricketData,
+                              runs_b: newRuns,
+                              balls_faced_b: cricketData.balls_faced_b + 1,
+                              run_rate_b: runRate
+                            }
+                            setCricketData(newData)
+                            await applyUpdate(localA, localB + 1, localStatus, { cricket: {
+                              team_a: cricketData,
+                              team_b: { ...newData }
+                            }})
                           }}
                           className="text-xs h-8"
                         >
@@ -396,14 +483,21 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => {
-                            setCricketData(prev => ({
-                              ...prev,
-                              runs_b: prev.runs_b + 4,
-                              fours_b: prev.fours_b + 1,
-                              balls_faced_b: prev.balls_faced_b + 1
-                            }))
-                            applyUpdate(localA, localB + 4, localStatus)
+                          onClick={async () => {
+                            const newRuns = cricketData.runs_b + 4;
+                            const runRate = calculateRunRate(newRuns, cricketData.overs_b);
+                            const newData = {
+                              ...cricketData,
+                              runs_b: newRuns,
+                              fours_b: cricketData.fours_b + 1,
+                              balls_faced_b: cricketData.balls_faced_b + 1,
+                              run_rate_b: runRate
+                            }
+                            setCricketData(newData)
+                            await applyUpdate(localA, localB + 4, localStatus, { cricket: {
+                              team_a: cricketData,
+                              team_b: { ...newData }
+                            }})
                           }}
                           className="text-xs h-8 bg-blue-50 border-blue-200 text-blue-700"
                         >
@@ -412,14 +506,21 @@ export function ScoreboardControls({ fixtureId, teamAName, teamBName, teamAScore
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => {
-                            setCricketData(prev => ({
-                              ...prev,
-                              runs_b: prev.runs_b + 6,
-                              sixes_b: prev.sixes_b + 1,
-                              balls_faced_b: prev.balls_faced_b + 1
-                            }))
-                            applyUpdate(localA, localB + 6, localStatus)
+                          onClick={async () => {
+                            const newRuns = cricketData.runs_b + 6;
+                            const runRate = calculateRunRate(newRuns, cricketData.overs_b);
+                            const newData = {
+                              ...cricketData,
+                              runs_b: newRuns,
+                              sixes_b: cricketData.sixes_b + 1,
+                              balls_faced_b: cricketData.balls_faced_b + 1,
+                              run_rate_b: runRate
+                            }
+                            setCricketData(newData)
+                            await applyUpdate(localA, localB + 6, localStatus, { cricket: {
+                              team_a: cricketData,
+                              team_b: { ...newData }
+                            }})
                           }}
                           className="text-xs h-8 bg-purple-50 border-purple-200 text-purple-700"
                         >

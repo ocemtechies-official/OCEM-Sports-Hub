@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -10,7 +10,6 @@ import { FormLoadingSkeleton } from "@/components/ui/form-loading-skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -19,15 +18,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { notifications } from "@/lib/notifications";
-
-// ⚙️ Define team sports with min/max limits (same as in SportsGrid)
-const teamLimits: Record<string, { min: number; max: number }> = {
-  cricket: { min: 11, max: 15 },
-  football: { min: 9, max: 11 },
-  basketball: { min: 5, max: 8 },
-  volleyball: { min: 6, max: 9 },
-  "tug-of-war": { min: 8, max: 8 },
-};
 
 // ✅ Base schema (we'll refine members dynamically later)
 const baseSchema = z.object({
@@ -39,7 +29,8 @@ const baseSchema = z.object({
   captainContact: z
     .string()
     .regex(/^[0-9]{10}$/, "Please enter a valid 10-digit phone number"),
-  members: z.array(z.string().min(2, "Member name is required")),
+  captainEmail: z.string().email("Please enter a valid email address"),
+  members: z.array(z.string()).min(1, "At least one member is required"),
 });
 
 type TeamFormData = z.infer<typeof baseSchema>;
@@ -50,6 +41,11 @@ interface TeamRegistrationFormProps {
   onBackToSelection: () => void;
 }
 
+interface SportLimits {
+  min: number;
+  max: number;
+}
+
 export const TeamRegistrationForm = ({
   sportId,
   sportName,
@@ -57,16 +53,74 @@ export const TeamRegistrationForm = ({
 }: TeamRegistrationFormProps) => {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [sportLimits, setSportLimits] = useState<SportLimits>({ min: 1, max: 1 });
+  const [members, setMembers] = useState<string[]>([""]);
+  const [isFetchingLimits, setIsFetchingLimits] = useState(true);
 
-  const limit = teamLimits[sportId] || { min: 1, max: 1 };
-  const [members, setMembers] = useState<string[]>(Array(limit.min).fill(""));
+  // Fetch sport limits from database
+  useEffect(() => {
+    const fetchSportLimits = async () => {
+      try {
+        setIsFetchingLimits(true);
+        const response = await fetch(`/api/sports?id=${sportId}&active_only=true`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.sports && data.sports.length > 0) {
+            const sport = data.sports[0];
+            const limits = {
+              min: sport.min_players || 1,
+              max: sport.max_players || 1
+            };
+            setSportLimits(limits);
+            setMembers(Array(limits.min).fill(""));
+          } else {
+            // Fallback to default values if sport not found
+            const defaultLimits = { min: 1, max: 1 };
+            setSportLimits(defaultLimits);
+            setMembers(Array(defaultLimits.min).fill(""));
+          }
+        } else {
+          // Fallback to default values if API fails
+          const defaultLimits = { min: 1, max: 1 };
+          setSportLimits(defaultLimits);
+          setMembers(Array(defaultLimits.min).fill(""));
+        }
+      } catch (error) {
+        console.error("Error fetching sport limits:", error);
+        // Fallback to default values if API fails
+        const defaultLimits = { min: 1, max: 1 };
+        setSportLimits(defaultLimits);
+        setMembers(Array(defaultLimits.min).fill(""));
+      } finally {
+        setIsFetchingLimits(false);
+      }
+    };
 
+    if (sportId) {
+      fetchSportLimits();
+    } else {
+      setIsFetchingLimits(false);
+    }
+  }, [sportId]);
 
+  // Define schema and form after state initialization to avoid hook order issues
   const schema = baseSchema.refine(
-    (data) =>
-      data.members.length >= limit.min && data.members.length <= limit.max,
+    (data) => {
+      const validMembers = data.members.filter(member => member.trim() !== '');
+      return validMembers.length >= sportLimits.min && validMembers.length <= sportLimits.max;
+    },
     {
-      message: `Team must have between ${limit.min} and ${limit.max} members.`,
+      message: `Team must have between ${sportLimits.min} and ${sportLimits.max} members.`,
+      path: ["members"],
+    }
+  ).refine(
+    (data) => {
+      // Ensure all members have valid names (at least 2 characters)
+      const validMembers = data.members.filter(member => member.trim() !== '');
+      return validMembers.every(member => member.trim().length >= 2);
+    },
+    {
+      message: "All member names must be at least 2 characters long.",
       path: ["members"],
     }
   );
@@ -79,26 +133,31 @@ export const TeamRegistrationForm = ({
     formState: { errors },
   } = useForm<TeamFormData>({
     resolver: zodResolver(schema),
-    defaultValues: { members: Array(limit.min).fill("") },
+    defaultValues: { members: Array(sportLimits.min).fill("") },
   });
 
+  // Wait for sport limits to be loaded
+  if (isFetchingLimits) {
+    return <FormLoadingSkeleton />;
+  }
+
   const addMember = () => {
-    if (members.length < limit.max) {
+    if (members.length < sportLimits.max) {
       const updated = [...members, ""];
       setMembers(updated);
       setValue("members", updated);
     } else {
-      notifications.showWarning(`Maximum ${limit.max} members allowed.`);
+      notifications.showWarning(`Maximum ${sportLimits.max} members allowed.`);
     }
   };
 
   const removeMember = (index: number) => {
-    if (members.length > limit.min) {
+    if (members.length > sportLimits.min) {
       const updated = members.filter((_, i) => i !== index);
       setMembers(updated);
       setValue("members", updated);
     } else {
-      notifications.showWarning(`Minimum ${limit.min} members required.`);
+      notifications.showWarning(`Minimum ${sportLimits.min} members required.`);
     }
   };
 
@@ -110,10 +169,12 @@ export const TeamRegistrationForm = ({
   };
 
   const onSubmit = async (data: TeamFormData) => {
+    console.log('Form data submitted:', data); // Debug log
     setIsLoading(true);
     try {
       // Filter out empty members
       const validMembers = data.members.filter(member => member.trim() !== '');
+      console.log('Valid members:', validMembers); // Debug log
 
       const response = await fetch('/api/registrations/team', {
         method: 'POST',
@@ -128,12 +189,13 @@ export const TeamRegistrationForm = ({
           gender: data.gender,
           captainName: data.captainName,
           captainContact: data.captainContact,
-          captainEmail: data.captainContact + '@example.com', // You might want to add email field
+          captainEmail: data.captainEmail,
           members: validMembers,
         }),
       });
 
       const result = await response.json();
+      console.log('API Response:', result); // Debug log
 
       if (!response.ok) {
         throw new Error(result.error || 'Team registration failed');
@@ -146,7 +208,7 @@ export const TeamRegistrationForm = ({
 
       // Clear form and go back to sports selection
       reset();
-      setMembers(Array(limit.min).fill(""));
+      setMembers(Array(sportLimits.min).fill(""));
       setTimeout(() => {
         onBackToSelection();
       }, 1500);
@@ -179,7 +241,7 @@ export const TeamRegistrationForm = ({
             </div>
             <div className="bg-gradient-to-r from-blue-100 to-purple-100 px-4 py-2 rounded-full">
               <span className="text-sm font-semibold text-blue-700">
-                {limit.min}-{limit.max} members
+                {sportLimits.min}-{sportLimits.max} members
               </span>
             </div>
           </div>
@@ -321,6 +383,24 @@ export const TeamRegistrationForm = ({
                   </p>
                 )}
               </div>
+              
+              <div className="group">
+                <Label htmlFor="captainEmail" className="text-sm font-semibold text-gray-700 mb-2 block">
+                  Captain Email *
+                </Label>
+                <Input
+                  id="captainEmail"
+                  type="email"
+                  {...register("captainEmail")}
+                  placeholder="Enter captain's email address"
+                  className="h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 transition-all duration-300 hover:border-gray-300 bg-white/90 backdrop-blur-sm"
+                />
+                {errors.captainEmail && (
+                  <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
+                    <span>⚠️</span> {errors.captainEmail.message}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -334,7 +414,7 @@ export const TeamRegistrationForm = ({
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900">Team Members</h3>
-                <p className="text-sm text-gray-600">Add all team members ({members.length}/{limit.max})</p>
+                <p className="text-sm text-gray-600">Add all team members including captain ({members.length}/{sportLimits.max})</p>
               </div>
             </div>
             <Button
@@ -342,7 +422,7 @@ export const TeamRegistrationForm = ({
               variant="outline"
               size="sm"
               onClick={addMember}
-              disabled={members.length >= limit.max}
+              disabled={members.length >= sportLimits.max}
               className="rounded-full px-6 py-2 border-2 hover:bg-green-50 hover:border-green-300 transition-all duration-300 disabled:opacity-50"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -362,7 +442,7 @@ export const TeamRegistrationForm = ({
                   onChange={(e) => updateMember(index, e.target.value)}
                   className="flex-1 h-12 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:ring-0 transition-all duration-300 hover:border-gray-300 bg-white/80 backdrop-blur-sm"
                 />
-                {members.length > limit.min && (
+                {members.length > sportLimits.min && (
                   <Button
                     type="button"
                     variant="outline"
@@ -388,11 +468,14 @@ export const TeamRegistrationForm = ({
             <span className="text-blue-600 text-xl">ℹ️</span>
             <div className="text-sm">
               <span className="font-semibold text-blue-800">
-                {members.length < limit.min ? 
-                  `Add ${limit.min - members.length} more member${limit.min - members.length > 1 ? 's' : ''} (minimum required)` :
-                  `Team complete! You can add ${limit.max - members.length} more member${limit.max - members.length !== 1 ? 's' : ''}.`
+                {members.length < sportLimits.min ? 
+                  `Add ${sportLimits.min - members.length} more member${sportLimits.min - members.length > 1 ? 's' : ''} (minimum required)` :
+                  `Team complete! You can add ${sportLimits.max - members.length} more member${sportLimits.max - members.length !== 1 ? 's' : ''}.`
                 }
               </span>
+              <p className="text-blue-700 mt-1">
+                Note: The captain is included in the member count. You need a total of {sportLimits.min}-{sportLimits.max} team members.
+              </p>
             </div>
           </div>
         </div>
@@ -409,7 +492,7 @@ export const TeamRegistrationForm = ({
           </Button>
           <Button
             type="submit"
-            disabled={members.length < limit.min || isLoading}
+            disabled={members.length < sportLimits.min || isLoading}
             className="flex-1 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 font-bold text-white shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? (
