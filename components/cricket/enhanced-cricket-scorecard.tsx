@@ -19,24 +19,10 @@ import {
   Minus,
   CheckCircle
 } from "lucide-react"
+import { calculateRunRate, type CricketTeamData } from "@/lib/cricket/run-rate"
 
-interface CricketTeamData {
-  runs: number
-  wickets: number
-  overs: number
-  extras: number
-  balls_faced: number
-  fours: number
-  sixes: number
-  wides: number
-  no_balls: number
-  byes: number
-  leg_byes: number
-  run_rate: number
-  // New fields for innings tracking (optional for backward compatibility)
-  balls_in_current_over?: number  // 0-5 balls in current over
-  innings?: 1 | 2                 // Which innings (1st or 2nd)
-  is_batting?: boolean            // Currently batting
+interface CricketTeamDataExtended extends CricketTeamData {
+  // Add any additional fields that might be used in this component but not in the base interface
 }
 
 interface CricketMatchConfig {
@@ -142,16 +128,56 @@ export function EnhancedCricketScorecard({
     }
   }, [initialData])
 
-  // Sync cricket runs with main scores
+  // Remove score sync effects since we now use cricket data as source of truth
   useEffect(() => {
-    setLocalTeamAScore(teamAData.runs)
-  }, [teamAData.runs])
+    // Initialize cricket data from main scores if needed
+    if (!initialData?.cricket?.team_a && teamAScore > 0) {
+      setTeamAData(prev => ({ ...prev, runs: teamAScore }))
+    }
+    if (!initialData?.cricket?.team_b && teamBScore > 0) {
+      setTeamBData(prev => ({ ...prev, runs: teamBScore }))
+    }
+  }, [teamAScore, teamBScore, initialData])
 
-  useEffect(() => {
-    setLocalTeamBScore(teamBData.runs)
-  }, [teamBData.runs])
+  // const calculateRunRate = (data: CricketTeamData): number => {
+  //   // If no overs have been bowled, return 0
+  //   if (data.overs === 0 && (!data.balls_in_current_over || data.balls_in_current_over === 0)) {
+  //     return 0;
+  //   }
 
-  // Calculate run rate
+  //   // Calculate total balls (overs * 6 + balls in current over)
+  //   const totalBalls = (data.overs * 6) + (data.balls_in_current_over || 0);
+    
+  //   // Convert to decimal overs
+  //   const totalOvers = totalBalls / 6;
+    
+  //   // Calculate and return run rate with 2 decimal places
+  //   return Number((data.runs / totalOvers).toFixed(2));
+  // }
+
+  // Always calculate run rate from current data rather than using stored value
+  const getTeamARunRate = (): number => {
+    return calculateRunRate(teamAData);
+  }
+
+  const getTeamBRunRate = (): number => {
+    return calculateRunRate(teamBData);
+  }
+
+  // Helper: Calculate required run rate for chasing team
+  const getRequiredRunRate = (target: number, currentRuns: number, oversRemaining: string): number => {
+    const [overs, balls] = oversRemaining.split('.').map(Number)
+    const totalBalls = (overs * 6) + (balls || 0)
+    
+    if (totalBalls === 0) return 0
+    
+    const runsNeeded = target - currentRuns
+    const totalOvers = totalBalls / 6
+    const rrr = runsNeeded / totalOvers
+    
+    return Math.max(0, parseFloat(rrr.toFixed(2)))
+  }
+
   // Helper: Format overs display (e.g., 15 overs + 4 balls = "15.4")
   const formatOvers = (overs: number, balls: number = 0): string => {
     if (balls === 0) return `${overs}.0`
@@ -169,17 +195,6 @@ export function EnhancedCricketScorecard({
     const oversRem = Math.floor(ballsRemaining / 6)
     const ballsRem = ballsRemaining % 6
     return formatOvers(oversRem, ballsRem)
-  }
-
-  // Helper: Calculate required run rate for chasing team
-  const getRequiredRunRate = (target: number, currentRuns: number, oversRemaining: string): number => {
-    const [overs, balls] = oversRemaining.split('.').map(Number)
-    const totalOversRemaining = overs + (balls / 6)
-    
-    if (totalOversRemaining <= 0) return 0
-    
-    const runsNeeded = target - currentRuns
-    return Number((runsNeeded / totalOversRemaining).toFixed(2))
   }
 
   // Helper: Auto-increment overs when 6 balls are bowled
@@ -205,31 +220,25 @@ export function EnhancedCricketScorecard({
     }
   }
 
-  const calculateRunRate = (runs: number, overs: number) => {
-    if (overs === 0) return 0
-    return Number((runs / overs).toFixed(2))
-  }
-
-  // Update run rate when runs or overs change
-  useEffect(() => {
-    setTeamAData(prev => ({
-      ...prev,
-      run_rate: calculateRunRate(prev.runs, prev.overs)
-    }))
-  }, [teamAData.runs, teamAData.overs])
-
-  useEffect(() => {
-    setTeamBData(prev => ({
-      ...prev,
-      run_rate: calculateRunRate(prev.runs, prev.overs)
-    }))
-  }, [teamBData.runs, teamBData.overs])
-
   const handleTeamUpdate = async (team: 'a' | 'b', field: keyof CricketTeamData, value: number) => {
     if (team === 'a') {
-      setTeamAData(prev => ({ ...prev, [field]: value }))
+      setTeamAData(prev => {
+        const updatedData = { ...prev, [field]: value };
+        // Recalculate run rate if runs, overs, or balls changed
+        if (field === 'runs' || field === 'overs' || field === 'balls_in_current_over') {
+          updatedData.run_rate = calculateRunRate(updatedData);
+        }
+        return updatedData;
+      });
     } else {
-      setTeamBData(prev => ({ ...prev, [field]: value }))
+      setTeamBData(prev => {
+        const updatedData = { ...prev, [field]: value };
+        // Recalculate run rate if runs, overs, or balls changed
+        if (field === 'runs' || field === 'overs' || field === 'balls_in_current_over') {
+          updatedData.run_rate = calculateRunRate(updatedData);
+        }
+        return updatedData;
+      });
     }
 
     // Auto-save after a short delay
@@ -242,13 +251,18 @@ export function EnhancedCricketScorecard({
     setIsUpdating(true)
     try {
       // Use custom data if provided (for immediate updates), otherwise use state
+      const finalTeamAData = customTeamAData || teamAData
+      const finalTeamBData = customTeamBData || teamBData
+      
+      // CRITICAL: Ensure team scores match cricket data runs
+      const scoreA = finalTeamAData.runs
+      const scoreB = finalTeamBData.runs
+
       const dataToSave = {
-        team_a: customTeamAData || teamAData,
-        team_b: customTeamBData || teamBData,
+        team_a: finalTeamAData,
+        team_b: finalTeamBData,
         config: matchConfig // Include match configuration
       }
-      const scoreA = typeof customTeamAScore === 'number' ? customTeamAScore : localTeamAScore
-      const scoreB = typeof customTeamBScore === 'number' ? customTeamBScore : localTeamBScore
 
       const response = await fetch(`/api/moderator/fixtures/${fixtureId}/update-score`, {
         method: 'POST',
@@ -324,109 +338,228 @@ export function EnhancedCricketScorecard({
   }
 
   const quickScoreUpdate = async (team: 'a' | 'b', runs: number) => {
-    const currentData = team === 'a' ? teamAData : teamBData
-    const setData = team === 'a' ? setTeamAData : setTeamBData
+    setIsUpdating(true)
+    try {
+      const currentData = team === 'a' ? teamAData : teamBData
 
-    // Calculate new values BEFORE updating state
-    let newData = {
-      ...currentData,
-      runs: currentData.runs + runs,
-      balls_faced: currentData.balls_faced + 1,
-      fours: runs === 4 ? currentData.fours + 1 : currentData.fours,
-      sixes: runs === 6 ? currentData.sixes + 1 : currentData.sixes
+      // Calculate new values BEFORE updating state
+      let newData = {
+        ...currentData,
+        runs: currentData.runs + runs,
+        balls_faced: currentData.balls_faced + 1,
+        fours: runs === 4 ? currentData.fours + 1 : currentData.fours,
+        sixes: runs === 6 ? currentData.sixes + 1 : currentData.sixes
+      }
+
+      // Auto-increment overs after ball is bowled (normal delivery, not extra)
+      newData = incrementBall(newData, false)
+
+      // Calculate run rate with the updated data to ensure consistency
+      newData.run_rate = calculateRunRate(newData)
+
+      // Prepare update data
+      const updateA = team === 'a' ? newData : teamAData
+      const updateB = team === 'b' ? newData : teamBData
+
+      // Save immediately before updating local state to prevent race conditions
+      const response = await fetch(`/api/moderator/fixtures/${fixtureId}/update-score`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          team_a_score: updateA.runs,
+          team_b_score: updateB.runs,
+          status: status,
+          extra: {
+            cricket: {
+              team_a: updateA,
+              team_b: updateB,
+              config: matchConfig
+            }
+          }
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update cricket data')
+      }
+
+      // Update local state AFTER successful server update
+      if (team === 'a') {
+        setTeamAData(newData)
+      } else {
+        setTeamBData(newData)
+      }
+
+      // Show success feedback
+      toast({
+        title: "Score Updated!",
+        description: "Cricket data saved successfully",
+      })
+
+    } catch (error) {
+      console.error('Failed to update cricket score:', error)
+      toast({
+        title: "Update Failed",
+        description: "Failed to save cricket data. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsUpdating(false)
     }
-
-    // Auto-increment overs after ball is bowled (normal delivery, not extra)
-    newData = incrementBall(newData, false)
-
-    // Update cricket data in state
-    setData(newData)
-
-    // Calculate new main scores
-    const newTeamAScore = team === 'a' ? localTeamAScore + runs : localTeamAScore
-    const newTeamBScore = team === 'b' ? localTeamBScore + runs : localTeamBScore
-
-    // Update main scores in state
-    if (team === 'a') {
-      setLocalTeamAScore(newTeamAScore)
-    } else {
-      setLocalTeamBScore(newTeamBScore)
-    }
-
-    // Save with the NEW calculated values (not stale state)
-    await saveCricketData(
-      team === 'a' ? newData : teamAData,
-      team === 'b' ? newData : teamBData,
-      newTeamAScore,
-      newTeamBScore
-    )
   }
 
   const quickWicketUpdate = async (team: 'a' | 'b') => {
-    const currentData = team === 'a' ? teamAData : teamBData
-    const setData = team === 'a' ? setTeamAData : setTeamBData
+    setIsUpdating(true)
+    try {
+      const currentData = team === 'a' ? teamAData : teamBData
 
-    // Calculate new values
-    let newData = {
-      ...currentData,
-      wickets: Math.min(10, currentData.wickets + 1),
-      balls_faced: currentData.balls_faced + 1
+      // Calculate new values
+      let newData = {
+        ...currentData,
+        wickets: Math.min(10, currentData.wickets + 1),
+        balls_faced: currentData.balls_faced + 1
+      }
+
+      // Auto-increment overs (wicket counts as a legal ball)
+      newData = incrementBall(newData, false)
+
+      // Calculate run rate with the updated data to ensure consistency
+      newData.run_rate = calculateRunRate(newData)
+
+      // Prepare update data
+      const updateA = team === 'a' ? newData : teamAData
+      const updateB = team === 'b' ? newData : teamBData
+
+      // Save immediately before updating local state
+      const response = await fetch(`/api/moderator/fixtures/${fixtureId}/update-score`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          team_a_score: updateA.runs,
+          team_b_score: updateB.runs,
+          status: status,
+          extra: {
+            cricket: {
+              team_a: updateA,
+              team_b: updateB,
+              config: matchConfig
+            }
+          }
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update cricket data')
+      }
+
+      // Update local state AFTER successful server update
+      if (team === 'a') {
+        setTeamAData(newData)
+      } else {
+        setTeamBData(newData)
+      }
+
+      // Show success feedback
+      toast({
+        title: "Wicket Updated!",
+        description: "Cricket data saved successfully",
+      })
+
+    } catch (error) {
+      console.error('Failed to update wicket:', error)
+      toast({
+        title: "Update Failed",
+        description: "Failed to save cricket data. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsUpdating(false)
     }
-
-    // Auto-increment overs (wicket counts as a legal ball)
-    newData = incrementBall(newData, false)
-
-    // Update state
-    setData(newData)
-
-    // Save with NEW calculated values
-    await saveCricketData(
-      team === 'a' ? newData : teamAData,
-      team === 'b' ? newData : teamBData,
-      localTeamAScore,
-      localTeamBScore
-    )
   }
 
   const quickExtraUpdate = async (team: 'a' | 'b', extraType: 'wides' | 'no_balls' | 'byes' | 'leg_byes', runs: number = 1) => {
-    const currentData = team === 'a' ? teamAData : teamBData
-    const setData = team === 'a' ? setTeamAData : setTeamBData
+    setIsUpdating(true)
+    try {
+      const currentData = team === 'a' ? teamAData : teamBData
 
-    // Calculate new values
-    let newData = {
-      ...currentData,
-      extras: currentData.extras + runs,
-      [extraType]: (currentData[extraType] || 0) + runs,
-      runs: currentData.runs + runs // Extras also add to total runs
+      // Calculate new values
+      let newData = {
+        ...currentData,
+        extras: currentData.extras + runs,
+        [extraType]: (currentData[extraType] || 0) + runs,
+        runs: currentData.runs + runs // Extras also add to total runs
+      }
+
+      // Auto-increment overs based on extra type
+      // Wides and no-balls don't count as legal deliveries
+      // Byes and leg-byes count as legal deliveries
+      const isIllegalDelivery = extraType === 'wides' || extraType === 'no_balls'
+      newData = incrementBall(newData, isIllegalDelivery)
+
+      // Calculate run rate with the updated data to ensure consistency
+      newData.run_rate = calculateRunRate(newData)
+
+      // Prepare update data
+      const updateA = team === 'a' ? newData : teamAData
+      const updateB = team === 'b' ? newData : teamBData
+
+      // Save immediately before updating local state
+      const response = await fetch(`/api/moderator/fixtures/${fixtureId}/update-score`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          team_a_score: updateA.runs,
+          team_b_score: updateB.runs,
+          status: status,
+          extra: {
+            cricket: {
+              team_a: updateA,
+              team_b: updateB,
+              config: matchConfig
+            }
+          }
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to update cricket data')
+      }
+
+      // Update local state AFTER successful server update
+      if (team === 'a') {
+        setTeamAData(newData)
+      } else {
+        setTeamBData(newData)
+      }
+
+      // Show success feedback
+      toast({
+        title: "Extra Updated!",
+        description: "Cricket data saved successfully",
+      })
+
+    } catch (error) {
+      console.error('Failed to update extras:', error)
+      toast({
+        title: "Update Failed",
+        description: "Failed to save cricket data. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsUpdating(false)
     }
-
-    // Auto-increment overs based on extra type
-    // Wides and no-balls don't count as legal deliveries
-    // Byes and leg-byes count as legal deliveries
-    const isIllegalDelivery = extraType === 'wides' || extraType === 'no_balls'
-    newData = incrementBall(newData, isIllegalDelivery)
-
-    // Update state
-    setData(newData)
-
-    // Calculate new main scores
-    const newTeamAScore = team === 'a' ? localTeamAScore + runs : localTeamAScore
-    const newTeamBScore = team === 'b' ? localTeamBScore + runs : localTeamBScore
-
-    // Update main scores in state
-    if (team === 'a') {
-      setLocalTeamAScore(newTeamAScore)
-    } else {
-      setLocalTeamBScore(newTeamBScore)
-    }
-
-    // Save with NEW calculated values
-    await saveCricketData(
-      team === 'a' ? newData : teamAData,
-      team === 'b' ? newData : teamBData,
-      newTeamAScore,
-      newTeamBScore
-    )
   }
 
   return (
@@ -596,7 +729,7 @@ export function EnhancedCricketScorecard({
               <div className="grid grid-cols-2 gap-2 mb-4">
                 <div className="text-center bg-green-50 rounded p-2">
                   <div className="text-lg font-semibold text-green-600">
-                    {teamAData.run_rate}
+                    {getTeamARunRate()}
                   </div>
                   <div className="text-xs text-slate-600">Run Rate</div>
                 </div>
@@ -717,7 +850,7 @@ export function EnhancedCricketScorecard({
               <div className="grid grid-cols-2 gap-2 mb-4">
                 <div className="text-center bg-green-50 rounded p-2">
                   <div className="text-lg font-semibold text-green-600">
-                    {teamBData.run_rate}
+                    {getTeamBRunRate()}
                   </div>
                   <div className="text-xs text-slate-600">Run Rate</div>
                 </div>

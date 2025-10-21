@@ -12,24 +12,10 @@ import {
   Info
 } from "lucide-react"
 import { getSupabaseBrowserClient } from "@/lib/supabase/client"
+import { calculateRunRate, type CricketTeamData } from "@/lib/cricket/run-rate"
 
-interface CricketTeamData {
-  runs: number
-  wickets: number
-  overs: number
-  extras: number
-  balls_faced: number
-  fours: number
-  sixes: number
-  wides: number
-  no_balls: number
-  byes: number
-  leg_byes: number
-  run_rate: number
-  // New innings tracking fields
-  balls_in_current_over?: number  // 0-5 balls in current over
-  innings?: 1 | 2                 // Which innings (1st or 2nd)
-  is_batting?: boolean            // Currently batting
+interface CricketTeamDataExtended extends CricketTeamData {
+  // Add any additional fields that might be used in this component but not in the base interface
 }
 
 interface CricketMatchConfig {
@@ -107,6 +93,23 @@ export function CricketScoreDisplay({
     return formatOvers(oversRem, ballsRem)
   }
 
+  // Calculate run rate in real-time
+  // const calculateRunRate = (data: CricketTeamData): number => {
+  //   // If no overs have been bowled, return 0
+  //   if (data.overs === 0 && (!data.balls_in_current_over || data.balls_in_current_over === 0)) {
+  //     return 0;
+  //   }
+
+  //   // Calculate total balls (overs * 6 + balls in current over)
+  //   const totalBalls = (data.overs * 6) + (data.balls_in_current_over || 0);
+    
+  //   // Convert to decimal overs
+  //   const totalOvers = totalBalls / 6;
+    
+  //   // Calculate and return run rate with 2 decimal places
+  //   return Number((data.runs / totalOvers).toFixed(2));
+  // }
+
   const getRequiredRunRate = (target: number, currentRuns: number, oversRemaining: string): number => {
     const [overs, balls] = oversRemaining.split('.').map(Number)
     const totalBalls = (overs * 6) + (balls || 0)
@@ -120,10 +123,20 @@ export function CricketScoreDisplay({
     return Math.max(0, parseFloat(rrr.toFixed(2)))
   }
 
-  // Real-time polling for live matches
+  // Always calculate run rate from current data rather than using stored value
+  const getTeamARunRate = (): number => {
+    return calculateRunRate(teamA);
+  }
+
+  const getTeamBRunRate = (): number => {
+    return calculateRunRate(teamB);
+  }
+
+  // Real-time subscription for live matches
   useEffect(() => {
     if (!isLive) return
 
+    // Initial fetch
     const fetchLatestData = async () => {
       try {
         const { data: fixtureData } = await supabase
@@ -145,13 +158,36 @@ export function CricketScoreDisplay({
       }
     }
 
-    // Poll every 5 seconds for live matches
-    const interval = setInterval(fetchLatestData, 5000)
-    
+    // Subscribe to changes
+    const subscription = supabase
+      .channel('fixture-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'fixtures',
+          filter: `id=eq.${fixture.id}`
+        },
+        (payload: { new: { extra?: { cricket?: { team_a: CricketTeamData; team_b: CricketTeamData; config?: CricketMatchConfig } } } }) => {
+          if (payload.new?.extra?.cricket) {
+            setLiveTeamAData(payload.new.extra.cricket.team_a)
+            setLiveTeamBData(payload.new.extra.cricket.team_b)
+            if (payload.new.extra.cricket.config) {
+              setMatchConfig(payload.new.extra.cricket.config)
+            }
+            setLastUpdate(new Date())
+          }
+        }
+      )
+      .subscribe()
+
     // Fetch immediately on mount
     fetchLatestData()
 
-    return () => clearInterval(interval)
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [isLive, fixture.id, supabase])
 
   // Update when props change
@@ -212,8 +248,43 @@ export function CricketScoreDisplay({
     }
   }
 
+  // Calculate match status details
+  const getMatchStatusDetails = () => {
+    if (fixture.status !== 'completed') return null
+    
+    let winningTeam, losingTeam, margin
+    if (teamA.runs > teamB.runs) {
+      winningTeam = teamAName
+      losingTeam = teamBName
+      margin = teamA.runs - teamB.runs
+    } else if (teamB.runs > teamA.runs) {
+      winningTeam = teamBName
+      losingTeam = teamAName
+      margin = teamB.runs - teamA.runs
+    }
+    
+    return { winningTeam, losingTeam, margin }
+  }
+
   return (
     <div className="space-y-6">
+      {/* Match Status Banner (for completed matches) */}
+      {fixture.status === 'completed' && (
+        <div className="relative bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg overflow-hidden shadow-lg">
+          <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+          <div className="relative p-6 text-center space-y-2">
+            <Trophy className="h-8 w-8 text-amber-300 mx-auto mb-2" />
+            <h3 className="text-xl font-bold">Match Completed</h3>
+            {getMatchStatusDetails()?.winningTeam && (
+              <p className="text-2xl font-extrabold">{getMatchStatusDetails()?.winningTeam} won by {getMatchStatusDetails()?.margin} runs</p>
+            )}
+            {!getMatchStatusDetails()?.winningTeam && (
+              <p className="text-2xl font-extrabold">Match Drawn</p>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Match Configuration Banner */}
       {matchConfig && (
         <Card className="bg-gradient-to-r from-purple-50 via-indigo-50 to-blue-50 border-purple-200">
@@ -335,7 +406,7 @@ export function CricketScoreDisplay({
               {/* Run Rates */}
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="text-center bg-green-50 rounded-lg p-3">
-                  <div className="text-2xl font-bold text-green-600">{teamA.run_rate}</div>
+                  <div className="text-2xl font-bold text-green-600">{getTeamARunRate()}</div>
                   <div className="text-xs text-slate-600">Run Rate</div>
                 </div>
                 {matchConfig.current_innings === 2 && matchConfig.batting_first === 'team_b' && (
@@ -432,7 +503,7 @@ export function CricketScoreDisplay({
               {/* Run Rates */}
               <div className="grid grid-cols-2 gap-3 mb-4">
                 <div className="text-center bg-green-50 rounded-lg p-3">
-                  <div className="text-2xl font-bold text-green-600">{teamB.run_rate}</div>
+                  <div className="text-2xl font-bold text-green-600">{getTeamBRunRate()}</div>
                   <div className="text-xs text-slate-600">Run Rate</div>
                 </div>
                 {matchConfig.current_innings === 2 && matchConfig.batting_first === 'team_a' && (
@@ -479,6 +550,42 @@ export function CricketScoreDisplay({
         </CardContent>
       </Card>
 
+      {/* Match Result Banner (for completed matches) */}
+      {fixture.status === 'completed' && (
+        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+          <CardContent className="py-6">
+            <div className="text-center space-y-3">
+              <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-sm border border-green-200">
+                <Trophy className="h-5 w-5 text-amber-500" />
+                <span className="text-lg font-bold text-green-800">Match Result</span>
+              </div>
+              <div className="text-2xl font-bold text-slate-900">
+                {teamA.runs > teamB.runs ? (
+                  <span>{teamAName} won by {teamA.runs - teamB.runs} runs</span>
+                ) : teamB.runs > teamA.runs ? (
+                  <span>{teamBName} won by {teamB.runs - teamA.runs} runs</span>
+                ) : (
+                  <span>Match Drawn</span>
+                )}
+              </div>
+              {matchConfig.current_innings === 2 && (
+                <div className="text-base text-slate-600">
+                  {matchConfig.batting_first === 'team_a' ? (
+                    <span>
+                      {teamAName} scored {teamA.runs}/{teamA.wickets} in {formatOvers(teamA.overs, teamA.balls_in_current_over || 0)} overs, followed by {teamBName} scoring {teamB.runs}/{teamB.wickets} in {formatOvers(teamB.overs, teamB.balls_in_current_over || 0)} overs
+                    </span>
+                  ) : (
+                    <span>
+                      {teamBName} scored {teamB.runs}/{teamB.wickets} in {formatOvers(teamB.overs, teamB.balls_in_current_over || 0)} overs, followed by {teamAName} scoring {teamA.runs}/{teamA.wickets} in {formatOvers(teamA.overs, teamA.balls_in_current_over || 0)} overs
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Match Summary */}
       <Card className="bg-slate-50 border-slate-200">
         <CardHeader>
@@ -488,31 +595,82 @@ export function CricketScoreDisplay({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-slate-900">
-                {teamA.fours + teamB.fours}
+          <div className="space-y-6">
+            {/* Key Match Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-slate-900">
+                  {teamA.fours + teamB.fours}
+                </div>
+                <div className="text-sm text-slate-600">Total 4s</div>
               </div>
-              <div className="text-sm text-slate-600">Total 4s</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-slate-900">
-                {teamA.sixes + teamB.sixes}
+              <div className="text-center">
+                <div className="text-2xl font-bold text-slate-900">
+                  {teamA.sixes + teamB.sixes}
+                </div>
+                <div className="text-sm text-slate-600">Total 6s</div>
               </div>
-              <div className="text-sm text-slate-600">Total 6s</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-slate-900">
-                {teamA.wickets + teamB.wickets}
+              <div className="text-center">
+                <div className="text-2xl font-bold text-slate-900">
+                  {teamA.wickets + teamB.wickets}
+                </div>
+                <div className="text-sm text-slate-600">Total Wickets</div>
               </div>
-              <div className="text-sm text-slate-600">Total Wickets</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-slate-900">
-                {teamA.extras + teamB.extras}
+              <div className="text-center">
+                <div className="text-2xl font-bold text-slate-900">
+                  {teamA.extras + teamB.extras}
+                </div>
+                <div className="text-sm text-slate-600">Total Extras</div>
               </div>
-              <div className="text-sm text-slate-600">Total Extras</div>
             </div>
+
+            {/* Innings Summary */}
+            {matchConfig.current_innings === 2 && (
+              <div className="border-t border-slate-200 pt-4">
+                <h4 className="text-sm font-semibold text-slate-900 mb-3">Innings Progression</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* First Innings */}
+                  <div className="bg-white p-4 rounded-lg border border-slate-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-semibold text-slate-600">1st Innings</span>
+                      <Badge variant="outline" className="text-blue-600">
+                        {matchConfig.batting_first === 'team_a' ? teamAName : teamBName}
+                      </Badge>
+                    </div>
+                    <div className="text-2xl font-bold text-slate-900">
+                      {matchConfig.batting_first === 'team_a' ? (
+                        <span>{teamA.runs}/{teamA.wickets} ({formatOvers(teamA.overs, teamA.balls_in_current_over || 0)})</span>
+                      ) : (
+                        <span>{teamB.runs}/{teamB.wickets} ({formatOvers(teamB.overs, teamB.balls_in_current_over || 0)})</span>
+                      )}
+                    </div>
+                    <div className="text-sm text-slate-600 mt-1">
+                      Run Rate: {matchConfig.batting_first === 'team_a' ? getTeamARunRate() : getTeamBRunRate()}
+                    </div>
+                  </div>
+
+                  {/* Second Innings */}
+                  <div className="bg-white p-4 rounded-lg border border-slate-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-semibold text-slate-600">2nd Innings</span>
+                      <Badge variant="outline" className="text-green-600">
+                        {matchConfig.batting_first === 'team_a' ? teamBName : teamAName}
+                      </Badge>
+                    </div>
+                    <div className="text-2xl font-bold text-slate-900">
+                      {matchConfig.batting_first === 'team_a' ? (
+                        <span>{teamB.runs}/{teamB.wickets} ({formatOvers(teamB.overs, teamB.balls_in_current_over || 0)})</span>
+                      ) : (
+                        <span>{teamA.runs}/{teamA.wickets} ({formatOvers(teamA.overs, teamA.balls_in_current_over || 0)})</span>
+                      )}
+                    </div>
+                    <div className="text-sm text-slate-600 mt-1">
+                      Run Rate: {matchConfig.batting_first === 'team_a' ? getTeamBRunRate() : getTeamARunRate()}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

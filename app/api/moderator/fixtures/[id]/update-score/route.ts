@@ -10,6 +10,9 @@ import {
   handleDatabaseError 
 } from "@/lib/errors/fixture-update-errors"
 import { generateScoringMessage, generateCricketScoringMessage } from "@/lib/utils/sport-scoring"
+import { calculateRunRate } from "@/lib/cricket/run-rate"
+
+// Helper function to calculate run rate from cricket team data
 
 const updateScoreSchema = z.object({
   team_a_score: z.number().int().min(0),
@@ -247,7 +250,19 @@ export async function POST(
           .eq('id', id)
           .single()
         const currentExtra = (fx?.extra as Record<string, any>) || {}
-        updateData.extra = { ...currentExtra, ...extra }
+        const mergedExtra = { ...currentExtra, ...extra }
+        
+        // For cricket data, always recalculate run rates to ensure consistency
+        if (mergedExtra.cricket) {
+          if (mergedExtra.cricket.team_a) {
+            mergedExtra.cricket.team_a.run_rate = calculateRunRate(mergedExtra.cricket.team_a)
+          }
+          if (mergedExtra.cricket.team_b) {
+            mergedExtra.cricket.team_b.run_rate = calculateRunRate(mergedExtra.cricket.team_b)
+          }
+        }
+        
+        updateData.extra = mergedExtra
       }
 
       // Fetch previous state for audit
