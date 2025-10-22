@@ -23,7 +23,8 @@ import {
   Target,
   AlertCircle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,6 +38,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { notifications } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import RegistrationDetailModal from "@/components/admin/RegistrationDetailModal";
 
 // Enhanced interface definitions with better typing
@@ -480,15 +482,23 @@ export default function AdminRegistrationsPage() {
             </h1>
             <p className="text-gray-500 text-sm">Manage and review sports event registrations</p>
           </div>
-          <Button
-            onClick={handleRetry}
-            variant="outline"
-            size="sm"
-            className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm" className="hover:bg-blue-50 hover:border-blue-300 transition-colors">
+              <Link href="/admin/registrations/settings">
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Link>
+            </Button>
+            <Button
+              onClick={handleRetry}
+              variant="outline"
+              size="sm"
+              className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
         </motion.div>
 
         {/* Enhanced Stats Cards */}

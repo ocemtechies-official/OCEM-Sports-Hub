@@ -15,6 +15,7 @@ export default async function MatchesPage() {
       team_a:teams!fixtures_team_a_id_fkey(*),
       team_b:teams!fixtures_team_b_id_fkey(*)
     `)
+    .is('deleted_at', null) // Filter out deleted fixtures
     .order('scheduled_at', { ascending: true })
 
   const list = fixtures || []

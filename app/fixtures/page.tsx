@@ -30,6 +30,7 @@ export default async function FixturesPage({ searchParams }: { searchParams: { s
     .from("fixtures")
     .select(baseSelect)
     .eq("status", "live")
+    .is("deleted_at", null) // Filter out deleted fixtures
     .order("scheduled_at", { ascending: true })
   if (sportFilter) liveQuery = liveQuery.eq("sport_id", sportFilter)
   const { data: liveFixtures } = await liveQuery
@@ -39,6 +40,7 @@ export default async function FixturesPage({ searchParams }: { searchParams: { s
     .from("fixtures")
     .select(baseSelect)
     .eq("status", "scheduled")
+    .is("deleted_at", null) // Filter out deleted fixtures
     .order("scheduled_at", { ascending: true })
   if (sportFilter) upcomingQuery = upcomingQuery.eq("sport_id", sportFilter)
   const { data: upcomingFixtures } = await upcomingQuery
@@ -48,6 +50,7 @@ export default async function FixturesPage({ searchParams }: { searchParams: { s
     .from("fixtures")
     .select(baseSelect)
     .eq("status", "completed")
+    .is("deleted_at", null) // Filter out deleted fixtures
     .order("scheduled_at", { ascending: false })
     .limit(18)
   if (sportFilter) pastQuery = pastQuery.eq("sport_id", sportFilter)
