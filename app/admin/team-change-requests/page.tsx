@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { notifications } from "@/lib/notifications"
 import { Clock, CheckCircle, XCircle, Users, Eye } from "lucide-react"
 import { ChangeRequestModal } from "@/components/admin/team-change-requests/change-request-modal"
+import AdminPageWrapper from "../admin-page-wrapper"
 
 interface TeamChangeRequest {
   id: string
@@ -136,18 +137,20 @@ export default function TeamChangeRequestsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600 text-lg">Loading change requests...</p>
+      <AdminPageWrapper>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-slate-600 text-lg">Loading change requests...</p>
+          </div>
         </div>
-      </div>
+      </AdminPageWrapper>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-4 md:p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <AdminPageWrapper>
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
         {/* Header Section */}
         <div className="text-center py-5">
           <div className="inline-flex items-center gap-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-full mb-5 shadow-md">
@@ -321,6 +324,6 @@ export default function TeamChangeRequestsPage() {
           />
         )}
       </div>
-    </div>
+    </AdminPageWrapper>
   )
 }

@@ -23,7 +23,8 @@ import {
   Target,
   AlertCircle,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,7 +38,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { notifications } from "@/lib/notifications";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import RegistrationDetailModal from "@/components/admin/RegistrationDetailModal";
+import AdminPageWrapper from "../admin-page-wrapper";
 
 // Enhanced interface definitions with better typing
 interface Registration {
@@ -465,8 +468,8 @@ export default function AdminRegistrationsPage() {
 
   // Main render with enhanced UI
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/40 to-purple-50/30 p-4 md:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-2 md:space-y-6">
+    <AdminPageWrapper>
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
         {/* Enhanced Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -475,20 +478,28 @@ export default function AdminRegistrationsPage() {
           className="flex justify-between items-start animate-fade-in-up mb-2"
         >
           <div>
-            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
               Registration Management
             </h1>
-            <p className="text-gray-500 text-sm">Manage and review sports event registrations</p>
+            <p className="text-gray-500 text-l">Manage and review sports event registrations</p>
           </div>
-          <Button
-            onClick={handleRetry}
-            variant="outline"
-            size="sm"
-            className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
-          >
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild variant="outline" size="sm" className="hover:bg-blue-50 hover:border-blue-300 transition-colors">
+              <Link href="/admin/registrations/settings">
+                <Settings className="h-4 w-4 mr-2" />
+                Settings
+              </Link>
+            </Button>
+            <Button
+              onClick={handleRetry}
+              variant="outline"
+              size="sm"
+              className="hover:bg-blue-50 hover:border-blue-300 transition-colors"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
         </motion.div>
 
         {/* Enhanced Stats Cards */}
@@ -667,6 +678,6 @@ export default function AdminRegistrationsPage() {
         />
 
       </div>
-    </div>
+    </AdminPageWrapper>
   );
 }

@@ -62,6 +62,7 @@ export default async function ModeratorDashboard() {
       team_b:teams!fixtures_team_b_id_fkey(id, name, logo_url),
       updated_by_profile:profiles!fixtures_updated_by_fkey(full_name)
     `)
+    .is('deleted_at', null) // Filter out deleted fixtures
     .gte('scheduled_at', today.toISOString())
     .lt('scheduled_at', tomorrow.toISOString())
     .order('scheduled_at', { ascending: true })
@@ -90,6 +91,7 @@ export default async function ModeratorDashboard() {
         team_b:teams!fixtures_team_b_id_fkey(id, name, logo_url),
         updated_by_profile:profiles!fixtures_updated_by_fkey(full_name)
       `)
+      .is('deleted_at', null) // Filter out deleted fixtures
       .eq('status', 'live')
       .order('scheduled_at', { ascending: true })
       .limit(5)

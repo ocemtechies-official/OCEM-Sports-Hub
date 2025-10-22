@@ -20,6 +20,7 @@ export default async function MatchDetailsPage({ params }: { params: Promise<{ i
       team_b:teams!fixtures_team_b_id_fkey(*)
     `)
     .eq('id', id)
+    .is('deleted_at', null) // Filter out deleted fixtures
     .single()
 
   if (!fixture) notFound()

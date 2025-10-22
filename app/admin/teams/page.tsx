@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Plus } from "lucide-react"
 import { TeamManagement } from "@/components/admin/team-management"
+import AdminPageWrapper from "../admin-page-wrapper"
 
 export default async function AdminTeamsPage() {
   const admin = await isAdmin()
@@ -35,21 +36,10 @@ export default async function AdminTeamsPage() {
     .order("created_at", { ascending: false })
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Team Management</h1>
-          <p className="text-slate-600 mt-1">Manage all teams - official and student registrations</p>
-        </div>
-        <Button asChild>
-          <Link href="/admin/teams/create">
-            <Plus className="mr-2 h-4 w-4" />
-            Create Official Team
-          </Link>
-        </Button>
+    <AdminPageWrapper>
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+        <TeamManagement initialTeams={teams || []} />
       </div>
-
-      <TeamManagement initialTeams={teams || []} />
-    </div>
+    </AdminPageWrapper>
   )
 }

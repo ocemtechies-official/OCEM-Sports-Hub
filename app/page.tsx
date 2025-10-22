@@ -38,12 +38,13 @@ export default async function HomePage() {
     .limit(3)
 
   const { count: totalTeams } = await supabase.from("teams").select("*", { count: "exact", head: true })
-  const { count: totalFixtures } = await supabase.from("fixtures").select("*", { count: "exact", head: true })
+  const { count: totalFixtures } = await supabase.from("fixtures").select("*", { count: "exact", head: true }).is("deleted_at", null)
   
   // Get distinct sports count
   const { data: sports } = await supabase
     .from("fixtures")
     .select("sport")
+    .is("deleted_at", null) // Filter out deleted fixtures
     .not("sport", "is", null)
 
   const uniqueSports = [...new Set(sports?.map(f => f.sport))]
@@ -52,6 +53,7 @@ export default async function HomePage() {
   const { data: recentFixtures } = await supabase
     .from("fixtures")
     .select("*, teams!fixtures_home_team_id_fkey(name), teams_away:teams!fixtures_away_team_id_fkey(name)")
+    .is("deleted_at", null) // Filter out deleted fixtures
     .order("created_at", { ascending: false })
     .limit(5)
 

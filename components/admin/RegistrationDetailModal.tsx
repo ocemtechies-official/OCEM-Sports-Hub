@@ -100,6 +100,13 @@ export default function RegistrationDetailModal({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl w-full max-h-[95vh] flex flex-col bg-white border-0 shadow-xl p-0">
+        <DialogHeader className="sr-only">
+          <DialogTitle>
+            Registration Details for {registration.type === 'individual' 
+              ? registration.student_name 
+              : registration.team_name}
+          </DialogTitle>
+        </DialogHeader>
         {/* Clean Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-100">
           <div className="flex items-center gap-4">
@@ -116,12 +123,12 @@ export default function RegistrationDetailModal({
                   ? registration.student_name 
                   : registration.team_name}
               </h2>
-              <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
-                <span className="flex items-center gap-1">
-                  <Trophy className="h-4 w-4" />
+              <div className="flex flex-wrap items-center gap-4 mt-2">
+                <Badge className="bg-blue-100 text-blue-800 font-medium px-3 py-1 rounded-full text-sm">
+                  <Trophy className="h-4 w-4 inline mr-1" />
                   {registration.sports?.name || 'Unknown Sport'}
-                </span>
-                <span className="flex items-center gap-1">
+                </Badge>
+                <span className="flex items-center gap-1 text-gray-600 text-sm">
                   <Calendar className="h-4 w-4" />
                   {new Date(registration.registered_at).toLocaleDateString()}
                 </span>
@@ -136,10 +143,10 @@ export default function RegistrationDetailModal({
           <button
             onClick={() => setActiveTab('details')}
             className={cn(
-              "flex-1 px-6 py-3 text-sm font-medium border-b-2 transition-colors",
+              "flex-1 px-6 py-3 text-sm font-medium border-b-2 transition-all duration-200 ease-in-out hover:bg-gray-50",
               activeTab === 'details'
                 ? "border-blue-500 text-blue-600 bg-blue-50/50"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                : "border-transparent text-gray-500 hover:text-gray-700"
             )}
           >
             Registration Details
@@ -148,10 +155,10 @@ export default function RegistrationDetailModal({
             <button
               onClick={() => setActiveTab('admin')}
               className={cn(
-                "flex-1 px-6 py-3 text-sm font-medium border-b-2 transition-colors",
+                "flex-1 px-6 py-3 text-sm font-medium border-b-2 transition-all duration-200 ease-in-out hover:bg-gray-50",
                 activeTab === 'admin'
                   ? "border-blue-500 text-blue-600 bg-blue-50/50"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                  : "border-transparent text-gray-500 hover:text-gray-700"
               )}
             >
               Admin Review
@@ -396,7 +403,7 @@ function AdminReview({
               variant="outline"
               size="sm"
               onClick={() => setAdminNotes(note)}
-              className="text-xs h-7"
+              className="text-xs h-7 transition-all duration-200 ease-in-out hover:shadow-md"
               disabled={isAnyLoading}
             >
               {note.split(' ')[0]}...
@@ -406,7 +413,7 @@ function AdminReview({
             variant="outline"
             size="sm"
             onClick={() => setAdminNotes("")}
-            className="text-xs h-7"
+            className="text-xs h-7 transition-all duration-200 ease-in-out hover:shadow-md"
             disabled={isAnyLoading}
           >
             Clear
@@ -418,7 +425,7 @@ function AdminReview({
         <Button
           onClick={handleApprove}
           disabled={isAnyLoading}
-          className="h-12 bg-green-600 hover:bg-green-700 text-white"
+          className="h-12 bg-green-600 hover:bg-green-700 text-white transition-all duration-200 ease-in-out transform hover:scale-105 hover:shadow-lg"
         >
           {approving ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -431,7 +438,7 @@ function AdminReview({
           onClick={handleReject}
           disabled={isAnyLoading}
           variant="destructive"
-          className="h-12"
+          className="h-12 transition-all duration-200 ease-in-out transform hover:scale-105 hover:shadow-lg"
         >
           {rejecting ? (
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />

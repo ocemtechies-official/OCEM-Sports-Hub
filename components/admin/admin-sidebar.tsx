@@ -60,7 +60,7 @@ const navigation: NavigationSection[] = [
     ],
   },
   {
-    title: "Management",
+    title: "User Management",
     items: [
       { 
         name: "Users", 
@@ -73,14 +73,24 @@ const navigation: NavigationSection[] = [
         icon: UserCog 
       },
       { 
+        name: "Team Changes", 
+        href: "/admin/team-change-requests", 
+        icon: UserPlus 
+      },
+    ],
+  },
+  {
+    title: "Event Management",
+    items: [
+      { 
         name: "Registrations", 
         href: "/admin/registrations", 
         icon: UserCheck 
       },
       { 
-        name: "Fixtures", 
-        href: "/admin/fixtures", 
-        icon: Calendar 
+        name: "Reg. Settings", 
+        href: "/admin/registrations/settings", 
+        icon: Settings 
       },
       { 
         name: "Tournaments", 
@@ -88,24 +98,29 @@ const navigation: NavigationSection[] = [
         icon: Trophy 
       },
       { 
-        name: "Quizzes", 
-        href: "/admin/quizzes", 
-        icon: Brain 
+        name: "Fixtures", 
+        href: "/admin/fixtures", 
+        icon: Calendar 
       },
+    ],
+  },
+  {
+    title: "Content Management",
+    items: [
       { 
         name: "Teams", 
         href: "/admin/teams", 
         icon: Shield 
       },
       { 
-        name: "Team Changes", 
-        href: "/admin/team-change-requests", 
-        icon: UserPlus 
-      },
-      { 
         name: "Sports", 
         href: "/admin/sports", 
         icon: Target 
+      },
+      { 
+        name: "Quizzes", 
+        href: "/admin/quizzes", 
+        icon: Brain 
       },
     ],
   },
@@ -170,9 +185,21 @@ export function AdminSidebar({ user, profile }: AdminSidebarProps) {
 
   const isActive = (href: string, exact?: boolean) => {
     if (exact) {
-      return pathname === href
+      return pathname === href;
     }
-    return pathname.startsWith(href)
+    
+    // Special handling for registration pages to avoid conflicts
+    if (href === "/admin/registrations") {
+      // Only match exact path, not subpaths
+      return pathname === "/admin/registrations";
+    }
+    
+    if (href === "/admin/registrations/settings") {
+      // Match exact path for settings
+      return pathname === "/admin/registrations/settings";
+    }
+    
+    return pathname.startsWith(href);
   }
 
   return (
@@ -239,7 +266,7 @@ export function AdminSidebar({ user, profile }: AdminSidebarProps) {
                         "group flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-300",
                         active
                           ? "bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md hover:from-blue-700 hover:to-indigo-800 shadow-blue-500/30"
-                          : "text-slate-800 hover:text-blue-700 hover:bg-blue-50/80",
+                          : "text-slate-800 hover:text-blue-600 hover:bg-blue-100",
                         (collapsed && !isHovering) ? "justify-center px-2 py-2" : "px-3 py-2"
                       )}
                     >

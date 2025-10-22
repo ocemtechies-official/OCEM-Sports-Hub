@@ -67,6 +67,7 @@ export default async function ModeratorFixturesPage({
           team_b:teams!fixtures_team_b_id_fkey(id, name, logo_url),
           updated_by_profile:profiles!fixtures_updated_by_fkey(full_name)
         `)
+        .is('deleted_at', null) // Filter out deleted fixtures
         .order('scheduled_at', { ascending: true })
 
       // Apply status filter
@@ -107,6 +108,7 @@ export default async function ModeratorFixturesPage({
           team_b:teams!fixtures_team_b_id_fkey(id, name, logo_url),
           updated_by_profile:profiles!fixtures_updated_by_fkey(full_name)
         `)
+        .is('deleted_at', null) // Filter out deleted fixtures
         .in('sport_id', assignedSportIds)
         .order('scheduled_at', { ascending: true })
 

@@ -226,7 +226,7 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
     const teamStats = {
       total: data.teams?.reports?.length || 0,
       registrations: data.teams?.registrations?.length || 0,
-      active: data.teams?.reports?.filter(t => !t.deleted_at).length || 0
+      active: data.teams?.reports?.length || 0  // Teams don't have deleted_at property
     }
 
     // Registration analytics
@@ -270,8 +270,9 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
       ) || []
       
       filtered.fixtures.reports = filtered.fixtures?.reports?.filter(fixture =>
-        fixture.title?.toLowerCase().includes(searchLower) ||
-        fixture.sports?.name?.toLowerCase().includes(searchLower)
+        fixture.sports?.name?.toLowerCase().includes(searchLower) ||
+        fixture.team_a?.name?.toLowerCase().includes(searchLower) ||
+        fixture.team_b?.name?.toLowerCase().includes(searchLower)
       ) || []
       
       filtered.quizzes.reports = filtered.quizzes?.reports?.filter(quiz =>
@@ -285,8 +286,7 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
       ) || []
       
       filtered.teams.reports = filtered.teams?.reports?.filter(team =>
-        team.name?.toLowerCase().includes(searchLower) ||
-        team.description?.toLowerCase().includes(searchLower)
+        team.name?.toLowerCase().includes(searchLower)
       ) || []
     }
 
@@ -381,11 +381,11 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
             <FileText className="h-8 w-8 text-blue-500" />
             Reports Dashboard
           </h1>
-          <p className="text-slate-600 mt-1">
+          <p className="text-slate-600 mt-2 text-lg">
             Comprehensive reports and analytics for your sports platform
           </p>
         </div>

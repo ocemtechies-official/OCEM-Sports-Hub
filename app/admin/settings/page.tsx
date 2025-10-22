@@ -11,6 +11,7 @@ import { Calendar, Save, AlertCircle } from "lucide-react"
 import { format, parseISO } from 'date-fns'
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { notifications } from "@/lib/notifications"
+import AdminPageWrapper from "../admin-page-wrapper"
 
 export default function SportsWeekSettingsPage() {
   const router = useRouter()
@@ -93,104 +94,110 @@ export default function SportsWeekSettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
+      <AdminPageWrapper>
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </AdminPageWrapper>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Sports Week Settings</h1>
-        <p className="text-muted-foreground">
-          Configure the start date and other details for the sports week event.
-        </p>
+    <AdminPageWrapper>
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+        <div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              Sports Week Settings
+          </h1>
+          <p className="text-slate-600 mt-2 text-lg">
+            Configure the start date and other details for the sports week event.
+          </p>
+        </div>
+
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Important</AlertTitle>
+          <AlertDescription>
+            Changes to the sports week configuration will be reflected immediately on the homepage.
+          </AlertDescription>
+        </Alert>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Sports Week Configuration
+            </CardTitle>
+            <CardDescription>
+              Set the dates and details for the upcoming sports week event.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Event Name</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g., Sports Week 2025"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="startDate">Start Date and Time</Label>
+                  <Input
+                    id="startDate"
+                    type="datetime-local"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="endDate">End Date and Time (Optional)</Label>
+                  <Input
+                    id="endDate"
+                    type="datetime-local"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description</Label>
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Describe the sports week event..."
+                    rows={4}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end">
+                <Button type="submit" disabled={saving}>
+                  {saving ? (
+                    <>
+                      <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Configuration
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
-
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Important</AlertTitle>
-        <AlertDescription>
-          Changes to the sports week configuration will be reflected immediately on the homepage.
-        </AlertDescription>
-      </Alert>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Sports Week Configuration
-          </CardTitle>
-          <CardDescription>
-            Set the dates and details for the upcoming sports week event.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Event Name</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g., Sports Week 2025"
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="startDate">Start Date and Time</Label>
-                <Input
-                  id="startDate"
-                  type="datetime-local"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="endDate">End Date and Time (Optional)</Label>
-                <Input
-                  id="endDate"
-                  type="datetime-local"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe the sports week event..."
-                  rows={4}
-                />
-              </div>
-            </div>
-
-            <div className="flex justify-end">
-              <Button type="submit" disabled={saving}>
-                {saving ? (
-                  <>
-                    <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Configuration
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+    </AdminPageWrapper>
   )
 }

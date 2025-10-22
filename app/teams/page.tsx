@@ -1,11 +1,9 @@
 import { getSupabaseServerClient } from "@/lib/supabase/server"
-import { TeamCard } from "@/components/teams/team-card"
 import { Card, CardContent } from "@/components/ui/card"
-import { Users, Trophy, Target, TrendingUp, Search, Filter, VenetianMask, User, UserCheck } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+import { Users, Trophy, Target, TrendingUp } from "lucide-react"
 import { Suspense } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
+import { TeamsSearchFilter } from "@/components/teams/teams-search-filter"
 
 // Loading skeleton for team cards
 function TeamCardSkeleton() {
@@ -39,13 +37,67 @@ function StatsSkeleton() {
   )
 }
 
+interface Team {
+  id: string
+  name: string
+  color: string | null
+  logo_url: string | null
+  gender: string | null
+  team_members?: { count: number }[]
+  sport?: {
+    id: string
+    name: string
+    icon: string | null
+  } | null
+}
+
+interface Sport {
+  id: string
+  name: string
+  icon: string | null
+}
+
 async function TeamsPageContent() {
   const supabase = await getSupabaseServerClient()
 
-  // Fetch teams with player count and gender
-  const { data: teams } = await supabase
+  // Fetch teams with player count, gender, and sport information
+  const { data: supabaseTeams, error } = await supabase
     .from("teams")
-    .select("id, name, color, logo_url, gender, team_members(count)")
+    .select(`
+      id, 
+      name, 
+      color, 
+      logo_url, 
+      gender, 
+      team_members(count),
+      sport:sport_id (
+        id,
+        name,
+        icon
+      )
+    `)
+    .order("name")
+
+  // Convert Supabase teams to our Team interface
+  const teams: Team[] = (supabaseTeams || []).map(team => {
+    // Handle the case where sport might be an array (Supabase relation)
+    let sportObj = null
+    if (Array.isArray(team.sport) && team.sport.length > 0) {
+      sportObj = team.sport[0]
+    } else if (team.sport && !Array.isArray(team.sport)) {
+      sportObj = team.sport
+    }
+    
+    return {
+      ...team,
+      sport: sportObj
+    }
+  })
+
+  // Fetch all sports for filtering
+  const { data: sports } = await supabase
+    .from("sports")
+    .select("id, name, icon")
     .order("name")
 
   // Fetch stats for overview
@@ -54,14 +106,19 @@ async function TeamsPageContent() {
     .select("points, wins, matches_played")
     .limit(10)
 
-  // Group teams by gender
-  const maleTeams = teams?.filter(team => team.gender === 'male') || []
-  const femaleTeams = teams?.filter(team => team.gender === 'female') || []
-  const mixedTeams = teams?.filter(team => team.gender === 'mixed' || !team.gender) || []
+  // Group teams by sport
+  const teamsBySport: Record<string, Team[]> = {}
+  teams.forEach(team => {
+    const sportName = team.sport?.name || "Unknown Sport"
+    if (!teamsBySport[sportName]) {
+      teamsBySport[sportName] = []
+    }
+    teamsBySport[sportName].push(team)
+  })
 
   // Calculate overview stats
-  const totalTeams = teams?.length || 0
-  const totalPlayers = teams?.reduce((sum, team) => sum + (team.team_members?.[0]?.count || 0), 0) || 0
+  const totalTeams = teams.length
+  const totalPlayers = teams.reduce((sum, team) => sum + (team.team_members?.[0]?.count || 0), 0)
   const avgPoints = teamStats 
     ? teamStats.reduce((sum, stat) => sum + (stat.points || 0), 0) / teamStats.length 
     : 0
@@ -124,155 +181,12 @@ async function TeamsPageContent() {
           </div>
         </Suspense>
 
-        {/* Gender-based Team Categories */}
-        <div className="mb-10">
-          <div className="flex items-center justify-center gap-4 mb-6 flex-wrap">
-            <Button 
-              variant="outline" 
-              className="border-2 border-blue-200 hover:border-blue-300 hover:bg-blue-50 font-semibold px-5 py-2.5 rounded-lg transition-all duration-300 text-sm flex items-center gap-2"
-            >
-              <VenetianMask className="h-4 w-4 text-blue-600" />
-              All Teams ({totalTeams})
-            </Button>
-            <Button 
-              variant="outline" 
-              className="border-2 border-blue-200 hover:border-blue-300 hover:bg-blue-50 font-semibold px-5 py-2.5 rounded-lg transition-all duration-300 text-sm flex items-center gap-2"
-            >
-              <User className="h-4 w-4 text-blue-600" />
-              Boys Teams ({maleTeams.length})
-            </Button>
-            <Button 
-              variant="outline" 
-              className="border-2 border-pink-200 hover:border-pink-300 hover:bg-pink-50 font-semibold px-5 py-2.5 rounded-lg transition-all duration-300 text-sm flex items-center gap-2"
-            >
-              <UserCheck className="h-4 w-4 text-pink-600" />
-              Girls Teams ({femaleTeams.length})
-            </Button>
-          </div>
-        </div>
-
-        {/* Enhanced Filters and Search */}
-        <div className="bg-white border-0 shadow-lg rounded-xl p-5 mb-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3 w-full md:w-auto">
-              <div className="p-2.5 bg-blue-100 rounded-lg">
-                <Filter className="h-5 w-5 text-blue-600" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-slate-900">Filter Teams</h3>
-                <p className="text-xs text-slate-600">Browse teams by name, sport, or gender</p>
-              </div>
-            </div>
-            <div className="relative w-full md:w-64">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="Search teams..."
-                className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Enhanced Navigation */}
-        <div className="flex gap-3 mb-8 justify-center flex-wrap">
-          <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-5 py-2.5 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 text-sm">
-            <Users className="mr-2 h-4 w-4" />
-            All Teams
-          </Button>
-          <Button variant="outline" asChild className="border-2 border-slate-200 hover:border-blue-300 hover:bg-blue-50 font-semibold px-5 py-2.5 rounded-lg transition-all duration-300 text-sm">
-            <Link href="/fixtures">
-              <Target className="mr-2 h-4 w-4" />
-              View Fixtures
-            </Link>
-          </Button>
-          <Button variant="outline" asChild className="border-2 border-slate-200 hover:border-blue-300 hover:bg-blue-50 font-semibold px-5 py-2.5 rounded-lg transition-all duration-300 text-sm">
-            <Link href="/tournaments">
-              <Trophy className="mr-2 h-4 w-4" />
-              Tournaments
-            </Link>
-          </Button>
-        </div>
-
-        {/* Teams Grid - All Teams */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-            <Users className="h-6 w-6 text-blue-600" />
-            All Teams
-          </h2>
-          {teams && teams.length > 0 ? (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {teams.map((team, index) => (
-                <div 
-                  key={team.id} 
-                  className="animate-fade-in-up"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <TeamCard team={team} />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <Card className="col-span-full text-center py-16 bg-white rounded-xl border-0 shadow-lg">
-              <div className="flex flex-col items-center gap-4">
-                <div className="p-4 bg-slate-100 rounded-full">
-                  <Users className="h-8 w-8 text-slate-400" />
-                </div>
-                <h3 className="text-2xl font-bold text-slate-900">No Teams Found</h3>
-                <p className="text-slate-600 max-w-md">
-                  There are currently no teams registered in the system. Check back later for updates!
-                </p>
-                <Button asChild className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold px-6 py-2.5 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300">
-                  <Link href="/">
-                    Back to Home
-                  </Link>
-                </Button>
-              </div>
-            </Card>
-          )}
-        </div>
-
-        {/* Boys Teams */}
-        {maleTeams.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <User className="h-6 w-6 text-blue-600" />
-              Boys Teams
-            </h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {maleTeams.map((team, index) => (
-                <div 
-                  key={team.id} 
-                  className="animate-fade-in-up"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <TeamCard team={team} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Girls Teams */}
-        {femaleTeams.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <UserCheck className="h-6 w-6 text-pink-600" />
-              Girls Teams
-            </h2>
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {femaleTeams.map((team, index) => (
-                <div 
-                  key={team.id} 
-                  className="animate-fade-in-up"
-                  style={{ animationDelay: `${index * 100}ms` }}
-                >
-                  <TeamCard team={team} />
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Search and Filter Section */}
+        <TeamsSearchFilter 
+          teams={teams} 
+          sports={sports || []} 
+          teamsBySport={teamsBySport} 
+        />
       </div>
     </div>
   )

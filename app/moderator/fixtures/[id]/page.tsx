@@ -47,6 +47,7 @@ export default async function ModeratorFixtureDetailPage({
       updated_by_profile:profiles!fixtures_updated_by_fkey(full_name)
     `)
     .eq('id', id)
+    .is('deleted_at', null) // Filter out deleted fixtures
     .single()
 
   if (error || !fixture) {
