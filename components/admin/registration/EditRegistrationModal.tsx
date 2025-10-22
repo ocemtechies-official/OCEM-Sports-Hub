@@ -17,7 +17,12 @@ import {
   Users, 
   Save, 
   RefreshCw,
-  Edit3
+  Edit3,
+  Clock,
+  Hash,
+  VenetianMask,
+  Building,
+  CheckCircle
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { notifications } from "@/lib/notifications";
@@ -120,64 +125,87 @@ export function EditRegistrationModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Edit3 className="h-5 w-5" />
-            Edit Registration Settings for {getSportName(editedSetting.sport_id)}
-          </DialogTitle>
-          <DialogDescription>
-            Modify the registration settings for this sport
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-6 py-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Registration Period</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 rounded-xl">
+        <>
+          {/* Header with enhanced gradient background */}
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white rounded-t-xl">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-4 text-3xl font-bold">
+                <Edit3 className="h-8 w-8" />
                 <div>
-                  <Label htmlFor="start-date" className="text-sm font-medium">
-                    Start Date
-                  </Label>
-                  <Input
-                    id="start-date"
-                    type="datetime-local"
-                    value={editedSetting.registration_start ? 
-                      new Date(editedSetting.registration_start).toISOString().slice(0, 16) : ''}
-                    onChange={(e) => setEditedSetting({
-                      ...editedSetting,
-                      registration_start: e.target.value || null
-                    })}
-                  />
+                  <div>Edit {getSportName(editedSetting.sport_id)} Registration</div>
+                  <div className="text-xl font-normal opacity-90 mt-1">
+                    Modify registration settings
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="end-date" className="text-sm font-medium">
-                    End Date
-                  </Label>
-                  <Input
-                    id="end-date"
-                    type="datetime-local"
-                    value={editedSetting.registration_end ? 
-                      new Date(editedSetting.registration_end).toISOString().slice(0, 16) : ''}
-                    onChange={(e) => setEditedSetting({
-                      ...editedSetting,
-                      registration_end: e.target.value || null
-                    })}
-                  />
+              </DialogTitle>
+              <DialogDescription className="text-blue-100 mt-3 text-lg">
+                Update the registration settings for {getSportName(editedSetting.sport_id)}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          
+          {/* Content with improved spacing and layout */}
+          <div className="p-6 space-y-6 bg-gray-50">
+            {/* Registration Period Card */}
+            <Card className="border-0 shadow-lg rounded-xl">
+              <CardHeader className="pb-4 border-b bg-white rounded-t-xl">
+                <CardTitle className="flex items-center gap-3 text-xl font-semibold">
+                  <Calendar className="h-6 w-6 text-blue-600" />
+                  Registration Period
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pt-5 bg-white rounded-b-xl">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div>
+                    <Label htmlFor="start-date" className="text-sm font-medium flex items-center gap-2 mb-2">
+                      <Clock className="w-4 h-4" />
+                      Start Date & Time
+                    </Label>
+                    <Input
+                      id="start-date"
+                      type="datetime-local"
+                      value={editedSetting.registration_start ? 
+                        new Date(editedSetting.registration_start).toISOString().slice(0, 16) : ''}
+                      onChange={(e) => setEditedSetting({
+                        ...editedSetting,
+                        registration_start: e.target.value || null
+                      })}
+                      className="p-3 text-base"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="end-date" className="text-sm font-medium flex items-center gap-2 mb-2">
+                      <Clock className="w-4 h-4" />
+                      End Date & Time
+                    </Label>
+                    <Input
+                      id="end-date"
+                      type="datetime-local"
+                      value={editedSetting.registration_end ? 
+                        new Date(editedSetting.registration_end).toISOString().slice(0, 16) : ''}
+                      onChange={(e) => setEditedSetting({
+                        ...editedSetting,
+                        registration_end: e.target.value || null
+                      })}
+                      className="p-3 text-base"
+                    />
+                  </div>
                 </div>
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Registration Status</CardTitle>
+            {/* Registration Status Card */}
+            <Card className="border-0 shadow-lg rounded-xl">
+              <CardHeader className="pb-4 border-b bg-white rounded-t-xl">
+                <CardTitle className="flex items-center gap-3 text-xl font-semibold">
+                  Registration Status
+                </CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="registration-open" className="text-sm font-medium">
+              <CardContent className="pt-5 bg-white rounded-b-xl">
+                <div className="flex items-center justify-between p-5 bg-gray-50 rounded-lg border">
+                  <Label htmlFor="registration-open" className="text-base font-medium flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-gray-600" />
                     Registration Open
                   </Label>
                   <Switch
@@ -187,124 +215,147 @@ export function EditRegistrationModal({
                       ...editedSetting,
                       registration_open: checked
                     })}
+                    className="scale-125"
                   />
                 </div>
               </CardContent>
             </Card>
-          </div>
-          
-          {isTeamSport(editedSetting.sport_id) && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Team Configuration</CardTitle>
+            
+            {/* Team Configuration Card (only for team sports) */}
+            {isTeamSport(editedSetting.sport_id) && (
+              <Card className="border-0 shadow-lg rounded-xl">
+                <CardHeader className="pb-4 border-b bg-white rounded-t-xl">
+                  <CardTitle className="flex items-center gap-3 text-xl font-semibold">
+                    <Users className="h-6 w-6 text-blue-600" />
+                    Team Configuration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-5 bg-white rounded-b-xl">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div>
+                      <Label htmlFor="min-team-size" className="text-sm font-medium flex items-center gap-2 mb-2">
+                        <Hash className="w-4 h-4" />
+                        Minimum Team Size
+                      </Label>
+                      <Input
+                        id="min-team-size"
+                        type="number"
+                        min="1"
+                        value={editedSetting.min_team_size || ''}
+                        onChange={(e) => setEditedSetting({
+                          ...editedSetting,
+                          min_team_size: e.target.value ? parseInt(e.target.value) : null
+                        })}
+                        className="p-3 text-base"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="max-team-size" className="text-sm font-medium flex items-center gap-2 mb-2">
+                        <Hash className="w-4 h-4" />
+                        Maximum Team Size
+                      </Label>
+                      <Input
+                        id="max-team-size"
+                        type="number"
+                        min="1"
+                        value={editedSetting.max_team_size || ''}
+                        onChange={(e) => setEditedSetting({
+                          ...editedSetting,
+                          max_team_size: e.target.value ? parseInt(e.target.value) : null
+                        })}
+                        className="p-3 text-base"
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Registration Options Card */}
+            <Card className="border-0 shadow-lg rounded-xl">
+              <CardHeader className="pb-4 border-b bg-white rounded-t-xl">
+                <CardTitle className="flex items-center gap-3 text-xl font-semibold">
+                  Registration Options
+                </CardTitle>
               </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="min-team-size" className="text-sm font-medium">
-                    Minimum Team Size
+              <CardContent className="pt-5 bg-white rounded-b-xl space-y-4">
+                <div className="flex items-center justify-between p-5 bg-gray-50 rounded-lg border">
+                  <Label htmlFor="mixed-gender" className="text-base font-medium flex items-center gap-3">
+                    <VenetianMask className="w-5 h-5 text-gray-600" />
+                    Allow Mixed Gender Teams
                   </Label>
-                  <Input
-                    id="min-team-size"
-                    type="number"
-                    min="1"
-                    value={editedSetting.min_team_size || ''}
-                    onChange={(e) => setEditedSetting({
+                  <Switch
+                    id="mixed-gender"
+                    checked={editedSetting.allow_mixed_gender}
+                    onCheckedChange={(checked) => setEditedSetting({
                       ...editedSetting,
-                      min_team_size: e.target.value ? parseInt(e.target.value) : null
+                      allow_mixed_gender: checked
                     })}
+                    className="scale-125"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="max-team-size" className="text-sm font-medium">
-                    Maximum Team Size
+                <div className="flex items-center justify-between p-5 bg-gray-50 rounded-lg border">
+                  <Label htmlFor="mixed-department" className="text-base font-medium flex items-center gap-3">
+                    <Building className="w-5 h-5 text-gray-600" />
+                    Allow Mixed Department Teams
                   </Label>
-                  <Input
-                    id="max-team-size"
-                    type="number"
-                    min="1"
-                    value={editedSetting.max_team_size || ''}
-                    onChange={(e) => setEditedSetting({
+                  <Switch
+                    id="mixed-department"
+                    checked={editedSetting.allow_mixed_department}
+                    onCheckedChange={(checked) => setEditedSetting({
                       ...editedSetting,
-                      max_team_size: e.target.value ? parseInt(e.target.value) : null
+                      allow_mixed_department: checked
                     })}
+                    className="scale-125"
+                  />
+                </div>
+                <div className="flex items-center justify-between p-5 bg-gray-50 rounded-lg border">
+                  <Label htmlFor="requires-approval" className="text-base font-medium flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-gray-600" />
+                    Requires Admin Approval
+                  </Label>
+                  <Switch
+                    id="requires-approval"
+                    checked={editedSetting.requires_approval}
+                    onCheckedChange={(checked) => setEditedSetting({
+                      ...editedSetting,
+                      requires_approval: checked
+                    })}
+                    className="scale-125"
                   />
                 </div>
               </CardContent>
             </Card>
-          )}
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Registration Options</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="mixed-gender" className="text-sm font-medium">
-                  Allow Mixed Gender Teams
-                </Label>
-                <Switch
-                  id="mixed-gender"
-                  checked={editedSetting.allow_mixed_gender}
-                  onCheckedChange={(checked) => setEditedSetting({
-                    ...editedSetting,
-                    allow_mixed_gender: checked
-                  })}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="mixed-department" className="text-sm font-medium">
-                  Allow Mixed Department Teams
-                </Label>
-                <Switch
-                  id="mixed-department"
-                  checked={editedSetting.allow_mixed_department}
-                  onCheckedChange={(checked) => setEditedSetting({
-                    ...editedSetting,
-                    allow_mixed_department: checked
-                  })}
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="requires-approval" className="text-sm font-medium">
-                  Requires Admin Approval
-                </Label>
-                <Switch
-                  id="requires-approval"
-                  checked={editedSetting.requires_approval}
-                  onCheckedChange={(checked) => setEditedSetting({
-                    ...editedSetting,
-                    requires_approval: checked
-                  })}
-                />
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={saving}
-            >
-              {saving ? (
-                <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="w-4 h-4 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </Button>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
+              <Button
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="flex-1 py-3 text-base font-medium rounded-lg transition-all duration-200 hover:shadow-md"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={saving}
+                className="flex-1 py-3 text-base font-medium rounded-lg transition-all duration-200 hover:shadow-md"
+              >
+                {saving ? (
+                  <>
+                    <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-5 h-5 mr-2" />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
-        </div>
+        </>
       </DialogContent>
     </Dialog>
   );

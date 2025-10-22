@@ -20,7 +20,11 @@ import {
   Play, 
   Pause, 
   Settings,
-  Edit3
+  Edit3,
+  Clock,
+  Hash,
+  VenetianMask,
+  Building
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -81,209 +85,268 @@ export function ViewRegistrationModal({
 
   const getStatusBadge = (isOpen: boolean) => {
     return isOpen ? 
-      <Badge className="bg-green-100 text-green-800">
-        <Play className="w-3 h-3 mr-1" />
+      <Badge className="bg-green-100 text-green-800 hover:bg-green-200 transition-colors px-3 py-1 text-sm">
+        <Play className="w-4 h-4 mr-1" />
         Open
       </Badge> :
-      <Badge className="bg-red-100 text-red-800">
-        <Pause className="w-3 h-3 mr-1" />
+      <Badge className="bg-red-100 text-red-800 hover:bg-red-200 transition-colors px-3 py-1 text-sm">
+        <Pause className="w-4 h-4 mr-1" />
         Closed
       </Badge>;
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <span className="text-2xl">{getSportIcon(setting?.sport_id || '')}</span>
-            {setting && getSportName(setting.sport_id)} Registration Details
-          </DialogTitle>
-          <DialogDescription>
-            Detailed information about registration settings for this sport
-          </DialogDescription>
-        </DialogHeader>
-        
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 rounded-xl">
         {setting && (
-          <div className="space-y-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Trophy className="h-5 w-5" />
+          <>
+            {/* Header with enhanced gradient background */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-8 text-white rounded-t-xl">
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-4 text-3xl font-bold">
+                  <span className="text-4xl">{getSportIcon(setting.sport_id)}</span>
+                  <div>
+                    <div className="flex items-center gap-3">
+                      {getSportName(setting.sport_id)}
+                      {getStatusBadge(setting.registration_open)}
+                    </div>
+                    <div className="text-xl font-normal opacity-90 mt-1">
+                      Registration Settings
+                    </div>
+                  </div>
+                </DialogTitle>
+                <DialogDescription className="text-blue-100 mt-3 text-lg">
+                  Detailed configuration for {getSportName(setting.sport_id)} registration
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+            
+            {/* Content with improved spacing and layout */}
+            <div className="p-6 space-y-6 bg-gray-50">
+              {/* Sport Information Card */}
+              <Card className="border-0 shadow-lg rounded-xl">
+                <CardHeader className="pb-4 border-b bg-white rounded-t-xl">
+                  <CardTitle className="flex items-center gap-3 text-xl font-semibold">
+                    <Trophy className="h-6 w-6 text-blue-600" />
                     Sport Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Sport Name:</span>
-                    <span className="font-medium">{getSportName(setting.sport_id)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Sport Type:</span>
-                    <div>
-                      {isTeamSport(setting.sport_id) ? (
-                        <Badge variant="secondary">
-                          <Users className="w-3 h-3 mr-1" />
-                          Team Sport
-                        </Badge>
-                      ) : (
-                        <Badge variant="secondary">
-                          <User className="w-3 h-3 mr-1" />
-                          Individual Sport
-                        </Badge>
-                      )}
+                <CardContent className="pt-5 bg-white rounded-b-xl">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                    <div className="flex flex-col">
+                      <span className="text-gray-500 text-sm mb-1">Sport Name</span>
+                      <span className="font-medium text-lg">{getSportName(setting.sport_id)}</span>
                     </div>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Status:</span>
-                    <div>
-                      {getStatusBadge(setting.registration_open)}
+                    <div className="flex flex-col">
+                      <span className="text-gray-500 text-sm mb-1">Sport Type</span>
+                      <div>
+                        {isTeamSport(setting.sport_id) ? (
+                          <Badge variant="secondary" className="flex items-center gap-2 py-1 px-3 text-sm">
+                            <Users className="w-4 h-4" />
+                            Team Sport
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary" className="flex items-center gap-2 py-1 px-3 text-sm">
+                            <User className="w-4 h-4" />
+                            Individual Sport
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-gray-500 text-sm mb-1">Current Status</span>
+                      <div>
+                        {getStatusBadge(setting.registration_open)}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
               
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
+              {/* Registration Period Card */}
+              <Card className="border-0 shadow-lg rounded-xl">
+                <CardHeader className="pb-4 border-b bg-white rounded-t-xl">
+                  <CardTitle className="flex items-center gap-3 text-xl font-semibold">
+                    <Calendar className="h-6 w-6 text-blue-600" />
                     Registration Period
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div>
-                    <span className="text-gray-500 block mb-1">Start Date:</span>
-                    {setting.registration_start ? (
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-gray-500" />
-                        <span>{format(new Date(setting.registration_start), 'MMMM d, yyyy h:mm a')}</span>
-                      </div>
-                    ) : (
-                      <span className="text-gray-400 italic">Not set</span>
-                    )}
-                  </div>
-                  <div>
-                    <span className="text-gray-500 block mb-1">End Date:</span>
-                    {setting.registration_end ? (
-                      <div className="flex items-center gap-2">
-                        <Calendar className="w-4 h-4 text-gray-500" />
-                        <span>{format(new Date(setting.registration_end), 'MMMM d, yyyy h:mm a')}</span>
-                      </div>
-                    ) : (
-                      <span className="text-gray-400 italic">Not set</span>
-                    )}
+                <CardContent className="pt-5 bg-white rounded-b-xl">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div className="flex flex-col">
+                      <span className="text-gray-500 text-sm mb-1 flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        Start Date & Time
+                      </span>
+                      {setting.registration_start ? (
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                          <span className="font-medium text-lg">{format(new Date(setting.registration_start), 'MMMM d, yyyy')}</span>
+                          <div className="text-gray-600 mt-1">{format(new Date(setting.registration_start), 'h:mm a')}</div>
+                        </div>
+                      ) : (
+                        <div className="p-4 bg-gray-100 rounded-lg border border-gray-200 text-gray-500 italic">
+                          Not set
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-gray-500 text-sm mb-1 flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        End Date & Time
+                      </span>
+                      {setting.registration_end ? (
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                          <span className="font-medium text-lg">{format(new Date(setting.registration_end), 'MMMM d, yyyy')}</span>
+                          <div className="text-gray-600 mt-1">{format(new Date(setting.registration_end), 'h:mm a')}</div>
+                        </div>
+                      ) : (
+                        <div className="p-4 bg-gray-100 rounded-lg border border-gray-200 text-gray-500 italic">
+                          Not set
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            </div>
-            
-            {isTeamSport(setting.sport_id) && (
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Users className="h-5 w-5" />
-                    Team Configuration
+              
+              {/* Team Configuration Card (only for team sports) */}
+              {isTeamSport(setting.sport_id) && (
+                <Card className="border-0 shadow-lg rounded-xl">
+                  <CardHeader className="pb-4 border-b bg-white rounded-t-xl">
+                    <CardTitle className="flex items-center gap-3 text-xl font-semibold">
+                      <Users className="h-6 w-6 text-blue-600" />
+                      Team Configuration
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-5 bg-white rounded-b-xl">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div className="flex flex-col">
+                        <span className="text-gray-500 text-sm mb-1 flex items-center gap-1">
+                          <Hash className="w-4 h-4" />
+                          Minimum Players
+                        </span>
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                          <span className="font-medium text-2xl">
+                            {setting.min_team_size || 'N/A'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-gray-500 text-sm mb-1 flex items-center gap-1">
+                          <Hash className="w-4 h-4" />
+                          Maximum Players
+                        </span>
+                        <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                          <span className="font-medium text-2xl">
+                            {setting.max_team_size || 'N/A'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+              
+              {/* Registration Settings Card */}
+              <Card className="border-0 shadow-lg rounded-xl">
+                <CardHeader className="pb-4 border-b bg-white rounded-t-xl">
+                  <CardTitle className="flex items-center gap-3 text-xl font-semibold">
+                    <Settings className="h-6 w-6 text-blue-600" />
+                    Registration Settings
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Minimum Players:</span>
-                    <span className="font-medium">
-                      {setting.min_team_size || 'Not set'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Maximum Players:</span>
-                    <span className="font-medium">
-                      {setting.max_team_size || 'Not set'}
-                    </span>
+                <CardContent className="pt-5 bg-white rounded-b-xl">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <VenetianMask className="w-5 h-5 text-gray-600" />
+                        <span className="text-gray-700">Mixed Gender Allowed</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {setting.allow_mixed_gender ? (
+                          <CheckCircle className="w-6 h-6 text-green-500" />
+                        ) : (
+                          <XCircle className="w-6 h-6 text-red-500" />
+                        )}
+                        <span className="font-medium">{setting.allow_mixed_gender ? 'Yes' : 'No'}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <Building className="w-5 h-5 text-gray-600" />
+                        <span className="text-gray-700">Mixed Department Allowed</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {setting.allow_mixed_department ? (
+                          <CheckCircle className="w-6 h-6 text-green-500" />
+                        ) : (
+                          <XCircle className="w-6 h-6 text-red-500" />
+                        )}
+                        <span className="font-medium">{setting.allow_mixed_department ? 'Yes' : 'No'}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                      <div className="flex items-center gap-3">
+                        <CheckCircle className="w-5 h-5 text-gray-600" />
+                        <span className="text-gray-700">Approval Required</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {setting.requires_approval ? (
+                          <CheckCircle className="w-6 h-6 text-green-500" />
+                        ) : (
+                          <XCircle className="w-6 h-6 text-red-500" />
+                        )}
+                        <span className="font-medium">{setting.requires_approval ? 'Yes' : 'No'}</span>
+                      </div>
+                    </div>
+                    {setting.max_registrations_per_sport && (
+                      <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                        <div className="flex items-center gap-3">
+                          <Hash className="w-5 h-5 text-gray-600" />
+                          <span className="text-gray-700">Max Registrations</span>
+                        </div>
+                        <span className="font-medium text-xl">
+                          {setting.max_registrations_per_sport}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
-            )}
-            
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Registration Settings
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-500">Mixed Gender Allowed:</span>
-                  <div className="flex items-center gap-2">
-                    {setting.allow_mixed_gender ? (
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-red-500" />
-                    )}
-                    <span>{setting.allow_mixed_gender ? 'Yes' : 'No'}</span>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-500">Mixed Department Allowed:</span>
-                  <div className="flex items-center gap-2">
-                    {setting.allow_mixed_department ? (
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-red-500" />
-                    )}
-                    <span>{setting.allow_mixed_department ? 'Yes' : 'No'}</span>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-gray-500">Approval Required:</span>
-                  <div className="flex items-center gap-2">
-                    {setting.requires_approval ? (
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                    ) : (
-                      <XCircle className="w-5 h-5 text-red-500" />
-                    )}
-                    <span>{setting.requires_approval ? 'Yes' : 'No'}</span>
-                  </div>
-                </div>
-                {setting.max_registrations_per_sport && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-500">Max Registrations:</span>
-                    <span className="font-medium">
-                      {setting.max_registrations_per_sport}
-                    </span>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            <div className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  onOpenChange(false);
-                  onEdit(setting);
-                }}
-              >
-                <Edit3 className="w-4 h-4 mr-2" />
-                Edit Settings
-              </Button>
-              <Button
-                variant="secondary"
-                onClick={() => onToggleStatus(setting.id, !setting.registration_open)}
-              >
-                {setting.registration_open ? (
-                  <>
-                    <Pause className="w-4 h-4 mr-2" />
-                    Close Registration
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4 mr-2" />
-                    Open Registration
-                  </>
-                )}
-              </Button>
+              
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 pt-4 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    onOpenChange(false);
+                    onEdit(setting);
+                  }}
+                  className="flex-1 py-3 text-base font-medium rounded-lg transition-all duration-200 hover:shadow-md hover:bg-blue-50 hover:text-blue-700"
+                >
+                  <Edit3 className="w-5 h-5 mr-2" />
+                  Edit Settings
+                </Button>
+                <Button
+                  variant={setting.registration_open ? "destructive" : "default"}
+                  onClick={() => onToggleStatus(setting.id, !setting.registration_open)}
+                  className="flex-1 py-3 text-base font-medium rounded-lg transition-all duration-200 hover:shadow-md"
+                >
+                  {setting.registration_open ? (
+                    <>
+                      <Pause className="w-5 h-5 mr-2" />
+                      Close Registration
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-5 h-5 mr-2" />
+                      Open Registration
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
-          </div>
+          </>
         )}
       </DialogContent>
     </Dialog>

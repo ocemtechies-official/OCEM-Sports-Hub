@@ -5,13 +5,13 @@ import { Trophy, Calendar, Users, Target } from "lucide-react"
 export async function StatsOverview() {
   const supabase = await getSupabaseServerClient()
 
-  // Fetch stats
+  // Fetch stats - filter out deleted fixtures
   const [{ count: totalFixtures }, { count: liveMatches }, { count: totalTeams }, { count: completedMatches }] =
     await Promise.all([
-      supabase.from("fixtures").select("*", { count: "exact", head: true }),
-      supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "live"),
+      supabase.from("fixtures").select("*", { count: "exact", head: true }).is("deleted_at", null),
+      supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "live").is("deleted_at", null),
       supabase.from("teams").select("*", { count: "exact", head: true }),
-      supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "completed"),
+      supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "completed").is("deleted_at", null),
     ])
 
   const stats = [
