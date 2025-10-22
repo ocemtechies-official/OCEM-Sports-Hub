@@ -1,6 +1,7 @@
 import { requireAdmin } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { ReportsDashboard } from "@/components/admin/reports-dashboard"
+import AdminPageWrapper from "../admin-page-wrapper"
 
 export default async function ReportsPage() {
   const { isAdmin } = await requireAdmin()
@@ -10,10 +11,10 @@ export default async function ReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      <main className="container mx-auto px-4 py-8">
+    <AdminPageWrapper>
+      <div className="p-4 sm:p-6 lg:p-8">
         <ReportsDashboard />
-      </main>
-    </div>
+      </div>
+    </AdminPageWrapper>
   )
 }

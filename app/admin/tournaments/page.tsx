@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Trophy, Plus, ArrowLeft, Calendar, Users, Settings } from "lucide-react"
 import Link from "next/link"
+import AdminPageWrapper from "../admin-page-wrapper"
 
 export default async function AdminTournamentsPage() {
   const admin = await isAdmin()
@@ -47,22 +48,25 @@ export default async function AdminTournamentsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">Tournament Management</h1>
-          <p className="text-slate-600 mt-1">Create and manage tournament brackets</p>
-        </div>
+    <AdminPageWrapper>
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              Tournament Management
+            </h1>
+            <p className="text-slate-600 mt-2 text-lg">Create and manage tournament brackets</p>
+          </div>
           <Button asChild>
-          <Link href="/admin/tournaments/create">
-            <Plus className="mr-2 h-4 w-4" />
-            Create Tournament
-          </Link>
-        </Button>
-      </div>
+            <Link href="/admin/tournaments/create">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Tournament
+            </Link>
+          </Button>
+        </div>
 
-      {/* Tournaments List */}
-      <div className="grid gap-6">
+        {/* Tournaments List */}
+        <div className="grid gap-6">
           {tournaments && tournaments.length > 0 ? (
             tournaments.map((tournament) => (
               <Card key={tournament.id} className="overflow-hidden">
@@ -176,8 +180,9 @@ export default async function AdminTournamentsPage() {
                 </Button>
               </CardContent>
             </Card>
-        )}
+          )}
+        </div>
       </div>
-    </div>
+    </AdminPageWrapper>
   )
 }

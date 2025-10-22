@@ -140,7 +140,7 @@ export default function EnhancedAdminFixturesClient({ initialFixtures }: { initi
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Header with enhanced styling */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
@@ -148,7 +148,9 @@ export default function EnhancedAdminFixturesClient({ initialFixtures }: { initi
         className="flex flex-col md:flex-row md:items-center justify-between gap-6"
       >
         <div>
-          <h1 className="text-4xl font-bold text-slate-900">Fixtures Management</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            Fixtures Management
+          </h1>
           <p className="text-slate-600 mt-2 text-lg">Create and manage sports fixtures with advanced filtering</p>
         </div>
         <div className="flex flex-wrap gap-3">

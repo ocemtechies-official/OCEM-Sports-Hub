@@ -3,6 +3,7 @@ import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { redirect } from "next/navigation"
 import { EnhancedUserTable } from "@/components/admin/users/enhanced-user-table"
 import { updateUserRole } from "./actions"
+import AdminPageWrapper from "../admin-page-wrapper"
 
 export default async function AdminUsersPage() {
   const { user, profile, isAdmin } = await requireAdmin()
@@ -25,16 +26,20 @@ export default async function AdminUsersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">User Management</h1>
-        <p className="text-slate-600 mt-1">Manage user roles and permissions with advanced filtering and bulk operations</p>
+    <AdminPageWrapper>
+      <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+        <div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            User Management
+          </h1>
+          <p className="text-slate-600 mt-2 text-lg">Manage user roles and permissions with advanced filtering and bulk operations</p>
+        </div>
+        
+        <EnhancedUserTable 
+          users={users || []}
+          onUpdateUserRole={updateUserRole}
+        />
       </div>
-      
-      <EnhancedUserTable 
-        users={users || []}
-        onUpdateUserRole={updateUserRole}
-      />
-    </div>
+    </AdminPageWrapper>
   )
 }

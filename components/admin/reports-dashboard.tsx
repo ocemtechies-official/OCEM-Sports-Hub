@@ -381,11 +381,11 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
             <FileText className="h-8 w-8 text-blue-500" />
             Reports Dashboard
           </h1>
-          <p className="text-slate-600 mt-1">
+          <p className="text-slate-600 mt-2 text-lg">
             Comprehensive reports and analytics for your sports platform
           </p>
         </div>

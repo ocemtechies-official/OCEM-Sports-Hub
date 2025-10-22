@@ -266,7 +266,7 @@ export function AdminSidebar({ user, profile }: AdminSidebarProps) {
                         "group flex items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-300",
                         active
                           ? "bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md hover:from-blue-700 hover:to-indigo-800 shadow-blue-500/30"
-                          : "text-slate-800 hover:text-blue-700 hover:bg-blue-50/80",
+                          : "text-slate-800 hover:text-blue-600 hover:bg-blue-100",
                         (collapsed && !isHovering) ? "justify-center px-2 py-2" : "px-3 py-2"
                       )}
                     >

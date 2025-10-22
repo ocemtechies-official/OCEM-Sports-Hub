@@ -34,6 +34,7 @@ import { ViewRegistrationModal } from "@/components/admin/registration/ViewRegis
 import { EditRegistrationModal } from "@/components/admin/registration/EditRegistrationModal";
 import { RegistrationSkeleton } from "@/components/admin/registration/RegistrationSkeleton";
 import { ConfirmationModal } from "@/components/admin/registration/ConfirmationModal";
+import AdminPageWrapper from "../../admin-page-wrapper";
 
 interface Sport {
   id: string;
@@ -312,7 +313,8 @@ export default function RegistrationSettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
+  <AdminPageWrapper>
+    <div className="space-y-6 p-4 sm:p-6 lg:p-8">
       {/* Header with enhanced styling */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
@@ -320,7 +322,9 @@ export default function RegistrationSettingsPage() {
         className="flex flex-col md:flex-row md:items-center justify-between gap-6"
       >
         <div>
-          <h1 className="text-4xl font-bold text-slate-900">Registration Settings</h1>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            Registration Settings
+          </h1>
           <p className="text-slate-600 mt-2 text-lg">Manage registration periods and settings for all sports</p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -576,5 +580,6 @@ export default function RegistrationSettingsPage() {
         type="warning"
       />
     </div>
+  </AdminPageWrapper>
   );
 }

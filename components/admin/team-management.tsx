@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { CheckCircle, XCircle, Clock, Users, Trophy, Filter, Search } from "lucide-react"
 import { notifications } from "@/lib/notifications"
+import Link from "next/link"
+import { Plus } from "lucide-react"
 
 interface Team {
   id: string
@@ -191,18 +193,41 @@ export function TeamManagement({ initialTeams = [] }: TeamManagementProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Team Management</h2>
-          <p className="text-slate-600 mt-1">Manage all teams - official and student registrations</p>
+          <div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              Team Management
+            </h1>
+            <p className="text-slate-600 mt-2 text-lg">Manage all teams - official and student registrations</p>
+          </div>
+        <div className="flex flex-col items-start gap-3">
+          {/* Create Button */}
+          <Button asChild className="mx-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md hover:from-blue-700 hover:to-indigo-700">
+            <Link href="/admin/teams/create">
+              <Plus className="mr-2 h-4 w-4" />
+              Create Official Team
+            </Link>
+          </Button>
+
+          {/* Badges Section */}
+          <div className="flex items-center gap-2">
+            <Badge
+              variant="outline"
+              className="flex items-center gap-1 border-none bg-blue-100 text-blue-800 font-medium px-3 py-1 rounded-full shadow-sm"
+            >
+              <div className="h-2 w-2 rounded-full bg-blue-500"></div>
+              {teams.length} Total Teams
+            </Badge>
+
+            <Badge
+              variant="outline"
+              className="flex items-center gap-1 border-none bg-yellow-100 text-yellow-800 font-medium px-3 py-1 rounded-full shadow-sm"
+            >
+              <div className="h-2 w-2 rounded-full bg-yellow-500"></div>
+              {pendingTeams.length} Pending
+            </Badge>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="bg-blue-50 text-blue-700">
-            {teams.length} Total Teams
-          </Badge>
-          <Badge variant="outline" className="bg-yellow-50 text-yellow-700">
-            {pendingTeams.length} Pending
-          </Badge>
-        </div>
+
       </div>
 
       {/* Filters */}

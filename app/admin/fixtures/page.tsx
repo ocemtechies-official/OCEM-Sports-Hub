@@ -1,6 +1,7 @@
 import { isAdmin } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
+import AdminPageWrapper from "../admin-page-wrapper"
 
 export default async function EnhancedAdminFixturesPage() {
   const admin = await isAdmin()
@@ -28,5 +29,9 @@ export default async function EnhancedAdminFixturesPage() {
 
   const EnhancedAdminFixturesClient = (await import("@/components/admin/fixtures/EnhancedAdminFixturesClient")).default
 
-  return <EnhancedAdminFixturesClient initialFixtures={fixtures || []} />
+  return (
+    <AdminPageWrapper>
+      <EnhancedAdminFixturesClient initialFixtures={fixtures || []} />
+    </AdminPageWrapper>
+  )
 }
