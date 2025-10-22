@@ -86,7 +86,7 @@ export function RescheduleFixtureDialog({ fixture, onSuccess }: RescheduleFixtur
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" className="flex-1 py-1.5 text-xs font-medium rounded-md hover:shadow-sm transition-colors hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 w-full">
           <Calendar className="mr-2 h-4 w-4" />
           Reschedule
         </Button>
@@ -130,10 +130,15 @@ export function RescheduleFixtureDialog({ fixture, onSuccess }: RescheduleFixtur
             variant="outline"
             onClick={() => setOpen(false)}
             disabled={loading}
+            className="hover:bg-gray-50 hover:text-gray-700 transition-colors"
           >
             Cancel
           </Button>
-          <Button onClick={handleReschedule} disabled={loading}>
+          <Button 
+            onClick={handleReschedule} 
+            disabled={loading}
+            className="hover:bg-purple-50 hover:text-purple-700 transition-colors"
+          >
             {loading ? (
               <>
                 <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></div>

@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -16,7 +16,7 @@ interface CreateFixtureFormProps {
   teams: any[]
 }
 
-export function CreateFixtureForm({ sports, teams }: CreateFixtureFormProps) {
+export function CreateFixtureForm({ sports, teams: allTeams }: CreateFixtureFormProps) {
   const router = useRouter()
   const { toast } = useToast()
   const [sportId, setSportId] = useState("")
@@ -25,6 +25,19 @@ export function CreateFixtureForm({ sports, teams }: CreateFixtureFormProps) {
   const [scheduledAt, setScheduledAt] = useState("")
   const [venue, setVenue] = useState("")
   const [isCreating, setIsCreating] = useState(false)
+
+  // Filter teams based on selected sport
+  const filteredTeams = useMemo(() => {
+    if (!sportId) return allTeams;
+    return allTeams.filter(team => team.sport_id === sportId);
+  }, [sportId, allTeams]);
+
+  // Reset teams when sport changes
+  const handleSportChange = (value: string) => {
+    setSportId(value);
+    setTeamAId("");
+    setTeamBId("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -64,7 +77,7 @@ export function CreateFixtureForm({ sports, teams }: CreateFixtureFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="sport">Sport</Label>
-        <Select value={sportId} onValueChange={setSportId} required>
+        <Select value={sportId} onValueChange={handleSportChange} required>
           <SelectTrigger id="sport">
             <SelectValue placeholder="Select sport" />
           </SelectTrigger>
@@ -81,12 +94,12 @@ export function CreateFixtureForm({ sports, teams }: CreateFixtureFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="team-a">Team A</Label>
-          <Select value={teamAId} onValueChange={setTeamAId} required>
+          <Select value={teamAId} onValueChange={setTeamAId} required disabled={!sportId}>
             <SelectTrigger id="team-a">
-              <SelectValue placeholder="Select team" />
+              <SelectValue placeholder={sportId ? "Select team A" : "Select a sport first"} />
             </SelectTrigger>
             <SelectContent>
-              {teams.map((team) => (
+              {filteredTeams.map((team) => (
                 <SelectItem key={team.id} value={team.id}>
                   {team.name}
                 </SelectItem>
@@ -97,12 +110,12 @@ export function CreateFixtureForm({ sports, teams }: CreateFixtureFormProps) {
 
         <div className="space-y-2">
           <Label htmlFor="team-b">Team B</Label>
-          <Select value={teamBId} onValueChange={setTeamBId} required>
+          <Select value={teamBId} onValueChange={setTeamBId} required disabled={!sportId}>
             <SelectTrigger id="team-b">
-              <SelectValue placeholder="Select team" />
+              <SelectValue placeholder={sportId ? "Select team B" : "Select a sport first"} />
             </SelectTrigger>
             <SelectContent>
-              {teams.map((team) => (
+              {filteredTeams.map((team) => (
                 <SelectItem key={team.id} value={team.id} disabled={team.id === teamAId}>
                   {team.name}
                 </SelectItem>

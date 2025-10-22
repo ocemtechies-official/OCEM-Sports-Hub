@@ -4,8 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
-import { Edit, Trash2 } from "lucide-react"
-import { UpdateScoreDialog } from "@/components/admin/update-score-dialog"
+import { Edit, Calendar } from "lucide-react"
 
 interface FixtureManagementTableProps {
   fixtures: any[]
@@ -62,12 +61,13 @@ export function FixtureManagementTable({ fixtures }: FixtureManagementTableProps
             </TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
-                <UpdateScoreDialog fixture={fixture} />
-                <Button variant="ghost" size="sm">
-                  <Edit className="h-4 w-4" />
+                {/* Disable reschedule for now to avoid type conflicts */}
+                <Button variant="outline" size="sm" disabled>
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Reschedule
                 </Button>
                 <Button variant="ghost" size="sm">
-                  <Trash2 className="h-4 w-4 text-red-600" />
+                  <Edit className="h-4 w-4" />
                 </Button>
               </div>
             </TableCell>
