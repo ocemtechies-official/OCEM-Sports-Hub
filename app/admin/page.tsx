@@ -42,16 +42,16 @@ export default async function AdminPage() {
     { data: upcomingFixtures },
   ] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }),
-    supabase.from("fixtures").select("*", { count: "exact", head: true }),
+    supabase.from("fixtures").select("*", { count: "exact", head: true }).is("deleted_at", null),
     supabase.from("tournaments").select("*", { count: "exact", head: true }),
     supabase.from("quizzes").select("*", { count: "exact", head: true }),
     supabase.from("teams").select("*", { count: "exact", head: true }),
-    supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "live"),
+    supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "live").is("deleted_at", null),
     supabase.from("tournaments").select("*", { count: "exact", head: true }).eq("status", "active"),
-    supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "scheduled"),
-    supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "completed"),
+    supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "scheduled").is("deleted_at", null),
+    supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "completed").is("deleted_at", null),
     supabase.from("profiles").select("id, full_name, email, created_at").order("created_at", { ascending: false }).limit(5),
-    supabase.from("fixtures").select("*, sport:sports(name), team_a:teams!fixtures_team_a_id_fkey(name), team_b:teams!fixtures_team_b_id_fkey(name)").eq("status", "scheduled").order("scheduled_at", { ascending: true }).limit(5),
+    supabase.from("fixtures").select("*, sport:sports(name), team_a:teams!fixtures_team_a_id_fkey(name), team_b:teams!fixtures_team_b_id_fkey(name)").eq("status", "scheduled").is("deleted_at", null).order("scheduled_at", { ascending: true }).limit(5),
   ])
   
   const stats = [

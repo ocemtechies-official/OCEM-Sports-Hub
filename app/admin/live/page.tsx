@@ -15,7 +15,7 @@ export default async function LiveMonitorPage() {
 
   const supabase = await getSupabaseServerClient()
 
-  // Fetch live fixtures
+  // Fetch live fixtures that are not deleted
   const { data: liveFixtures } = await supabase
     .from("fixtures")
     .select(`
@@ -25,9 +25,10 @@ export default async function LiveMonitorPage() {
       team_b:teams!fixtures_team_b_id_fkey(*)
     `)
     .eq("status", "live")
+    .is("deleted_at", null) // Filter out deleted fixtures
     .order("scheduled_at", { ascending: true })
 
-  // Fetch scheduled fixtures (upcoming)
+  // Fetch scheduled fixtures (upcoming) that are not deleted
   const { data: upcomingFixtures } = await supabase
     .from("fixtures")
     .select(`
@@ -37,11 +38,12 @@ export default async function LiveMonitorPage() {
       team_b:teams!fixtures_team_b_id_fkey(*)
     `)
     .eq("status", "scheduled")
+    .is("deleted_at", null) // Filter out deleted fixtures
     .gte("scheduled_at", new Date().toISOString())
     .order("scheduled_at", { ascending: true })
     .limit(5)
 
-  // Fetch recent completed fixtures
+  // Fetch recent completed fixtures that are not deleted
   const { data: recentCompleted } = await supabase
     .from("fixtures")
     .select(`
@@ -51,6 +53,7 @@ export default async function LiveMonitorPage() {
       team_b:teams!fixtures_team_b_id_fkey(*)
     `)
     .eq("status", "completed")
+    .is("deleted_at", null) // Filter out deleted fixtures
     .order("scheduled_at", { ascending: false })
     .limit(5)
 
