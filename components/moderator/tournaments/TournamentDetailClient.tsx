@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { ArrowLeft, Trophy, Loader2 } from "lucide-react"
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createBrowserClient } from '@supabase/ssr'
 import Link from "next/link"
 import { TournamentBracket } from './TournamentBracket'
 import { TournamentTeamManagement } from './TournamentTeamManagement'
@@ -44,7 +44,10 @@ export function TournamentDetailClient({
   availableTeams = [] // Provide default empty array
 }: TournamentDetailClientProps) {
   const router = useRouter()
-  const supabase = createClientComponentClient()
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
   const { toast } = useToast()
   const [isTeamManagementOpen, setIsTeamManagementOpen] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)

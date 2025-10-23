@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createBrowserClient } from '@supabase/ssr'
 import { useRouter } from 'next/navigation'
 
 interface Team {
@@ -47,7 +47,10 @@ export function TournamentTeamManagement({
   const [selectedTeamId, setSelectedTeamId] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const supabase = createClientComponentClient()
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
 
   const remainingSlots = maxTeams - currentTeams.length
   const canAddTeams = remainingSlots > 0
