@@ -14,7 +14,8 @@ import {
   Settings,
   LogOut,
   User,
-  Menu
+  Menu,
+  Trophy
 } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 
@@ -33,6 +34,11 @@ const navigation = [
     name: "Fixtures",
     href: "/moderator/fixtures",
     icon: Calendar,
+  },
+  {
+    name: "Tournaments",
+    href: "/moderator/tournaments",
+    icon: Trophy,
   },
   {
     name: "History",
