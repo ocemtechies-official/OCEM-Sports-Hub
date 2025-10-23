@@ -24,6 +24,7 @@ import { useState, useMemo, useEffect } from "react"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { LoadingButton } from "@/components/ui/loading-button"
+import { ReportsSkeleton } from "./reports-skeleton"
 
 interface ReportsData {
   users: {
@@ -293,15 +294,9 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
     return filtered
   }, [data, searchTerm])
 
-  // Early returns after all hooks
+
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <LoadingButton loading={true} disabled>
-          Loading reports data...
-        </LoadingButton>
-      </div>
-    )
+    return <ReportsSkeleton />
   }
 
   if (error) {
@@ -311,20 +306,13 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
           <p className="font-medium">Failed to load reports data</p>
           <p className="text-sm text-gray-600">{error}</p>
         </div>
-        <LoadingButton onClick={fetchReportsData} loading={loading}>
+        <LoadingButton onClick={fetchReportsData}>
           Retry
         </LoadingButton>
       </div>
     )
   }
 
-  if (!data) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-600">No reports data available</p>
-      </div>
-    )
-  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -381,7 +369,7 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="flex items-center gap-2 text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
             <FileText className="h-8 w-8 text-blue-500" />
             Reports Dashboard
           </h1>
@@ -389,10 +377,14 @@ export function ReportsDashboard({ data: initialData }: ReportsDashboardProps) {
             Comprehensive reports and analytics for your sports platform
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary" className="px-3 py-1">
-            <BarChart3 className="h-3 w-3 mr-1" />
-            Live Data
+        <div className="flex items-center">
+          <Badge 
+            variant="secondary" 
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-red-500 to-red-600 text-white shadow-sm hover:from-red-600 hover:to-red-700 transition-all duration-200"
+          >
+            <span className="h-2 w-2 bg-white rounded-full animate-pulse"></span>
+            <BarChart3 className="h-3.5 w-3.5" />
+            <span className="font-medium text-sm">Live Data</span>
           </Badge>
         </div>
       </div>

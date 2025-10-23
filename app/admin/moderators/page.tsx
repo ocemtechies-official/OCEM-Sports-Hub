@@ -21,6 +21,7 @@ export default async function AdminModeratorsPage() {
     return null
   }
 
+
   const supabase = await getSupabaseServerClient()
 
   // Get all moderators

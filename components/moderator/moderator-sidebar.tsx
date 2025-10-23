@@ -13,7 +13,8 @@ import {
   LogOut,
   User,
   PanelLeft,
-  PanelRight
+  PanelRight,
+  Trophy
 } from "lucide-react"
 import { useAuth } from "@/components/auth/auth-provider"
 import { useState, useEffect, useRef } from "react"
@@ -34,6 +35,11 @@ const navigation = [
     name: "Fixtures",
     href: "/moderator/fixtures",
     icon: Calendar,
+  },
+  {
+    name: "Tournaments",
+    href: "/moderator/tournaments",
+    icon: Trophy,
   },
   {
     name: "History",
@@ -126,7 +132,7 @@ export function ModeratorSidebar({ user, profile }: ModeratorSidebarProps) {
                   "w-full justify-start transition-all duration-300",
                   isActive 
                     ? "bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-md hover:from-blue-700 hover:to-indigo-800 shadow-blue-500/30" 
-                    : "text-slate-600 hover:text-blue-700 hover:bg-blue-50/80",
+                    : "text-slate-600 hover:text-blue-700 hover:bg-blue-100",
                   (collapsed && !isHovering) ? "justify-center px-2 py-6" : "px-4 py-6"
                 )}
               >

@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function RegistrationSkeleton() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 sm:p-6 lg:p-8">
       {/* Header skeleton */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-3">
