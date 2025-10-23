@@ -95,8 +95,58 @@ export default function SportsWeekSettingsPage() {
   if (loading) {
     return (
       <AdminPageWrapper>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+          {/* Page Header */}
+          <div>
+            <div className="h-10 w-64 bg-accent animate-pulse rounded-md"></div> {/* Title */}
+            <div className="h-5 w-96 mt-2 bg-accent animate-pulse rounded-md"></div> {/* Description */}
+          </div>
+
+          {/* Alert Skeleton */}
+          <div className="h-16 rounded-md border bg-accent animate-pulse"></div>
+
+          {/* Card with Form */}
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div className="flex flex-col space-y-1.5 p-6">
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-5 rounded-full bg-accent animate-pulse"></div>
+                <div className="h-6 w-48 bg-accent animate-pulse rounded-md"></div> {/* Card Title */}
+              </div>
+              <div className="h-4 w-80 mt-1 bg-accent animate-pulse rounded-md"></div> {/* Card Description */}
+            </div>
+            <div className="p-6 pt-0">
+              <div className="space-y-6">
+                {/* Event Name Field */}
+                <div className="space-y-2">
+                  <div className="h-4 w-24 bg-accent animate-pulse rounded-md"></div> {/* Label */}
+                  <div className="h-10 w-full bg-accent animate-pulse rounded-md"></div> {/* Input */}
+                </div>
+
+                {/* Start Date Field */}
+                <div className="space-y-2">
+                  <div className="h-4 w-32 bg-accent animate-pulse rounded-md"></div> {/* Label */}
+                  <div className="h-10 w-full bg-accent animate-pulse rounded-md"></div> {/* Input */}
+                </div>
+
+                {/* End Date Field */}
+                <div className="space-y-2">
+                  <div className="h-4 w-40 bg-accent animate-pulse rounded-md"></div> {/* Label */}
+                  <div className="h-10 w-full bg-accent animate-pulse rounded-md"></div> {/* Input */}
+                </div>
+
+                {/* Description Field */}
+                <div className="space-y-2">
+                  <div className="h-4 w-24 bg-accent animate-pulse rounded-md"></div> {/* Label */}
+                  <div className="h-20 w-full bg-accent animate-pulse rounded-md"></div> {/* Textarea */}
+                </div>
+
+                {/* Submit Button */}
+                <div className="flex justify-end">
+                  <div className="h-10 w-32 bg-accent animate-pulse rounded-md"></div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </AdminPageWrapper>
     )

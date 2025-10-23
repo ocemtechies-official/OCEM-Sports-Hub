@@ -20,6 +20,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import AdminPageWrapper from "./admin-page-wrapper"
 
 export default async function AdminPage() {
+  // Add a small delay to better demonstrate the loading state
+  await new Promise(resolve => setTimeout(resolve, 100));
+  
   const { user, profile, isAdmin } = await requireAdmin()
   
   if (!user || !profile || !isAdmin) {
