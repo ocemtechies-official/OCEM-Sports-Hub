@@ -15,6 +15,7 @@ import {
 } from "lucide-react"
 import { useEffect, useState, useMemo } from "react"
 import { LoadingButton } from "@/components/ui/loading-button"
+import { AnalyticsSkeleton } from "@/components/admin/analytics-skeleton"
 
 interface AnalyticsData {
   users: {
@@ -186,13 +187,7 @@ export function AnalyticsDashboard({ data: initialData }: AnalyticsDashboardProp
 
   // Early returns after all hooks and data processing
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <LoadingButton loading={true} disabled>
-          Loading analytics data...
-        </LoadingButton>
-      </div>
-    )
+    return <AnalyticsSkeleton />
   }
 
   if (error) {
@@ -200,7 +195,7 @@ export function AnalyticsDashboard({ data: initialData }: AnalyticsDashboardProp
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
         <div className="text-red-600 text-center">
           <p className="font-medium">Failed to load analytics data</p>
-          <p className="text-sm text-gray-600">{error}</p>
+          <p className="text-sm text-gray-600 mt-2">{error}</p>
         </div>
         <LoadingButton onClick={fetchAnalyticsData} loading={loading}>
           Retry
