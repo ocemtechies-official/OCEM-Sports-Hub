@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { ArrowLeft, Trophy, Loader2 } from "lucide-react"
+import { ArrowLeft, Trophy, Loader2, Calendar, MapPin, Users } from "lucide-react"
 import { createBrowserClient } from '@supabase/ssr'
 import Link from "next/link"
 import { TournamentBracket } from './TournamentBracket'
@@ -26,6 +26,9 @@ interface Tournament {
   status: 'draft' | 'registration' | 'active' | 'completed'
   tournament_type: string
   max_teams: number
+  start_date?: string
+  end_date?: string
+  venue?: string
   tournament_teams: {
     team: Team
   }[]
@@ -125,6 +128,46 @@ export function TournamentDetailClient({
     }
   }
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'Not set'
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'draft':
+        return <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">Draft</span>
+      case 'registration':
+        return <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">Registration</span>
+      case 'active':
+        return <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Active</span>
+      case 'completed':
+        return <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">Completed</span>
+      default:
+        return <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium capitalize">{status}</span>
+    }
+  }
+
+  const getTournamentTypeBadge = (type: string) => {
+    const formattedType = type.replace('_', ' ')
+    switch (type) {
+      case 'single_elimination':
+        return <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">{formattedType}</span>
+      case 'double_elimination':
+        return <span className="px-2 py-1 bg-orange-100 text-orange-800 rounded-full text-xs font-medium">{formattedType}</span>
+      case 'round_robin':
+        return <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">{formattedType}</span>
+      case 'swiss':
+        return <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">{formattedType}</span>
+      default:
+        return <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium capitalize">{formattedType}</span>
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between">
@@ -177,43 +220,78 @@ export function TournamentDetailClient({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="p-4">
-          <h3 className="font-semibold mb-2">Status</h3>
-          <p className={`font-medium capitalize ${
-            tournament.status === 'active' ? 'text-green-600' :
-            tournament.status === 'completed' ? 'text-blue-600' :
-            tournament.status === 'registration' ? 'text-orange-600' :
-            'text-slate-600'
-          }`}>
-            {tournament.status}
-          </p>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1 bg-blue-100 rounded-full">
+              <Trophy className="h-4 w-4 text-blue-600" />
+            </div>
+            <h3 className="font-semibold">Status</h3>
+          </div>
+          <div className="mt-1">
+            {getStatusBadge(tournament.status)}
+          </div>
         </Card>
+        
         <Card className="p-4">
-          <h3 className="font-semibold mb-2">Teams</h3>
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1 bg-green-100 rounded-full">
+              <Users className="h-4 w-4 text-green-600" />
+            </div>
+            <h3 className="font-semibold">Teams</h3>
+          </div>
           <p className="font-medium">
             {currentTeams.length} / {tournament.max_teams}
           </p>
         </Card>
+        
         <Card className="p-4">
-          <h3 className="font-semibold mb-2">Tournament Type</h3>
-          <p className="font-medium capitalize">
-            {tournament.tournament_type.replace('_', ' ')}
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1 bg-purple-100 rounded-full">
+              <Trophy className="h-4 w-4 text-purple-600" />
+            </div>
+            <h3 className="font-semibold">Tournament Type</h3>
+          </div>
+          <div className="mt-1">
+            {getTournamentTypeBadge(tournament.tournament_type)}
+          </div>
+        </Card>
+        
+        <Card className="p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1 bg-orange-100 rounded-full">
+              <Calendar className="h-4 w-4 text-orange-600" />
+            </div>
+            <h3 className="font-semibold">Date</h3>
+          </div>
+          <p className="text-sm">
+            {tournament.start_date ? formatDate(tournament.start_date) : 'Not set'}
           </p>
         </Card>
-        <Card className="p-4">
-          <h3 className="font-semibold mb-2">Actions</h3>
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="w-full"
-            onClick={() => setIsTeamManagementOpen(true)}
-            disabled={tournament.status !== 'draft' && tournament.status !== 'registration'}
-          >
-            Manage Teams
-          </Button>
-        </Card>
       </div>
+
+      {(tournament.venue || tournament.end_date) && (
+        <Card className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {tournament.venue && (
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-slate-500" />
+                <span className="text-sm">
+                  <span className="font-medium">Venue:</span> {tournament.venue}
+                </span>
+              </div>
+            )}
+            {tournament.end_date && (
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-slate-500" />
+                <span className="text-sm">
+                  <span className="font-medium">End Date:</span> {formatDate(tournament.end_date)}
+                </span>
+              </div>
+            )}
+          </div>
+        </Card>
+      )}
 
       <Tabs defaultValue="bracket">
         <TabsList>

@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Trophy } from "lucide-react"
+import { Trophy, MapPin, Calendar, Clock } from "lucide-react"
 import Link from "next/link"
 
 interface Team {
@@ -19,8 +19,10 @@ interface Match {
   team_a_score: number
   team_b_score: number
   winner_id?: string
-  status: 'scheduled' | 'live' | 'completed'
+  status: 'scheduled' | 'live' | 'completed' | 'cancelled'
   bracket_position: number
+  venue?: string
+  scheduled_at?: string
 }
 
 interface Round {
@@ -53,6 +55,27 @@ export function TournamentBracket({ rounds, onUpdateWinner, isEditable = false }
     }
   }
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'scheduled':
+        return <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">Scheduled</span>
+      case 'live':
+        return <span className="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs font-medium">Live</span>
+      case 'completed':
+        return <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">Completed</span>
+      case 'cancelled':
+        return <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">Cancelled</span>
+      default:
+        return <span className="px-2 py-1 bg-gray-100 text-gray-800 rounded-full text-xs font-medium capitalize">{status}</span>
+    }
+  }
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return ''
+    const date = new Date(dateString)
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  }
+
   return (
     <div className="overflow-x-auto">
       <div className="flex gap-8 min-w-[800px] p-4">
@@ -74,9 +97,23 @@ export function TournamentBracket({ rounds, onUpdateWinner, isEditable = false }
                   className={`bg-white rounded-lg border ${
                     match.status === 'live' ? 'border-red-300 shadow-red-100' :
                     match.status === 'completed' ? 'border-green-300 shadow-green-100' :
+                    match.status === 'cancelled' ? 'border-gray-300 shadow-gray-100' :
                     'border-slate-200'
                   } p-4 shadow-md transition-all duration-300 hover:shadow-lg`}
                 >
+                  {/* Match header with status */}
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="flex items-center gap-2">
+                      {getStatusBadge(match.status)}
+                    </div>
+                    {match.winner_id && (
+                      <div className="flex items-center gap-1 text-green-600">
+                        <Trophy className="h-4 w-4" />
+                        <span className="text-xs font-medium">Winner</span>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="flex flex-col gap-2">
                     {/* Team A */}
                     <div 
@@ -132,8 +169,29 @@ export function TournamentBracket({ rounds, onUpdateWinner, isEditable = false }
                       <span className="font-bold">{match.team_b_score || 0}</span>
                     </div>
 
+                    {/* Match details */}
+                    <div className="mt-2 pt-2 border-t border-slate-100 space-y-1">
+                      {match.venue && (
+                        <div className="flex items-center gap-1 text-xs text-slate-600">
+                          <MapPin className="h-3 w-3" />
+                          <span>{match.venue}</span>
+                        </div>
+                      )}
+                      {match.scheduled_at && (
+                        <div className="flex items-center gap-1 text-xs text-slate-600">
+                          <Clock className="h-3 w-3" />
+                          <span>{formatDate(match.scheduled_at)}</span>
+                        </div>
+                      )}
+                      {match.winner_id && (
+                        <div className="text-xs text-green-600 font-medium mt-1">
+                          Winner: {match.team_a?.id === match.winner_id ? match.team_a.name : match.team_b?.name || 'Unknown'}
+                        </div>
+                      )}
+                    </div>
+
                     {/* Match Actions */}
-                    <div className="mt-2 flex justify-end">
+                    <div className="mt-3 flex justify-end">
                       {match.status === 'live' ? (
                         <Button asChild size="sm" variant="destructive">
                           <Link href={`/moderator/fixtures/${match.id}`}>
