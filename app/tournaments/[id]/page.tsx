@@ -25,6 +25,7 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
       winner:teams!tournaments_winner_id_fkey(*)
     `)
     .eq("id", id)
+    .is('deleted_at', null) // Filter out deleted tournaments
     .single()
 
   if (error || !tournament) {
@@ -44,6 +45,7 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
       )
     `)
     .eq("tournament_id", id)
+    .is('matches.deleted_at', null) // Filter out deleted fixtures
     .order("round_number", { ascending: true })
 
   // Fetch tournament teams
@@ -112,7 +114,7 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
                     <Trophy className="h-4 w-4" />
                     <span className="text-sm font-bold">Tournament</span>
                   </div>
-                  <Badge className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border-blue-200">
+                  <Badge className="px-3 py-1.5 rounded-full text-xs font-bold bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 shadow-md">
                     {tournament.sport?.icon} {tournament.sport?.name}
                   </Badge>
                 </div>
@@ -127,10 +129,10 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
 
               <div className="text-right">
                 <Badge 
-                  className={`px-4 py-2 rounded-full text-sm font-semibold border flex items-center gap-2 ${
-                    tournament.status === 'completed' ? 'bg-blue-100 text-blue-800 border-blue-200' : 
-                    tournament.status === 'active' ? 'bg-green-100 text-green-800 border-green-200' : 
-                    'bg-gray-100 text-gray-800 border-gray-200'
+                  className={`px-4 py-2 rounded-full text-sm font-bold border-0 shadow-sm flex items-center gap-2 ${
+                    tournament.status === 'completed' ? 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white' : 
+                    tournament.status === 'active' ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' : 
+                    'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
                   }`}
                 >
                   {tournament.status === 'active' && <Zap className="h-3 w-3" />}
@@ -190,9 +192,9 @@ export default async function TournamentPage({ params }: TournamentPageProps) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-purple-600">Format</p>
-                  <p className="text-lg font-semibold text-purple-900 capitalize">
+                  <Badge className="px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white border-0 shadow-md">
                     {tournament.tournament_type.replace('_', ' ')}
-                  </p>
+                  </Badge>
                 </div>
               </div>
             </div>

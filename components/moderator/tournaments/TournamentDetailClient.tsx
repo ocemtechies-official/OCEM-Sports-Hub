@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { ArrowLeft, Trophy, Loader2, Calendar, MapPin, Users } from "lucide-react"
+import { ArrowLeft, Trophy, Loader2, Calendar, MapPin, Users, Award } from "lucide-react"
 import { createBrowserClient } from '@supabase/ssr'
 import Link from "next/link"
 import { TournamentBracket } from './TournamentBracket'
@@ -29,6 +29,7 @@ interface Tournament {
   start_date?: string
   end_date?: string
   venue?: string
+  winner_id?: string
   tournament_teams: {
     team: Team
   }[]
@@ -54,6 +55,7 @@ export function TournamentDetailClient({
   const { toast } = useToast()
   const [isTeamManagementOpen, setIsTeamManagementOpen] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
+  const [winnerTeam, setWinnerTeam] = useState<Team | null>(null)
 
   // Show warning toast if no teams are available
   useEffect(() => {
@@ -65,6 +67,25 @@ export function TournamentDetailClient({
       })
     }
   }, [availableTeams.length, tournament.status, sportName, toast])
+
+  // Fetch winner team details if tournament has a winner
+  useEffect(() => {
+    const fetchWinnerTeam = async () => {
+      if (tournament.winner_id) {
+        const { data, error } = await supabase
+          .from('teams')
+          .select('id, name, logo_url')
+          .eq('id', tournament.winner_id)
+          .single()
+        
+        if (!error && data) {
+          setWinnerTeam(data)
+        }
+      }
+    }
+    
+    fetchWinnerTeam()
+  }, [tournament.winner_id, supabase])
 
   const currentTeams = tournament.tournament_teams.map(tt => tt.team)
 
@@ -270,9 +291,9 @@ export function TournamentDetailClient({
         </Card>
       </div>
 
-      {(tournament.venue || tournament.end_date) && (
+      {(tournament.venue || tournament.end_date || (tournament.status === 'completed' && winnerTeam)) && (
         <Card className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {tournament.venue && (
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-slate-500" />
@@ -286,6 +307,14 @@ export function TournamentDetailClient({
                 <Calendar className="h-4 w-4 text-slate-500" />
                 <span className="text-sm">
                   <span className="font-medium">End Date:</span> {formatDate(tournament.end_date)}
+                </span>
+              </div>
+            )}
+            {tournament.status === 'completed' && winnerTeam && (
+              <div className="flex items-center gap-2">
+                <Award className="h-4 w-4 text-yellow-500" />
+                <span className="text-sm">
+                  <span className="font-medium">Winner:</span> {winnerTeam.name}
                 </span>
               </div>
             )}
