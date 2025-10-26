@@ -56,6 +56,25 @@ export async function POST(
 
     if (roundError) throw roundError
 
+    // Progress winners to the next round if this is a single elimination tournament
+    if (fixture.tournament.tournament_type === 'single_elimination') {
+      try {
+        const { error: progressError } = await supabase
+          .rpc('progress_tournament_bracket', {
+            tournament_id: fixture.tournament.id,
+            completed_round_id: fixture.tournament_round.id
+          });
+        
+        if (progressError) {
+          console.error('Error progressing bracket:', progressError);
+          // Don't throw error here as the match update was successful
+        }
+      } catch (progressError) {
+        console.error('Error calling progress_tournament_bracket function:', progressError);
+        // Don't throw error here as the match update was successful
+      }
+    }
+
     // If this was a final match, update tournament status
     if (fixture.tournament_round.round_number === 
         (fixture.tournament.tournament_type === 'single_elimination' ? 3 : // Final is round 3 in single elim
