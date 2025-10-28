@@ -74,6 +74,9 @@ interface BracketManagementProps {
       id: string
       round_name: string
       round_number: number
+      total_matches: number
+      completed_matches: number
+      status: 'pending' | 'active' | 'completed'
       fixtures: Array<{
         id: string
         team_a_id: string | null
@@ -82,6 +85,7 @@ interface BracketManagementProps {
         team_b: { id: string; name: string } | null
         scheduled_at: string | null
         venue: string | null
+        status: 'scheduled' | 'in_progress' | 'completed' | 'postponed' | 'cancelled'
       }>
     }>
   }
@@ -682,6 +686,22 @@ export function BracketManagement({ tournament }: BracketManagementProps) {
       }))
   }
 
+  // Function to automatically progress winners to the next round
+  const handleAutoProgress = async (completedRoundId: string) => {
+  }
+
+  // Check if a round is completed (all matches completed)
+  const isRoundCompleted = (round: any) => {
+    return round.fixtures.every((fixture: any) => fixture.status === 'completed');
+  }
+
+  // Check if a round is ready for activation (all fixtures have teams assigned)
+  const isRoundReadyForActivation = (round: any) => {
+    return round.fixtures.every((fixture: any) => 
+      fixture.team_a_id !== null && fixture.team_b_id !== null
+    );
+  }
+
   return (
     <div className="space-y-6">
       <Card>
@@ -893,8 +913,9 @@ export function BracketManagement({ tournament }: BracketManagementProps) {
               <div className="space-y-6">
                 {localRounds.map(round => (
                   <div key={round.id} className="border rounded-lg overflow-hidden">
-                    <div className="bg-slate-100 px-4 py-2 font-medium">
-                      {round.roundName}
+                    <div className="bg-slate-100 px-4 py-2 font-medium flex justify-between items-center">
+                      <span>{round.roundName}</span>
+                      <Badge variant="secondary">{round.fixtures?.length || 0} matches</Badge>
                     </div>
                     
                     <div className="p-4 space-y-4">
@@ -1008,13 +1029,37 @@ export function BracketManagement({ tournament }: BracketManagementProps) {
                 {localRounds.length} rounds generated with a total of{' '}
                 {localRounds.reduce((total, round) => total + (round.fixtures?.length || 0), 0)} matches.
               </p>
-              <div className="space-y-2">
-                {localRounds.map((round) => (
-                  <div key={round.id} className="flex items-center justify-between p-2 bg-white rounded">
-                    <span>{round.roundName}</span>
-                    <Badge variant="secondary">{round.fixtures?.length || 0} matches</Badge>
-                  </div>
-                ))}
+              <div className="space-y-3">
+                {localRounds.map((round) => {
+                  // Find the corresponding round in the tournament data
+                  const tournamentRound = tournament.tournament_rounds?.find(tr => tr.id === round.id);
+                  const isCompleted = tournamentRound ? isRoundCompleted(tournamentRound) : false;
+                  const isReadyForActivation = tournamentRound ? isRoundReadyForActivation(tournamentRound) : false;
+                  
+                  return (
+                    <div key={round.id} className="flex items-center justify-between p-3 bg-white rounded border">
+                      <div className="flex items-center gap-3">
+                        <span className="font-medium">{round.roundName}</span>
+                        <Badge variant="secondary">{round.fixtures?.length || 0} matches</Badge>
+                        {isCompleted && (
+                          <Badge variant="default" className="bg-green-500">
+                            Completed
+                          </Badge>
+                        )}
+                        {tournamentRound?.status === 'active' && (
+                          <Badge variant="default" className="bg-blue-500">
+                            Active
+                          </Badge>
+                        )}
+                        {tournamentRound?.status === 'pending' && isReadyForActivation && (
+                          <Badge variant="outline" className="border-yellow-500 text-yellow-700">
+                            Ready for Activation
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

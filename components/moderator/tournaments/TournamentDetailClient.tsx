@@ -123,11 +123,11 @@ export function TournamentDetailClient({
     try {
       setIsUpdating(true)
       const response = await fetch(`/api/moderator/tournaments/${tournament.id}/matches/${matchId}/winner`, {
-        method: 'PUT',
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ winner_id: winnerId }),
+        body: JSON.stringify({ winnerId }),
       })
 
       if (!response.ok) {
@@ -333,6 +333,7 @@ export function TournamentDetailClient({
               rounds={tournament.tournament_rounds}
               onUpdateWinner={tournament.status === 'active' ? handleUpdateWinner : undefined}
               isEditable={tournament.status === 'active'}
+              tournamentId={tournament.id}
             />
           ) : (
             <Card className="p-8 text-center">
