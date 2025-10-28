@@ -15,7 +15,8 @@ export async function GET(
 
     const supabase = await getSupabaseServerClient()
     
-    const { data: tournament, error } = await supabase
+    // First, get the tournament with rounds
+    const { data: tournament, error: tournamentError } = await supabase
       .from('tournaments')
       .select(`
         *,
@@ -26,21 +27,49 @@ export async function GET(
           team:teams(*)
         ),
         tournament_rounds(
-          *,
-          tournament_matches(
-            *,
-            team_a:teams!tournament_matches_team_a_id_fkey(*),
-            team_b:teams!tournament_matches_team_b_id_fkey(*)
-          )
+          *
         )
       `)
       .eq('id', params.id)
-      .eq('deleted_at', null)
+      .is('deleted_at', null)
       .single()
 
-    if (error) {
-      console.error('Error fetching tournament:', error)
+    if (tournamentError) {
+      console.error('Error fetching tournament:', tournamentError)
       return NextResponse.json({ error: 'Tournament not found' }, { status: 404 })
+    }
+
+    // If we have rounds, get the fixtures for each round, filtering out deleted ones
+    if (tournament.tournament_rounds && tournament.tournament_rounds.length > 0) {
+      const roundIds = tournament.tournament_rounds.map((round: any) => round.id)
+      
+      const { data: fixtures, error: fixturesError } = await supabase
+        .from('fixtures')
+        .select(`
+          *,
+          team_a:teams!fixtures_team_a_id_fkey(*),
+          team_b:teams!fixtures_team_b_id_fkey(*)
+        `)
+        .in('tournament_round_id', roundIds)
+        .is('deleted_at', null)
+        .order('bracket_position', { ascending: true })
+
+      if (!fixturesError) {
+        // Group fixtures by round
+        const fixturesByRound: { [key: string]: any[] } = {}
+        fixtures.forEach((fixture: any) => {
+          if (!fixturesByRound[fixture.tournament_round_id]) {
+            fixturesByRound[fixture.tournament_round_id] = []
+          }
+          fixturesByRound[fixture.tournament_round_id].push(fixture)
+        })
+
+        // Attach fixtures to their respective rounds
+        tournament.tournament_rounds = tournament.tournament_rounds.map((round: any) => ({
+          ...round,
+          fixtures: fixturesByRound[round.id] || []
+        }))
+      }
     }
 
     return NextResponse.json({ data: tournament })
@@ -96,7 +125,7 @@ export async function PUT(
         updated_at: new Date().toISOString()
       })
       .eq('id', params.id)
-      .eq('deleted_at', null)
+      .is('deleted_at', null) // Use .is() for proper null checking
       .select(`
         *,
         sport:sports(*),
@@ -106,7 +135,18 @@ export async function PUT(
 
     if (error) {
       console.error('Error updating tournament:', error)
-      return NextResponse.json({ error: 'Failed to update tournament' }, { status: 500 })
+      return NextResponse.json({ 
+        error: 'Failed to update tournament',
+        details: error.message,
+        code: error.code
+      }, { status: 500 })
+    }
+    
+    // Check if tournament was actually updated (might have been deleted)
+    if (!tournament) {
+      return NextResponse.json({ 
+        error: 'Tournament not found or has been deleted' 
+      }, { status: 404 })
     }
 
     return NextResponse.json({ 

@@ -17,6 +17,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Save, Trash2, Trophy, Calendar, Users } from "lucide-react"
 import { notifications } from "@/lib/notifications"
+import { ConfirmationModal } from "@/components/admin/ConfirmationModal"
 
 interface Sport {
   id: string
@@ -56,13 +57,29 @@ interface EditTournamentFormProps {
 export function EditTournamentForm({ tournament, sports, teams }: EditTournamentFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  
+  // Helper function to format date for input
+  const formatDateForInput = (dateString: string | null) => {
+    if (!dateString) return ""
+    try {
+      const date = new Date(dateString)
+      // Check if date is valid
+      if (isNaN(date.getTime())) return ""
+      return date.toISOString().slice(0, 16)
+    } catch (e) {
+      console.error('Error formatting date:', e)
+      return ""
+    }
+  }
+  
   const [formData, setFormData] = useState({
     name: tournament.name,
     description: tournament.description || "",
     sport_id: tournament.sport_id,
     tournament_type: tournament.tournament_type,
-    start_date: tournament.start_date ? new Date(tournament.start_date).toISOString().slice(0, 16) : "",
-    end_date: tournament.end_date ? new Date(tournament.end_date).toISOString().slice(0, 16) : "",
+    start_date: formatDateForInput(tournament.start_date),
+    end_date: formatDateForInput(tournament.end_date),
     status: tournament.status,
     winner_id: tournament.winner_id || ""
   })
@@ -72,23 +89,77 @@ export function EditTournamentForm({ tournament, sports, teams }: EditTournament
     setLoading(true)
 
     try {
+      // Validate required fields
+      if (!formData.name.trim()) {
+        throw new Error('Tournament name is required')
+      }
+      
+      if (!formData.sport_id) {
+        throw new Error('Sport is required')
+      }
+      
+      if (!formData.tournament_type) {
+        throw new Error('Tournament type is required')
+      }
+
+      // Validate and format dates
+      let startDateIso = null
+      let endDateIso = null
+      
+      if (formData.start_date) {
+        try {
+          startDateIso = new Date(formData.start_date).toISOString()
+        } catch (dateError) {
+          console.error('Invalid start date format:', formData.start_date)
+          throw new Error('Invalid start date format')
+        }
+      }
+      
+      if (formData.end_date) {
+        try {
+          endDateIso = new Date(formData.end_date).toISOString()
+        } catch (dateError) {
+          console.error('Invalid end date format:', formData.end_date)
+          throw new Error('Invalid end date format')
+        }
+      }
+      
+      // Ensure end date is after start date if both are provided
+      if (startDateIso && endDateIso) {
+        const start = new Date(startDateIso)
+        const end = new Date(endDateIso)
+        if (end < start) {
+          throw new Error('End date must be after start date')
+        }
+      }
+
+      // Log the data being sent for debugging
+      const requestData = {
+        ...formData,
+        start_date: startDateIso,
+        end_date: endDateIso,
+        winner_id: formData.winner_id || null
+      }
+      
+      console.log('Sending tournament update request:', requestData)
+
       const response = await fetch(`/api/admin/tournaments/${tournament.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          start_date: formData.start_date ? new Date(formData.start_date).toISOString() : null,
-          end_date: formData.end_date ? new Date(formData.end_date).toISOString() : null,
-          winner_id: formData.winner_id || null
-        }),
+        body: JSON.stringify(requestData),
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.error || 'Failed to update tournament')
+        const errorData = await response.json()
+        console.error('API Error Response:', errorData)
+        const errorMessage = errorData.error || errorData.details || `Failed to update tournament (${response.status})`
+        throw new Error(errorMessage)
       }
+
+      const result = await response.json()
+      console.log('Tournament update successful:', result)
 
       notifications.showSuccess({
         title: "Success",
@@ -109,10 +180,11 @@ export function EditTournamentForm({ tournament, sports, teams }: EditTournament
   }
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this tournament? This action cannot be undone.')) {
-      return
-    }
+    // Instead of using confirm(), we'll open the modal
+    setIsDeleteModalOpen(true)
+  }
 
+  const handleDeleteConfirm = async () => {
     setLoading(true)
     try {
       const response = await fetch(`/api/admin/tournaments/${tournament.id}`, {
@@ -145,28 +217,28 @@ export function EditTournamentForm({ tournament, sports, teams }: EditTournament
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'draft':
-        return 'bg-slate-100 text-slate-800'
+        return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
       case 'active':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md'
       case 'completed':
-        return 'bg-green-100 text-green-800'
+        return 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
       default:
-        return 'bg-slate-100 text-slate-800'
+        return 'bg-gradient-to-r from-gray-500 to-slate-500 text-white shadow-md'
     }
   }
 
   const getTournamentTypeColor = (type: string) => {
     switch (type) {
       case 'single_elimination':
-        return 'bg-red-100 text-red-800'
+        return 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-md'
       case 'double_elimination':
-        return 'bg-orange-100 text-orange-800'
+        return 'bg-gradient-to-r from-orange-500 to-amber-500 text-white shadow-md'
       case 'round_robin':
-        return 'bg-blue-100 text-blue-800'
+        return 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md'
       case 'swiss':
-        return 'bg-purple-100 text-purple-800'
+        return 'bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white shadow-md'
       default:
-        return 'bg-slate-100 text-slate-800'
+        return 'bg-gradient-to-r from-gray-500 to-slate-500 text-white shadow-md'
     }
   }
 
@@ -188,7 +260,7 @@ export function EditTournamentForm({ tournament, sports, teams }: EditTournament
               </div>
               <div>
                 <div className="text-sm text-slate-600">Status</div>
-                <Badge className={getStatusColor(tournament.status)}>
+                <Badge className={`${getStatusColor(tournament.status)} px-3 py-1.5 rounded-full text-xs font-bold border-0 shadow-sm`}>
                   {tournament.status.charAt(0).toUpperCase() + tournament.status.slice(1)}
                 </Badge>
               </div>
@@ -210,7 +282,7 @@ export function EditTournamentForm({ tournament, sports, teams }: EditTournament
               </div>
               <div>
                 <div className="text-sm text-slate-600">Type</div>
-                <Badge className={getTournamentTypeColor(tournament.tournament_type)}>
+                <Badge className={`${getTournamentTypeColor(tournament.tournament_type)} px-3 py-1.5 rounded-full text-xs font-bold border-0 shadow-sm`}>
                   {tournament.tournament_type.replace('_', ' ')}
                 </Badge>
               </div>
@@ -400,6 +472,18 @@ export function EditTournamentForm({ tournament, sports, teams }: EditTournament
           </Button>
         </div>
       </div>
+      
+      {/* Confirmation Modal for Delete */}
+      <ConfirmationModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Delete Tournament"
+        description={`Are you sure you want to delete the tournament "${tournament.name}"? This action cannot be undone.`}
+        confirmText="Delete Tournament"
+        cancelText="Cancel"
+        isLoading={loading}
+      />
     </form>
   )
 }

@@ -13,13 +13,13 @@ function TournamentCard({ tournament }: TournamentCardProps) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800 border-green-200'
+        return 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md'
       case 'completed':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
       case 'draft':
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gradient-to-r from-gray-500 to-slate-500 text-white shadow-md'
     }
   }
 
@@ -86,7 +86,7 @@ function TournamentCard({ tournament }: TournamentCardProps) {
               </div>
             </div>
             
-            <Badge className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${getStatusColor(tournament.status)} flex items-center gap-1.5`}>
+            <Badge className={`px-3 py-1.5 rounded-full text-xs font-bold border-0 shadow-sm flex items-center gap-1.5 ${getStatusColor(tournament.status)}`}>
               {getStatusIcon(tournament.status)}
               {tournament.status.charAt(0).toUpperCase() + tournament.status.slice(1)}
             </Badge>
@@ -201,6 +201,7 @@ export default async function TournamentsPage() {
         status
       )
     `)
+    .is('deleted_at', null) // Filter out deleted tournaments
     .order("created_at", { ascending: false })
 
   return (

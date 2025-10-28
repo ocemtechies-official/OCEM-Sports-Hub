@@ -6,13 +6,16 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
+    // Await params in Next.js 15
+    const { id } = await params
+    
     const supabase = await getSupabaseServerClient()
 
     // Get tournament details first
     const { data: tournament, error: tournamentError } = await supabase
       .from('tournaments')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (tournamentError) throw tournamentError
@@ -20,7 +23,7 @@ export async function POST(
     // Call the bracket generation function
     const { error: bracketError } = await supabase
       .rpc('generate_tournament_bracket', {
-        tournament_id: params.id
+        tournament_id: id
       })
 
     if (bracketError) throw bracketError

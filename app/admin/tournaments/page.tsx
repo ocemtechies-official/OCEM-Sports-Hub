@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Trophy, Plus, ArrowLeft, Calendar, Users, Settings } from "lucide-react"
 import Link from "next/link"
 import AdminPageWrapper from "../admin-page-wrapper"
+import { TournamentDeleteButton } from "@/components/admin/tournaments/TournamentDeleteButton"
 
 export default async function AdminTournamentsPage() {
   const admin = await isAdmin()
@@ -32,18 +33,19 @@ export default async function AdminTournamentsPage() {
         status
       )
     `)
+    .is('deleted_at', null) // Filter out deleted tournaments
     .order("created_at", { ascending: false })
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'secondary'
+        return 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-md'
       case 'completed':
-        return 'default'
+        return 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white shadow-md'
       case 'draft':
-        return 'outline'
+        return 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-md'
       default:
-        return 'destructive'
+        return 'bg-gradient-to-r from-gray-500 to-slate-500 text-white shadow-md'
     }
   }
 
@@ -78,17 +80,30 @@ export default async function AdminTournamentsPage() {
                       </div>
                       <div>
                         <CardTitle className="text-xl mb-1">{tournament.name}</CardTitle>
-                        <p className="text-slate-600">
-                          {tournament.sport?.name} • {tournament.tournament_type.replace('_', ' ')}
-                        </p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-slate-600">
+                            {tournament.sport?.name}
+                          </span>
+                          <span className="text-slate-400">•</span>
+                          <Badge className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-2 py-0.5 rounded-full text-xs font-bold border-0 shadow-sm">
+                            {tournament.tournament_type.replace('_', ' ')}
+                          </Badge>
+                        </div>
                         {tournament.description && (
                           <p className="text-sm text-slate-500 mt-1">{tournament.description}</p>
                         )}
                       </div>
                     </div>
-                    <Badge variant={getStatusColor(tournament.status)}>
-                      {tournament.status.charAt(0).toUpperCase() + tournament.status.slice(1)}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className={`${getStatusColor(tournament.status)} px-3 py-1.5 rounded-full text-xs font-bold border-0 shadow-sm`}>
+                        {tournament.status.charAt(0).toUpperCase() + tournament.status.slice(1)}
+                      </Badge>
+                      <TournamentDeleteButton 
+                        tournamentId={tournament.id} 
+                        tournamentName={tournament.name} 
+                      />
+                    </div>
+
                   </div>
                 </CardHeader>
                 

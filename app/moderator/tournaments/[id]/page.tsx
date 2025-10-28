@@ -8,7 +8,7 @@ export default async function ModeratorTournamentDetailPage({
 }: {
   params: { id: string }
 }) {
-  const { id } = params
+  const { id } = await params
   const { user, profile, isModerator } = await requireModerator()
   
   if (!user || !isModerator) {
@@ -46,6 +46,8 @@ export default async function ModeratorTournamentDetailPage({
           status,
           winner_id,
           bracket_position,
+          venue,
+          scheduled_at,
           team_a:teams!fixtures_team_a_id_fkey(id, name, logo_url),
           team_b:teams!fixtures_team_b_id_fkey(id, name, logo_url)
         )
@@ -53,6 +55,7 @@ export default async function ModeratorTournamentDetailPage({
     `)
     .eq('id', id)
     .is('deleted_at', null)
+    .is('tournament_rounds.fixtures.deleted_at', null) // Filter out deleted fixtures
     .single()
 
   if (tournamentError || !tournament) {
@@ -78,7 +81,7 @@ export default async function ModeratorTournamentDetailPage({
       .from('teams')
       .select('id, name, logo_url')
       .eq('sport_id', tournament.sport.id)
-      .is('deleted_at', null)
+      // Note: teams table doesn't have deleted_at column, so we don't filter by it
 
     if (teamsError) {
       console.error('Teams fetch error:', {

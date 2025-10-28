@@ -76,6 +76,29 @@ export async function POST(
     
     // Normalize to 'completed' for DB consistency
     const normalizedStatusGlobal = status === 'finished' ? 'completed' : status
+    
+    // Determine winner when completed
+    let winnerId = null
+    if (normalizedStatusGlobal === 'completed') {
+      if (team_a_score > team_b_score) {
+        // Get team_a_id for winner
+        const { data: fixtureData } = await supabase
+          .from('fixtures')
+          .select('team_a_id')
+          .eq('id', id)
+          .single()
+        winnerId = fixtureData?.team_a_id
+      } else if (team_b_score > team_a_score) {
+        // Get team_b_id for winner
+        const { data: fixtureData } = await supabase
+          .from('fixtures')
+          .select('team_b_id')
+          .eq('id', id)
+          .single()
+        winnerId = fixtureData?.team_b_id
+      }
+      // For draws, winnerId remains null
+    }
 
     // Validate sport-specific data if provided
     if (extra) {
@@ -192,33 +215,13 @@ export async function POST(
       }
       
       // Direct update fallback
-      let winnerId = null
-      // Determine winner when completed
-      if (normalizedStatusGlobal === 'completed') {
-        if (team_a_score > team_b_score) {
-          // Get team_a_id for winner
-          const { data: fixtureData } = await supabase
-            .from('fixtures')
-            .select('team_a_id')
-            .eq('id', id)
-            .single()
-          winnerId = fixtureData?.team_a_id
-        } else if (team_b_score > team_a_score) {
-          // Get team_b_id for winner
-          const { data: fixtureData } = await supabase
-            .from('fixtures')
-            .select('team_b_id')
-            .eq('id', id)
-            .single()
-          winnerId = fixtureData?.team_b_id
-        }
-      }
       
       const updateData: any = {
         team_a_score,
         team_b_score,
         status: normalizedStatusGlobal,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        winner_id: winnerId  // Always include winner_id in update data
       }
       
       // Add updated_by and version if columns exist
@@ -237,9 +240,8 @@ export async function POST(
         updateData.version = expected_version + 1
       }
 
-      if (columns?.some(col => col.column_name === 'winner_id')) {
-        updateData.winner_id = winnerId
-      }
+      // Always include winner_id in update data, regardless of column detection
+      updateData.winner_id = winnerId
       
       // Merge sport-specific extra payload if provided
       if (typeof extra === 'object' && extra !== null) {

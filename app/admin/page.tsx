@@ -47,11 +47,11 @@ export default async function AdminPage() {
   ] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("fixtures").select("*", { count: "exact", head: true }).is("deleted_at", null),
-    supabase.from("tournaments").select("*", { count: "exact", head: true }),
+    supabase.from("tournaments").select("*", { count: "exact", head: true }).is("deleted_at", null),
     supabase.from("quizzes").select("*", { count: "exact", head: true }),
     supabase.from("teams").select("*", { count: "exact", head: true }),
     supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "live").is("deleted_at", null),
-    supabase.from("tournaments").select("*", { count: "exact", head: true }).eq("status", "active"),
+    supabase.from("tournaments").select("*", { count: "exact", head: true }).eq("status", "active").is("deleted_at", null),
     supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "scheduled").is("deleted_at", null),
     supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "completed").is("deleted_at", null),
     supabase.from("profiles").select("id, full_name, email, created_at").order("created_at", { ascending: false }).limit(5),
@@ -130,8 +130,10 @@ export default async function AdminPage() {
       <div className="space-y-8 p-4 sm:p-6 lg:p-8">
         {/* Page Header */}
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Dashboard Overview</h1>
-          <p className="text-slate-600 mt-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
+            Dashboard Overview
+          </h1>
+          <p className="text-slate-600 mt-2 text-lg">
             Welcome back, {profile.full_name || "Admin"}! Here's what's happening with your platform.
           </p>
         </div>
