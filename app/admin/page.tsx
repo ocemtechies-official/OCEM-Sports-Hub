@@ -13,6 +13,7 @@ import {
   Activity,
   Shield,
   ArrowRight,
+  Mail,
 } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
@@ -39,25 +40,36 @@ export default async function AdminPage() {
     { count: totalQuizzes },
     { count: totalTeams },
     { count: liveFixtures },
-    { count: activeTournaments },
     { count: scheduledFixtures },
     { count: completedFixtures },
     { data: recentUsers },
     { data: upcomingFixtures },
+    { count: contactMessages },
+    { count: unreadMessages }
   ] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("fixtures").select("*", { count: "exact", head: true }).is("deleted_at", null),
     supabase.from("tournaments").select("*", { count: "exact", head: true }).is("deleted_at", null),
-    supabase.from("quizzes").select("*", { count: "exact", head: true }),
+    supabase.from("quizzes").select("*", { count: "exact", head: true }).eq("is_active", true),
     supabase.from("teams").select("*", { count: "exact", head: true }),
     supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "live").is("deleted_at", null),
-    supabase.from("tournaments").select("*", { count: "exact", head: true }).eq("status", "active").is("deleted_at", null),
     supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "scheduled").is("deleted_at", null),
     supabase.from("fixtures").select("*", { count: "exact", head: true }).eq("status", "completed").is("deleted_at", null),
-    supabase.from("profiles").select("id, full_name, email, created_at").order("created_at", { ascending: false }).limit(5),
-    supabase.from("fixtures").select("*, sport:sports(name), team_a:teams!fixtures_team_a_id_fkey(name), team_b:teams!fixtures_team_b_id_fkey(name)").eq("status", "scheduled").is("deleted_at", null).order("scheduled_at", { ascending: true }).limit(5),
+    supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(5),
+    supabase.from("fixtures").select(`
+      id,
+      scheduled_at,
+      team_a_id,
+      team_b_id,
+      sport_id,
+      team_a:teams!fixtures_team_a_id_fkey(name),
+      team_b:teams!fixtures_team_b_id_fkey(name),
+      sport:sports(name)
+    `).eq("status", "scheduled").is("deleted_at", null).order("scheduled_at").limit(5),
+    supabase.from("contact_messages").select("*", { count: "exact", head: true }),
+    supabase.from("contact_messages").select("*", { count: "exact", head: true }).eq("is_read", false)
   ])
-  
+
   const stats = [
     {
       title: "Total Users",
@@ -114,6 +126,16 @@ export default async function AdminPage() {
       href: "/admin/live",
       pulse: true,
     },
+    {
+      title: "Messages",
+      value: contactMessages || 0,
+      change: unreadMessages && unreadMessages > 0 ? `${unreadMessages} unread` : null,
+      trend: unreadMessages && unreadMessages > 0 ? "up" : null,
+      icon: Mail,
+      color: "cyan",
+      href: "/admin/contact-messages",
+      pulse: unreadMessages && unreadMessages > 0,
+    },
   ]
 
   const colorClasses = {
@@ -123,6 +145,7 @@ export default async function AdminPage() {
     purple: { bg: "bg-purple-50", text: "text-purple-600", border: "border-purple-200" },
     blue: { bg: "bg-blue-50", text: "text-blue-600", border: "border-blue-200" },
     red: { bg: "bg-red-50", text: "text-red-600", border: "border-red-200" },
+    cyan: { bg: "bg-cyan-50", text: "text-cyan-600", border: "border-cyan-200" },
   }
 
   return (
@@ -266,9 +289,9 @@ export default async function AdminPage() {
                     <div key={fixture.id} className="flex items-center justify-between py-2 border-b last:border-0">
                       <div className="flex-1">
                         <p className="font-medium text-slate-900 text-sm">
-                          {fixture.team_a?.name} vs {fixture.team_b?.name}
+                          {fixture.team_a && fixture.team_a.length > 0 ? fixture.team_a[0].name : 'Team A'} vs {fixture.team_b && fixture.team_b.length > 0 ? fixture.team_b[0].name : 'Team B'}
                         </p>
-                        <p className="text-xs text-slate-500">{fixture.sport?.name}</p>
+                        <p className="text-xs text-slate-500">{fixture.sport && fixture.sport.length > 0 ? fixture.sport[0].name : 'Sport'}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-slate-500">

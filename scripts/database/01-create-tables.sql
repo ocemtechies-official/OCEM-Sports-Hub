@@ -138,6 +138,17 @@ CREATE TABLE IF NOT EXISTS public.leaderboards (
   UNIQUE(sport_id, team_id)
 );
 
+-- Contact Messages table
+CREATE TABLE IF NOT EXISTS public.contact_messages (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  subject TEXT NOT NULL,
+  message TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Create indexes for better query performance
 CREATE INDEX IF NOT EXISTS idx_fixtures_sport ON public.fixtures(sport_id);
 CREATE INDEX IF NOT EXISTS idx_fixtures_status ON public.fixtures(status);
@@ -149,3 +160,4 @@ CREATE INDEX IF NOT EXISTS idx_quiz_attempts_quiz ON public.quiz_attempts(quiz_i
 CREATE INDEX IF NOT EXISTS idx_chess_games_players ON public.chess_games(white_player_id, black_player_id);
 CREATE INDEX IF NOT EXISTS idx_chess_moves_game ON public.chess_moves(game_id);
 CREATE INDEX IF NOT EXISTS idx_leaderboards_sport ON public.leaderboards(sport_id);
+CREATE INDEX IF NOT EXISTS idx_contact_messages_created ON public.contact_messages(created_at);
