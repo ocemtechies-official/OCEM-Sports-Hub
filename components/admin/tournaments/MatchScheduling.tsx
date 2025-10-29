@@ -29,6 +29,7 @@ interface Match {
 interface Round {
   id: string
   name: string
+  roundNumber: number // Add roundNumber field
   matches: Match[]
 }
 
@@ -78,6 +79,7 @@ export function MatchScheduling({ tournament }: MatchSchedulingProps) {
               rounds: updatedTournament.tournament_rounds.map((round: any) => ({
                 id: round.id,
                 name: round.round_name,
+                roundNumber: round.round_number, // Add round_number for sorting
                 matches: round.fixtures?.map((match: any) => ({
                   id: match.id,
                   teamA: match.team_a?.name || null,
@@ -91,7 +93,6 @@ export function MatchScheduling({ tournament }: MatchSchedulingProps) {
           }
         }
       } catch (error) {
-        console.error('Error in periodic refresh:', error)
         // Don't show notifications for periodic refresh errors
       }
     }, 120000)
@@ -125,6 +126,7 @@ export function MatchScheduling({ tournament }: MatchSchedulingProps) {
             rounds: updatedTournament.tournament_rounds.map((round: any) => ({
               id: round.id,
               name: round.round_name,
+              roundNumber: round.round_number, // Add round_number for sorting
               matches: round.fixtures?.map((match: any) => ({
                 id: match.id,
                 teamA: match.team_a?.name || null,
@@ -146,7 +148,6 @@ export function MatchScheduling({ tournament }: MatchSchedulingProps) {
         }
       }
     } catch (error) {
-      console.error('Error refreshing schedule data:', error)
       if (!initialLoad) {
         notifications.showError({
           title: "Error",
@@ -166,25 +167,68 @@ export function MatchScheduling({ tournament }: MatchSchedulingProps) {
     setLoading(true)
 
     try {
-      const response = await fetch(`/api/admin/tournaments/${tournament.id}/schedule`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(schedule),
+      // Collect all the modified fixtures
+      const updatedFixtures: Array<{id: string, scheduledAt: Date | null, venue: string, status: string}> = []
+      
+      schedule.rounds.forEach(round => {
+        round.matches.forEach(match => {
+          updatedFixtures.push({
+            id: match.id,
+            scheduledAt: match.scheduledAt,
+            venue: match.venue,
+            status: match.status
+          })
+        })
       })
 
-      if (!response.ok) {
-        throw new Error('Failed to update match schedule')
-      }
+      // Update each fixture individually using the new API endpoint
+      const updatePromises = updatedFixtures.map(async (fixture) => {
+        // Prepare the data for the API call
+        const updateData: any = {
+          fixtureId: fixture.id
+        }
+        
+        // Only include fields that have actually changed
+        if (fixture.scheduledAt !== undefined) {
+          updateData.scheduledAt = fixture.scheduledAt ? fixture.scheduledAt.toISOString() : null
+        }
+        
+        if (fixture.venue !== undefined) {
+          updateData.venue = fixture.venue || null
+        }
+        
+        if (fixture.status !== undefined) {
+          updateData.status = fixture.status || 'scheduled'
+        }
+
+        const response = await fetch(`/api/admin/tournaments/${tournament.id}/fixtures/update-details`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updateData),
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.error || `Failed to update fixture ${fixture.id}`)
+        }
+
+        return response.json()
+      })
+
+      // Wait for all updates to complete
+      await Promise.all(updatePromises)
 
       notifications.showSuccess({
         title: "Success",
         description: "Match schedule updated successfully"
       })
+      
+      // Refresh the data to ensure consistency
+      await refreshScheduleData()
     } catch (error: any) {
-      console.error('Error updating match schedule:', error)
       notifications.showError({
         title: "Error",
-        description: error.message
+        description: error.message || "Failed to update match schedule"
       })
     } finally {
       setLoading(false)
@@ -251,7 +295,7 @@ export function MatchScheduling({ tournament }: MatchSchedulingProps) {
             </div>
           </div>
         ) : schedule.rounds.length > 0 ? (
-          schedule.rounds.map((round: any) => (
+          [...schedule.rounds].sort((a, b) => a.roundNumber - b.roundNumber).map((round: any) => (
             <Card key={round.id}>
               <CardHeader>
                 <CardTitle>{round.name}</CardTitle>

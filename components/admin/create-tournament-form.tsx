@@ -22,6 +22,7 @@ interface Team {
   id: string
   name: string
   color?: string
+  sport_id?: string // Add sport_id to the Team interface
 }
 
 interface CreateTournamentFormProps {
@@ -122,6 +123,9 @@ export function CreateTournamentForm({ sports, teams }: CreateTournamentFormProp
     }
   }
 
+  // Filter teams by selected sport
+  const filteredTeams = teams.filter(team => !formData.sport_id || team.sport_id === formData.sport_id)
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
@@ -147,7 +151,11 @@ export function CreateTournamentForm({ sports, teams }: CreateTournamentFormProp
               <Label htmlFor="sport">Sport *</Label>
               <Select
                 value={formData.sport_id}
-                onValueChange={(value) => setFormData({ ...formData, sport_id: value })}
+                onValueChange={(value) => {
+                  setFormData({ ...formData, sport_id: value })
+                  // Clear selected teams when sport changes
+                  setSelectedTeams([])
+                }}
                 required
               >
                 <SelectTrigger>
@@ -239,36 +247,43 @@ export function CreateTournamentForm({ sports, teams }: CreateTournamentFormProp
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {teams.map((team) => (
-              <div
-                key={team.id}
-                className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
-                  selectedTeams.includes(team.id)
-                    ? 'border-blue-500 bg-blue-50'
-                    : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                }`}
-                onClick={() => toggleTeamSelection(team.id)}
-              >
+          {formData.sport_id ? (
+            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {filteredTeams.map((team) => (
                 <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
-                  style={{ backgroundColor: team.color || "#6b7280" }}
+                  key={team.id}
+                  className={`flex items-center gap-3 p-3 border rounded-lg cursor-pointer transition-all ${
+                    selectedTeams.includes(team.id)
+                      ? 'border-blue-500 bg-blue-50'
+                      : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                  }`}
+                  onClick={() => toggleTeamSelection(team.id)}
                 >
-                  {team.name.charAt(0)}
-                </div>
-                <span className="font-medium text-slate-900 flex-1 min-w-0 truncate">
-                  {team.name}
-                </span>
-                {selectedTeams.includes(team.id) && (
-                  <div className="flex-shrink-0">
-                    <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
-                      <Plus className="h-3 w-3 text-white rotate-45" />
-                    </div>
+                  <div
+                    className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
+                    style={{ backgroundColor: team.color || "#6b7280" }}
+                  >
+                    {team.name.charAt(0)}
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+                  <span className="font-medium text-slate-900 flex-1 min-w-0 truncate">
+                    {team.name}
+                  </span>
+                  {selectedTeams.includes(team.id) && (
+                    <div className="flex-shrink-0">
+                      <div className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center">
+                        <Plus className="h-3 w-3 text-white rotate-45" />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-slate-500">
+              <Users className="mx-auto h-12 w-12 text-slate-300 mb-4" />
+              <p>Please select a sport first to view available teams</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
