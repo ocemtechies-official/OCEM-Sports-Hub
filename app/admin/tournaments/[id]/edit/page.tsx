@@ -14,7 +14,7 @@ import { TournamentRules } from "@/components/admin/tournaments/TournamentRules"
 import { BracketManagement } from "@/components/admin/tournaments/BracketManagement"
 
 interface EditTournamentPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
 // Define types for our data
@@ -25,18 +25,12 @@ interface SimpleTournament {
 }
 
 export default async function EditTournamentPage({ params }: EditTournamentPageProps) {
-  // In Next.js 15, params are automatically awaited, so we can use params.id directly
-  const id = params.id
+  // In Next.js 15, params need to be awaited before using their properties
+  const { id } = await params
   
   const { isAdmin, user, profile } = await requireAdmin()
 
-  console.log("User:", user)
-  console.log("Profile:", profile)
-  console.log("Is Admin:", isAdmin)
-  console.log("Tournament ID:", id)
-
   if (!isAdmin) {
-    console.log("User is not admin, redirecting to home")
     redirect("/")
   }
 
@@ -50,11 +44,7 @@ export default async function EditTournamentPage({ params }: EditTournamentPageP
     .is('deleted_at', null) // Use .is() for proper null checking
     .single()
 
-  console.log("Simple tournament check:", { simpleTournament, simpleError })
-
   if (simpleError || !simpleTournament) {
-    console.log("Simple check failed, showing 404")
-    console.log("Simple error details:", simpleError)
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-8">
         <div className="max-w-4xl mx-auto">
@@ -108,11 +98,7 @@ export default async function EditTournamentPage({ params }: EditTournamentPageP
     .is('tournament_rounds.fixtures.deleted_at', null) // Filter out deleted fixtures
     .single()
 
-  console.log("Full tournament query result:", { tournament, tournamentError })
-
   if (tournamentError || !tournament) {
-    console.log("Full tournament query failed, showing error page")
-    console.log("Full tournament error details:", tournamentError)
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-8">
         <div className="max-w-4xl mx-auto">
@@ -143,11 +129,7 @@ export default async function EditTournamentPage({ params }: EditTournamentPageP
     supabase.from("teams").select("*").order("name"),
   ])
 
-  console.log("Sports query result:", { sports, sportsError })
-  console.log("Teams query result:", { teams, teamsError })
-
   if (sportsError || teamsError) {
-    console.log("Sports or teams query failed")
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-8">
         <div className="max-w-4xl mx-auto">
@@ -252,9 +234,3 @@ export default async function EditTournamentPage({ params }: EditTournamentPageP
     </div>
   )
 }
-
-
-
-
-
-

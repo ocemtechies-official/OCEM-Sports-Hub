@@ -125,6 +125,16 @@ const navigation: NavigationSection[] = [
     ],
   },
   {
+    title: "Communications",
+    items: [
+      { 
+        name: "Messages", 
+        href: "/admin/contact-messages", 
+        icon: FileText 
+      },
+    ],
+  },
+  {
     title: "System",
     items: [
       { 

@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Github, Twitter, Mail, Facebook, Instagram, Youtube } from "lucide-react"
+import { Github, Mail, Facebook, Instagram, Twitter } from "lucide-react"
 import ParticlesBackground from "@/components/ui/particles-background"
 
 export function Footer() {
@@ -51,19 +51,16 @@ export function Footer() {
               The ultimate multi-sport tournament platform featuring live scores, interactive quizzes, and competitive chess matches.
             </p>
             <div className="flex gap-3 md:gap-4 footer-social-icons">
-              <a href="#" className="bg-slate-800/50 backdrop-blur-sm p-2 md:p-3 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:bg-blue-500 hover:text-white hover:shadow-blue-500/30 border border-slate-700 hover:border-blue-400 hover:scale-110 glow-on-hover footer-social-icon">
+              <a href="https://www.facebook.com/ocemtechies" target="_blank" rel="noopener noreferrer" className="bg-slate-800/50 backdrop-blur-sm p-2 md:p-3 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:bg-blue-500 hover:text-white hover:shadow-blue-500/30 border border-slate-700 hover:border-blue-400 hover:scale-110 glow-on-hover footer-social-icon">
                 <Facebook className="h-4 w-4 md:h-5 md:w-5" />
               </a>
               <a href="#" className="bg-slate-800/50 backdrop-blur-sm p-2 md:p-3 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:bg-sky-400 hover:text-white hover:shadow-sky-400/30 border border-slate-700 hover:border-sky-300 hover:scale-110 glow-on-hover footer-social-icon">
                 <Twitter className="h-4 w-4 md:h-5 md:w-5" />
               </a>
-              <a href="#" className="bg-slate-800/50 backdrop-blur-sm p-2 md:p-3 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 hover:text-white hover:shadow-pink-500/30 border border-slate-700 hover:border-pink-400 hover:scale-110 glow-on-hover footer-social-icon">
+              <a href="https://www.instagram.com/ocemtechies" target="_blank" rel="noopener noreferrer" className="bg-slate-800/50 backdrop-blur-sm p-2 md:p-3 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500 hover:text-white hover:shadow-pink-500/30 border border-slate-700 hover:border-pink-400 hover:scale-110 glow-on-hover footer-social-icon">
                 <Instagram className="h-4 w-4 md:h-5 md:w-5" />
               </a>
-              <a href="#" className="bg-slate-800/50 backdrop-blur-sm p-2 md:p-3 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:bg-red-500 hover:text-white hover:shadow-red-500/30 border border-slate-700 hover:border-red-400 hover:scale-110 glow-on-hover footer-social-icon">
-                <Youtube className="h-4 w-4 md:h-5 md:w-5" />
-              </a>
-              <a href="https://github.com/FarhanAlam-Official" target="_blank" rel="noopener noreferrer" className="bg-slate-800/50 backdrop-blur-sm p-2 md:p-3 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:bg-white hover:text-black hover:shadow-white/30 border border-slate-700 hover:border-white hover:scale-110 glow-on-hover footer-social-icon">
+              <a href="https://github.com/ocemtechies-official" target="_blank" rel="noopener noreferrer" className="bg-slate-800/50 backdrop-blur-sm p-2 md:p-3 rounded-full transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg hover:bg-white hover:text-black hover:shadow-white/30 border border-slate-700 hover:border-white hover:scale-110 glow-on-hover footer-social-icon">
                 <Github className="h-4 w-4 md:h-5 md:w-5" />
               </a>
             </div>
@@ -173,7 +170,7 @@ export function Footer() {
                 <div>
                   <p className="font-medium text-white text-sm md:text-base">Email</p>
                   <span className="group-hover:text-cyan-300 transition-colors duration-300 text-xs md:text-sm">
-                    support@ocemsportshub.com
+                    ocemtechies@gmail.com
                   </span>
                 </div>
               </li>
@@ -186,7 +183,7 @@ export function Footer() {
                 <div>
                   <p className="font-medium text-white text-sm md:text-base">Address</p>
                   <span className="group-hover:text-cyan-300 transition-colors duration-300 text-xs md:text-sm">
-                    OCEM Sports Complex<br />Main Campus<br />City, State 12345
+                    Shastri Marga , Gaindakot , Nawalpur , Gandaki Province
                   </span>
                 </div>
               </li>
@@ -210,11 +207,12 @@ export function Footer() {
                 <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
-              <Link href="#" className="hover:text-cyan-400 transition-colors duration-300 relative group py-1 footer-link-hover">
+              <Link href="/contact" className="hover:text-cyan-400 transition-colors duration-300 relative group py-1 footer-link-hover">
                 <span className="relative z-10">Contact</span>
                 <span className="absolute bottom-0 left-0 w-0 h-full bg-cyan-500/10 rounded transition-all duration-300 group-hover:w-full"></span>
                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-500 to-emerald-500 transition-all duration-300 group-hover:w-full"></span>
               </Link>
+
             </div>
           </div>
           
