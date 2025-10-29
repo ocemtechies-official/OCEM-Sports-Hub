@@ -54,8 +54,12 @@ export async function POST(
         // Log each fixture for debugging
         console.log('Processing fixture:', fixture);
         
-        // Skip fixtures without teams
-        if (!fixture.teamA && !fixture.teamB) {
+        // Skip fixtures without teams, but allow placeholder teams
+        // Check if it's a placeholder team (starts with placeholder-)
+        const isPlaceholderTeam = (team: any) => team && team.id && team.id.startsWith('placeholder-');
+        
+        // Skip only if neither team is set and neither is a placeholder
+        if (!fixture.teamA && !fixture.teamB && !isPlaceholderTeam(fixture.teamA) && !isPlaceholderTeam(fixture.teamB)) {
           console.log('Skipping fixture without teams');
           continue;
         }
@@ -67,14 +71,18 @@ export async function POST(
         // Check if this is an existing fixture (valid UUID) or a temporary one
         const isExistingFixture = fixture.id && !fixture.id.startsWith('temp-');
         
+        // For placeholder teams, we set team IDs to null in the database
+        const teamAId = isPlaceholderTeam(fixture.teamA) ? null : (fixture.teamA?.id || null);
+        const teamBId = isPlaceholderTeam(fixture.teamB) ? null : (fixture.teamB?.id || null);
+        
         if (isExistingFixture) {
           // Update existing fixture
           console.log('Updating existing fixture:', fixture.id);
           const { data: updateData, error: updateError } = await supabase
             .from('fixtures')
             .update({
-              team_a_id: fixture.teamA?.id || null,
-              team_b_id: fixture.teamB?.id || null,
+              team_a_id: teamAId,
+              team_b_id: teamBId,
               scheduled_at: fixture.scheduledAt ? new Date(fixture.scheduledAt).toISOString() : null,
               venue: fixture.venue || null,
               sport_id: tournament.sport_id,
@@ -99,8 +107,8 @@ export async function POST(
             .insert({
               tournament_id: id, // Use awaited id
               tournament_round_id: round.id,
-              team_a_id: fixture.teamA?.id || null,
-              team_b_id: fixture.teamB?.id || null,
+              team_a_id: teamAId,
+              team_b_id: teamBId,
               scheduled_at: fixture.scheduledAt ? new Date(fixture.scheduledAt).toISOString() : null,
               venue: fixture.venue || null,
               sport_id: tournament.sport_id,

@@ -96,57 +96,57 @@ export function UserNav({ profile }: UserNavProps) {
         <DropdownMenuSeparator className="my-2 bg-slate-200" />
         <DropdownMenuItem 
           onClick={() => router.push("/profile")}
-          className="cursor-pointer py-2.5 rounded-lg transition-all duration-200 focus:bg-blue-50 focus:text-blue-700"
+          className="group cursor-pointer py-2.5 rounded-lg transition-all duration-200 hover:bg-blue-50/80 focus:bg-blue-50/80 hover:text-blue-700 focus:text-blue-700"
         >
-          <User className="mr-3 h-4.5 w-4.5 text-slate-500 group-hover:text-blue-600 flex-shrink-0" />
-          <span className="font-medium text-slate-700 group-hover:text-blue-600">Profile</span>
+          <User className="mr-3 h-4.5 w-4.5 text-slate-500 group-hover:text-blue-700 flex-shrink-0" />
+          <span className="font-medium text-slate-700 group-hover:text-blue-700">Profile</span>
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => router.push("/profile/registrations")}
-          className="cursor-pointer py-2.5 rounded-lg transition-all duration-200 focus:bg-blue-50 focus:text-blue-700"
+          className="group cursor-pointer py-2.5 rounded-lg transition-all duration-200 hover:bg-blue-50/80 focus:bg-blue-50/80 hover:text-blue-700 focus:text-blue-700"
         >
-          <UserCheck className="mr-3 h-4.5 w-4.5 text-slate-500 group-hover:text-blue-600 flex-shrink-0" />
-          <span className="font-medium text-slate-700 group-hover:text-blue-600">My Registrations</span>
+          <UserCheck className="mr-3 h-4.5 w-4.5 text-slate-500 group-hover:text-blue-700 flex-shrink-0" />
+          <span className="font-medium text-slate-700 group-hover:text-blue-700">My Registrations</span>
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => router.push("/profile/my-team")}
-          className="cursor-pointer py-2.5 rounded-lg transition-all duration-200 focus:bg-yellow-50 focus:text-yellow-700"
+          className="group cursor-pointer py-2.5 rounded-lg transition-all duration-200 hover:bg-yellow-50/80 focus:bg-yellow-50/80 hover:text-yellow-700 focus:text-yellow-700"
         >
-          <Crown className="mr-3 h-4.5 w-4.5 text-slate-500 group-hover:text-yellow-600 flex-shrink-0" />
-          <span className="font-medium text-slate-700 group-hover:text-yellow-600">My Team</span>
+          <Crown className="mr-3 h-4.5 w-4.5 text-slate-500 group-hover:text-yellow-700 flex-shrink-0" />
+          <span className="font-medium text-slate-700 group-hover:text-yellow-700">My Team</span>
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => router.push("/settings")}
-          className="cursor-pointer py-2.5 rounded-lg transition-all duration-200 focus:bg-blue-50 focus:text-blue-700"
+          className="group cursor-pointer py-2.5 rounded-lg transition-all duration-200 hover:bg-blue-50/80 focus:bg-blue-50/80 hover:text-blue-700 focus:text-blue-700"
         >
-          <Settings className="mr-3 h-4.5 w-4.5 text-slate-500 group-hover:text-blue-600 flex-shrink-0" />
-          <span className="font-medium text-slate-700 group-hover:text-blue-600">Settings</span>
+          <Settings className="mr-3 h-4.5 w-4.5 text-slate-500 group-hover:text-blue-700 flex-shrink-0" />
+          <span className="font-medium text-slate-700 group-hover:text-blue-700">Settings</span>
         </DropdownMenuItem>
         {(profile.role === "moderator" || profile.role === "admin") && (
           <DropdownMenuItem 
             onClick={() => router.push("/moderator")}
-            className="cursor-pointer py-2.5 rounded-lg transition-all duration-200 focus:bg-green-50 focus:text-green-700"
+            className="group cursor-pointer py-2.5 rounded-lg transition-all duration-200 hover:bg-green-50/80 focus:bg-green-50/80 hover:text-green-700 focus:text-green-700"
           >
-            <UserCog className="mr-3 h-4.5 w-4.5 text-slate-500 group-hover:text-green-600 flex-shrink-0"/>
-            <span className="font-medium text-slate-700 group-hover:text-green-600">Moderator Dashboard</span>
+            <UserCog className="mr-3 h-4.5 w-4.5 text-slate-500 group-hover:text-green-700 flex-shrink-0"/>
+            <span className="font-medium text-slate-700 group-hover:text-green-700">Moderator Dashboard</span>
           </DropdownMenuItem>
         )}
         {profile.role === "admin" && (
           <DropdownMenuItem 
             onClick={() => router.push("/admin")}
-            className="cursor-pointer py-2.5 rounded-lg transition-all duration-200 focus:bg-blue-50 focus:text-blue-700"
+            className="group cursor-pointer py-2.5 rounded-lg transition-all duration-200 hover:bg-blue-50/80 focus:bg-blue-50/80 hover:text-blue-700 focus:text-blue-700"
           >
-            <Shield className="mr-3 h-4.5 w-4.5 text-slate-500 group-hover:text-blue-600 flex-shrink-0"/>
-            <span className="font-medium text-slate-700 group-hover:text-blue-600">Admin Panel</span>
+            <Shield className="mr-3 h-4.5 w-4.5 text-slate-500 group-hover:text-blue-700 flex-shrink-0"/>
+            <span className="font-medium text-slate-700 group-hover:text-blue-700">Admin Panel</span>
           </DropdownMenuItem>
         )}
         <DropdownMenuSeparator className="my-2 bg-slate-200" />
         <DropdownMenuItem 
           onClick={handleSignOut}
-          className="cursor-pointer py-2.5 rounded-lg transition-all duration-200 focus:bg-red-50 focus:text-red-700"
+          className="group cursor-pointer py-2.5 rounded-lg transition-all duration-200 hover:bg-red-50/80 focus:bg-red-50/80 hover:text-red-700 focus:text-red-700"
         >
           <LogOut className="mr-3 h-4.5 w-4.5 text-red-500 flex-shrink-0" />
-          <span className="font-medium text-red-600">Sign Out</span>
+          <span className="font-medium text-red-700">Sign Out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

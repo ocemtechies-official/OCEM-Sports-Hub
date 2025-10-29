@@ -4,7 +4,7 @@ import { requireAdmin } from '@/lib/auth'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { isAdmin } = await requireAdmin()
@@ -12,6 +12,9 @@ export async function GET(
     if (!isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Await params before using them
+    const { id } = await params
 
     const supabase = await getSupabaseServerClient()
     
@@ -21,7 +24,7 @@ export async function GET(
         *,
         questions:quiz_questions(*)
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('deleted_at', null)
       .single()
 
@@ -39,7 +42,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { isAdmin } = await requireAdmin()
@@ -60,6 +63,9 @@ export async function PUT(
 
     const supabase = await getSupabaseServerClient()
     
+    // Await params before using them
+    const { id } = await params
+    
     // Update the quiz
     const { data: quiz, error: quizError } = await supabase
       .from('quizzes')
@@ -71,7 +77,7 @@ export async function PUT(
         is_active: is_active !== undefined ? is_active : true,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('deleted_at', null)
       .select('*')
       .single()
@@ -87,13 +93,13 @@ export async function PUT(
       await supabase
         .from('quiz_questions')
         .delete()
-        .eq('quiz_id', params.id)
+        .eq('quiz_id', id)
 
       // Insert new questions
       if (questions.length > 0) {
         const questionsWithQuizId = questions.map((q: any) => ({
           ...q,
-          quiz_id: params.id
+          quiz_id: id
         }))
 
         const { error: questionsError } = await supabase
@@ -119,7 +125,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { isAdmin } = await requireAdmin()
@@ -130,9 +136,12 @@ export async function DELETE(
 
     const supabase = await getSupabaseServerClient()
     
+    // Await params before using them
+    const { id } = await params
+    
     // Use the soft delete function
     const { data, error } = await supabase
-      .rpc('soft_delete_quiz', { quiz_id: params.id })
+      .rpc('soft_delete_quiz', { quiz_id: id })
 
     if (error) {
       console.error('Error soft deleting quiz:', error)

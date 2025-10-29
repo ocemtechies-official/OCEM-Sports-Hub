@@ -173,8 +173,12 @@ export function BracketManagement({ tournament }: BracketManagementProps) {
               roundName: round.round_name,
               fixtures: round.fixtures?.map(fixture => ({
                 id: fixture.id,
-                teamA: fixture.team_a ? { id: fixture.team_a.id, name: fixture.team_a.name } : null,
-                teamB: fixture.team_b ? { id: fixture.team_b.id, name: fixture.team_b.name } : null,
+                teamA: fixture.team_a ? { id: fixture.team_a.id, name: fixture.team_a.name } : 
+                       (fixture.team_a_id === null && (round.round_number > 1) ? 
+                         { id: `placeholder-a-${round.id}-${fixture.id}`, name: "Team A (Winner of previous match)" } : null),
+                teamB: fixture.team_b ? { id: fixture.team_b.id, name: fixture.team_b.name } : 
+                       (fixture.team_b_id === null && (round.round_number > 1) ? 
+                         { id: `placeholder-b-${round.id}-${fixture.id}`, name: "Team B (Winner of previous match)" } : null),
                 scheduledAt: fixture.scheduled_at ? new Date(fixture.scheduled_at) : null,
                 venue: fixture.venue || "",
                 bracketPosition: 0
@@ -221,8 +225,12 @@ export function BracketManagement({ tournament }: BracketManagementProps) {
               roundName: round.round_name,
               fixtures: round.fixtures?.map(fixture => ({
                 id: fixture.id,
-                teamA: fixture.team_a ? { id: fixture.team_a.id, name: fixture.team_a.name } : null,
-                teamB: fixture.team_b ? { id: fixture.team_b.id, name: fixture.team_b.name } : null,
+                teamA: fixture.team_a ? { id: fixture.team_a.id, name: fixture.team_a.name } : 
+                       (fixture.team_a_id === null && (round.round_number > 1) ? 
+                         { id: `placeholder-a-${round.id}-${fixture.id}`, name: "Team A (Winner of previous match)" } : null),
+                teamB: fixture.team_b ? { id: fixture.team_b.id, name: fixture.team_b.name } : 
+                       (fixture.team_b_id === null && (round.round_number > 1) ? 
+                         { id: `placeholder-b-${round.id}-${fixture.id}`, name: "Team B (Winner of previous match)" } : null),
                 scheduledAt: fixture.scheduled_at ? new Date(fixture.scheduled_at) : null,
                 venue: fixture.venue || "",
                 bracketPosition: 0
@@ -294,8 +302,12 @@ export function BracketManagement({ tournament }: BracketManagementProps) {
                 roundName: round.round_name,
                 fixtures: round.fixtures?.map((fixture: any) => ({
                   id: fixture.id,
-                  teamA: fixture.team_a ? { id: fixture.team_a.id, name: fixture.team_a.name } : null,
-                  teamB: fixture.team_b ? { id: fixture.team_b.id, name: fixture.team_b.name } : null,
+                  teamA: fixture.team_a ? { id: fixture.team_a.id, name: fixture.team_a.name } : 
+                         (fixture.team_a_id === null && (round.round_number > 1) ? 
+                           { id: `placeholder-a-${round.id}-${fixture.id}`, name: "Team A (Winner of previous match)" } : null),
+                  teamB: fixture.team_b ? { id: fixture.team_b.id, name: fixture.team_b.name } : 
+                         (fixture.team_b_id === null && (round.round_number > 1) ? 
+                           { id: `placeholder-b-${round.id}-${fixture.id}`, name: "Team B (Winner of previous match)" } : null),
                   scheduledAt: fixture.scheduled_at ? new Date(fixture.scheduled_at) : null,
                   venue: fixture.venue || "",
                   bracketPosition: 0
@@ -678,12 +690,20 @@ export function BracketManagement({ tournament }: BracketManagementProps) {
   const getAvailableTeams = (excludeTeamId?: string | null) => {
     if (!tournament.tournament_teams) return [];
     
-    return tournament.tournament_teams
+    const teams = tournament.tournament_teams
       .filter(tt => tt.team_id !== excludeTeamId)
       .map(tt => ({ 
         id: tt.team_id, 
         name: (tt.team && tt.team.name) ? tt.team.name : "Unknown Team" 
-      }))
+      }));
+      
+    // Add placeholder teams for later rounds
+    teams.push(
+      { id: "placeholder-a", name: "Team A (Winner of previous match)" },
+      { id: "placeholder-b", name: "Team B (Winner of previous match)" }
+    );
+    
+    return teams;
   }
 
   // Function to automatically progress winners to the next round
@@ -911,7 +931,7 @@ export function BracketManagement({ tournament }: BracketManagementProps) {
               <h3 className="font-semibold mb-4">Bracket Preview</h3>
               
               <div className="space-y-6">
-                {localRounds.map(round => (
+                {[...localRounds].sort((a, b) => a.roundNumber - b.roundNumber).map(round => (
                   <div key={round.id} className="border rounded-lg overflow-hidden">
                     <div className="bg-slate-100 px-4 py-2 font-medium flex justify-between items-center">
                       <span>{round.roundName}</span>
@@ -927,7 +947,15 @@ export function BracketManagement({ tournament }: BracketManagementProps) {
                               <Select
                                 value={fixture.teamA?.id || ""}
                                 onValueChange={(value) => {
-                                  const team = getAvailableTeams(fixture.teamB?.id).find(t => t.id === value);
+                                  // Handle placeholder teams
+                                  let team = null;
+                                  if (value === "placeholder-a") {
+                                    team = { id: `placeholder-a-${round.id}-${fixture.id}`, name: "Team A (Winner of previous match)" };
+                                  } else if (value === "placeholder-b") {
+                                    team = { id: `placeholder-b-${round.id}-${fixture.id}`, name: "Team B (Winner of previous match)" };
+                                  } else {
+                                    team = getAvailableTeams(fixture.teamB?.id).find(t => t.id === value && !t.id.startsWith('placeholder-'));
+                                  }
                                   updateLocalFixture(round.id, fixture.id, 'teamA', team || null);
                                 }}
                               >
@@ -953,7 +981,15 @@ export function BracketManagement({ tournament }: BracketManagementProps) {
                               <Select
                                 value={fixture.teamB?.id || ""}
                                 onValueChange={(value) => {
-                                  const team = getAvailableTeams(fixture.teamA?.id).find(t => t.id === value);
+                                  // Handle placeholder teams
+                                  let team = null;
+                                  if (value === "placeholder-a") {
+                                    team = { id: `placeholder-a-${round.id}-${fixture.id}`, name: "Team A (Winner of previous match)" };
+                                  } else if (value === "placeholder-b") {
+                                    team = { id: `placeholder-b-${round.id}-${fixture.id}`, name: "Team B (Winner of previous match)" };
+                                  } else {
+                                    team = getAvailableTeams(fixture.teamA?.id).find(t => t.id === value && !t.id.startsWith('placeholder-'));
+                                  }
                                   updateLocalFixture(round.id, fixture.id, 'teamB', team || null);
                                 }}
                               >
@@ -1030,7 +1066,7 @@ export function BracketManagement({ tournament }: BracketManagementProps) {
                 {localRounds.reduce((total, round) => total + (round.fixtures?.length || 0), 0)} matches.
               </p>
               <div className="space-y-3">
-                {localRounds.map((round) => {
+                {[...localRounds].sort((a, b) => a.roundNumber - b.roundNumber).map((round) => {
                   // Find the corresponding round in the tournament data
                   const tournamentRound = tournament.tournament_rounds?.find(tr => tr.id === round.id);
                   const isCompleted = tournamentRound ? isRoundCompleted(tournamentRound) : false;

@@ -181,7 +181,14 @@ export async function POST(
       // Create local rounds structure for frontend
       const localRounds = rounds.map((round: any) => {
         const matchesInRound = round.total_matches
-        const fixtures = []
+        const fixtures: Array<{
+          id: string;
+          teamA: { id: string; name: string } | null;
+          teamB: { id: string; name: string } | null;
+          scheduledAt: Date;
+          venue: string;
+          bracketPosition: number;
+        }> = []
         
         // Create placeholder fixtures for this round
         for (let i = 0; i < matchesInRound; i++) {
@@ -210,6 +217,16 @@ export async function POST(
                 teamA: { id: teamA.team_id, name: teamA.team.name },
                 teamB: { id: teamB.team_id, name: teamB.team.name }
               }
+            }
+          }
+        }
+        // For semi-finals and finals, add placeholder teams
+        else if (round.round_number > 1) {
+          for (let i = 0; i < fixtures.length; i++) {
+            fixtures[i] = {
+              ...fixtures[i],
+              teamA: { id: `placeholder-a-${round.id}-${i}`, name: "Team A (Winner of previous match)" },
+              teamB: { id: `placeholder-b-${round.id}-${i}`, name: "Team B (Winner of previous match)" }
             }
           }
         }
