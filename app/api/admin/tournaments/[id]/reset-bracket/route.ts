@@ -4,7 +4,7 @@ import { requireAdmin } from '@/lib/auth'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { isAdmin } = await requireAdmin()
@@ -15,37 +15,49 @@ export async function POST(
 
     const supabase = await getSupabaseServerClient()
     
-    // Delete all fixtures for this tournament
-    const { error: deleteFixturesError } = await supabase
+    // Await params before using them
+    const { id } = await params
+    
+    // First, delete all fixtures for this tournament
+    const { error: fixturesError } = await supabase
       .from('fixtures')
-      .update({ deleted_at: new Date().toISOString() })
-      .eq('tournament_id', params.id)
-      .is('deleted_at', null)
+      .delete()
+      .eq('tournament_id', id)
 
-    if (deleteFixturesError) {
-      console.error('Error deleting fixtures:', deleteFixturesError)
-      return NextResponse.json({ error: 'Failed to reset bracket' }, { status: 500 })
+    if (fixturesError) {
+      console.error('Error deleting tournament fixtures:', fixturesError)
+      return NextResponse.json({ error: 'Failed to reset tournament bracket' }, { status: 500 })
     }
 
-    // Reset tournament status to draft
-    const { error: updateTournamentError } = await supabase
+    // Then, delete all tournament rounds
+    const { error: roundsError } = await supabase
+      .from('tournament_rounds')
+      .delete()
+      .eq('tournament_id', id)
+
+    if (roundsError) {
+      console.error('Error deleting tournament rounds:', roundsError)
+      return NextResponse.json({ error: 'Failed to reset tournament bracket' }, { status: 500 })
+    }
+
+    // Reset the tournament status to draft
+    const { error: tournamentError } = await supabase
       .from('tournaments')
       .update({ 
         status: 'draft',
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id)
 
-    if (updateTournamentError) {
-      console.error('Error updating tournament:', updateTournamentError)
-      return NextResponse.json({ error: 'Failed to reset tournament status' }, { status: 500 })
+    if (tournamentError) {
+      console.error('Error updating tournament status:', tournamentError)
+      return NextResponse.json({ error: 'Failed to reset tournament bracket' }, { status: 500 })
     }
 
     return NextResponse.json({ 
       success: true,
-      message: 'Bracket reset successfully'
+      message: 'Tournament bracket reset successfully'
     })
-
   } catch (error) {
     console.error('Error in POST /api/admin/tournaments/[id]/reset-bracket:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
