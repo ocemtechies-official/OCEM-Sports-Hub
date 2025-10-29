@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase/server'
 import { requireAdmin } from '@/lib/auth'
 
-export async function GET(
+export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { isAdmin } = await requireAdmin()
@@ -13,27 +13,47 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const supabase = await getSupabaseServerClient()
-    
-    // Check if fixtures exist for this tournament
-    const { data: existingFixtures, error: checkError } = await supabase
-      .from('fixtures')
-      .select('id')
-      .eq('tournament_id', params.id)
-      .is('deleted_at', null)
-      .limit(1)
+    const body = await request.json()
+    const { status } = body
 
-    if (checkError) {
-      console.error('Error checking existing fixtures:', checkError)
-      return NextResponse.json({ error: 'Failed to check existing fixtures' }, { status: 500 })
+    if (!status) {
+      return NextResponse.json({ error: 'Status is required' }, { status: 400 })
     }
 
-    return NextResponse.json({ 
-      hasFixtures: existingFixtures && existingFixtures.length > 0
-    })
+    const supabase = await getSupabaseServerClient()
+    
+    // Await params before using them
+    const { id } = await params
+    
+    // Update all fixtures for this tournament with the new status
+    const { error } = await supabase
+      .from('fixtures')
+      .update({ 
+        status,
+        updated_at: new Date().toISOString()
+      })
+      .eq('tournament_id', id)
 
+    if (error) {
+      console.error('Error updating fixture status:', error)
+      return NextResponse.json({ error: 'Failed to update fixture status' }, { status: 500 })
+    }
+
+    // Get count of affected fixtures
+    const { count, error: countError } = await supabase
+      .from('fixtures')
+      .select('*', { count: 'exact', head: true })
+      .eq('tournament_id', id)
+      .eq('status', status)
+
+    const updatedCount = countError ? 0 : count || 0
+
+    return NextResponse.json({ 
+      success: true,
+      message: `Successfully updated ${updatedCount} fixtures to ${status} status`
+    })
   } catch (error) {
-    console.error('Error in GET /api/admin/tournaments/[id]/fixtures/status:', error)
+    console.error('Error in PUT /api/admin/tournaments/[id]/fixtures/status:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

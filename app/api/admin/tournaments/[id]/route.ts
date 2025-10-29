@@ -4,7 +4,7 @@ import { requireAdmin } from '@/lib/auth'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { isAdmin } = await requireAdmin()
@@ -12,6 +12,9 @@ export async function GET(
     if (!isAdmin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    // Await params before using them
+    const { id } = await params
 
     const supabase = await getSupabaseServerClient()
     
@@ -30,7 +33,7 @@ export async function GET(
           *
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id) // Use awaited id
       .is('deleted_at', null)
       .single()
 
@@ -81,7 +84,7 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { isAdmin } = await requireAdmin()
@@ -111,6 +114,9 @@ export async function PUT(
 
     const supabase = await getSupabaseServerClient()
     
+    // Await params before using them
+    const { id } = await params
+    
     const { data: tournament, error } = await supabase
       .from('tournaments')
       .update({
@@ -124,7 +130,7 @@ export async function PUT(
         winner_id: winner_id || null,
         updated_at: new Date().toISOString()
       })
-      .eq('id', params.id)
+      .eq('id', id) // Use awaited id
       .is('deleted_at', null) // Use .is() for proper null checking
       .select(`
         *,
@@ -161,7 +167,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { isAdmin } = await requireAdmin()
@@ -172,9 +178,12 @@ export async function DELETE(
 
     const supabase = await getSupabaseServerClient()
     
+    // Await params before using them
+    const { id } = await params
+    
     // Use the soft delete function
     const { data, error } = await supabase
-      .rpc('soft_delete_tournament', { tournament_id: params.id })
+      .rpc('soft_delete_tournament', { tournament_id: id }) // Use awaited id
 
     if (error) {
       console.error('Error soft deleting tournament:', error)
