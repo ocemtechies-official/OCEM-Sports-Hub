@@ -21,10 +21,10 @@ export default async function CreateTournamentPage() {
     .select("id, name, icon")
     .order("name")
 
-  // Fetch teams
+  // Fetch teams with sport information
   const { data: teams } = await supabase
     .from("teams")
-    .select("id, name, color")
+    .select("id, name, color, sport_id")
     .order("name")
 
   return (
