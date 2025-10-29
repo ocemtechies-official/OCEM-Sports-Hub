@@ -6,7 +6,7 @@ Welcome to the comprehensive documentation for the OCEM Sports Hub project. This
 
 1. [Getting Started](#getting-started)
 2. [Enhanced Guides](#enhanced-guides)
-3. [Guides](#guides)
+3. [Standard Guides](#standard-guides)
 4. [Implementations](#implementations)
 5. [Bug Fixes](#bug-fixes)
 6. [Enhanced Technical Documentation](#enhanced-technical-documentation)
@@ -29,9 +29,9 @@ Welcome to the comprehensive documentation for the OCEM Sports Hub project. This
 - [Enhanced Moderator System Guide](guides/setup/Moderator-System-Guide-Enhanced.md) - Comprehensive moderator system documentation
 - [Enhanced Authentication Guide](guides/setup/Authentication-Guide-Enhanced.md) - In-depth authentication system guide
 
-## Guides
+## Standard Guides
 
-### Setup
+### Setups
 
 - [Admin Setup Guide](guides/setup/Admin-Setup-Guide.md)
 - [Moderator System Guide](guides/setup/Moderator-System-Guide.md)
@@ -87,7 +87,7 @@ Welcome to the comprehensive documentation for the OCEM Sports Hub project. This
 
 ## Technical Documentation
 
-### Authentication
+### Authentications
 
 - [Authentication Enhancement Summary](technical/auth/Authentication-Enhancement-Summary.md)
 

@@ -344,25 +344,25 @@ Every change is logged with:
 
 ### Common Issues
 
-**Build Errors**
+#### Build Errors
 
 - Ensure all UI components exist in `components/ui/`
 - Check for missing imports
 - Verify TypeScript types are correct
 
-**Database Errors**
+#### Database Errors
 
 - Check RLS policies are enabled
 - Verify RPC functions have correct permissions
 - Ensure foreign key constraints are satisfied
 
-**Permission Errors**
+#### Permission Errors
 
 - Verify user has correct role in profiles table
 - Check assigned_sports/venues arrays
 - Ensure middleware is protecting routes correctly
 
-**Real-time Issues**
+#### Real-time Issues
 
 - Check Supabase Realtime is enabled
 - Verify subscription channels are correct

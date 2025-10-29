@@ -271,7 +271,7 @@ Separate tabs for each team provide detailed statistics:
 - **Byes**: Byes scored
 - **Leg Byes**: Leg byes scored
 
-### Match Configuration
+### Match Configurations
 
 The system allows configuration of:
 
@@ -361,19 +361,19 @@ The system should be tested as a whole:
 
 ### Common Issues
 
-**Incorrect Run Rates**
+#### Incorrect Run Rates
 
 1. Check that overs and balls are correctly calculated
 2. Verify that runs match the displayed score
 3. Ensure the calculation formula is correctly implemented
 
-**Overs Not Progressing**
+#### Overs Not Progressing
 
 1. Verify that balls are being counted correctly
 2. Check that 6 balls correctly increment the over count
 3. Ensure extras are handled properly
 
-**Data Not Saving**
+#### Data Not Saving
 
 1. Check API response for errors
 2. Verify network connectivity

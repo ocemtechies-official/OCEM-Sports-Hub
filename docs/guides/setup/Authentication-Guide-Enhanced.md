@@ -187,21 +187,30 @@ ADD COLUMN IF NOT EXISTS moderator_notes TEXT;
 
 ### Common Authentication Errors
 
-1. **Invalid Credentials**
-   - Displayed as "Invalid email or password"
-   - Rate limiting applied after multiple failures
+#### Login Failures
 
-2. **Email Not Verified**
-   - Automatic resend of verification email
-   - Clear user guidance on next steps
+1. Check if email is verified
+2. Verify password is correct
+3. Check rate limiting status
+4. Ensure network connectivity
 
-3. **Account Already Exists**
-   - Guidance to use login instead of signup
-   - Option to resend verification if needed
+#### Signup Issues
 
-4. **Password Too Weak**
-   - Specific guidance on password requirements
-   - Real-time password strength feedback
+1. Verify email is not already registered
+2. Check password strength requirements
+3. Ensure email provider is not blocking verification emails
+
+#### Social Login Problems
+
+1. Verify OAuth provider configuration
+2. Check redirect URLs
+3. Ensure provider credentials are correct
+
+#### Session Issues
+
+1. Check "Remember Me" setting
+2. Verify browser storage permissions
+3. Clear browser cache and cookies
 
 ### Network Errors
 
@@ -211,9 +220,7 @@ ADD COLUMN IF NOT EXISTS moderator_notes TEXT;
 
 ## User Interface Components
 
-### Login Form
-
-Features:
+### Login Form Features
 
 - Email and password fields
 - "Remember me" option
@@ -222,9 +229,7 @@ Features:
 - Forgot password link
 - Signup link for new users
 
-### Signup Form
-
-Features:
+### Signup Form Features
 
 - Full name, email, and password fields
 - Password strength indicator
@@ -274,26 +279,26 @@ Features:
 
 ### Common Issues
 
-**Login Failures**
+#### Login Failure
 
 1. Check if email is verified
 2. Verify password is correct
 3. Check rate limiting status
 4. Ensure network connectivity
 
-**Signup Issues**
+#### Signup Issue
 
 1. Verify email is not already registered
 2. Check password strength requirements
 3. Ensure email provider is not blocking verification emails
 
-**Social Login Problems**
+#### Social Login Problem
 
 1. Verify OAuth provider configuration
 2. Check redirect URLs
 3. Ensure provider credentials are correct
 
-**Session Issues**
+#### Session Issue
 
 1. Check "Remember Me" setting
 2. Verify browser storage permissions

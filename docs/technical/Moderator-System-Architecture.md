@@ -10,7 +10,7 @@ The Moderator System in OCEM Sports Hub is a comprehensive solution for real-tim
 
 The Moderator System follows a client-server architecture with the following components:
 
-```
+```text
 ┌─────────────────┐    ┌──────────────────┐    ┌──────────────────┐
 │   Frontend UI   │────│  API Middleware  │────│  Database Layer  │
 │                 │    │                  │    │                  │
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS public.match_updates (
 
 ### Data Relationships
 
-```
+```text
 profiles (1) ──< fixtures (N) >── match_updates (N)
     │              │
     │              └── extra (JSONB) - Sport-specific data
@@ -202,74 +202,104 @@ $$;
 
 ## API Design
 
-### Update Score Endpoint
+### Core Endpoints
 
-`POST /api/moderator/fixtures/[id]/update-score`
+#### Update Fixture Score
 
-#### Request Body
+```http
+POST /api/moderator/fixtures/{id}/update-score
+```
 
-```typescript
+**Request Body:**
+
+```json
 {
-  team_a_score: number,      // Team A's current score
-  team_b_score: number,      // Team B's current score
-  status: string,            // Fixture status ('scheduled', 'live', 'completed', 'cancelled')
-  expected_version: number,  // For optimistic locking
-  note: string,              // Optional note about the update
-  extra: object              // Sport-specific data (e.g., cricket stats)
+  "team_a_score": 10,
+  "team_b_score": 5,
+  "status": "live",
+  "expected_version": 3,
+  "note": "Goal by Player X"
 }
 ```
 
-#### Response
+**Response:**
 
-```typescript
+```json
 {
-  success: boolean,
-  fixture: object,           // Updated fixture data
-  message: string
+  "success": true,
+  "fixture": {
+    "id": "uuid",
+    "team_a_score": 10,
+    "team_b_score": 5,
+    "status": "live",
+    "version": 4
+  }
 }
 ```
 
-#### Key Features
+#### Create Incident
 
-1. **Optimistic Locking**: Prevents concurrent update conflicts
-2. **Validation**: Server-side validation of all inputs
-3. **Audit Trail**: Automatic logging of all changes
-4. **Real-time Updates**: Immediate broadcast to connected clients
-5. **Error Handling**: Comprehensive error responses
+```http
+POST /api/moderator/fixtures/{id}/incidents
+```
 
-### Incident Management
+**Request Body:**
 
-`POST /api/moderator/fixtures/[id]/incidents`
-
-#### Request Body
-
-```typescript
+```json
 {
-  note: string,              // Description of the incident
-  type: string,              // Type of incident
-  media_url: string,         // Optional media URL
-  player_id: UUID            // Optional player involved
+  "note": "Yellow card for Player Y",
+  "type": "incident",
+  "change_type": "yellow_card"
 }
 ```
 
-### Undo Functionality
+#### Undo Last Update
 
-`POST /api/moderator/fixtures/[id]/undo`
+```http
+POST /api/moderator/fixtures/{id}/undo
+```
 
-Reverts the last update within a 15-second window.
+**Response:**
+
+```json
+{
+  "success": true,
+  "reverted_to": {
+    "team_a_score": 8,
+    "team_b_score": 5,
+    "status": "live"
+  }
+}
+```
+
+### Error Handling
+
+The API implements comprehensive error handling:
+
+- **401 Unauthorized** - User not authenticated
+- **403 Forbidden** - User lacks permission
+- **404 Not Found** - Fixture not found
+- **409 Conflict** - Version mismatch
+- **422 Unprocessable Entity** - Validation errors
+- **429 Too Many Requests** - Rate limiting
 
 ## Frontend Implementation
 
 ### Component Architecture
 
-#### QuickUpdateCard
-
-Main component for general fixture management:
+#### Quick Update Card
 
 ```tsx
 interface QuickUpdateCardProps {
-  fixture: any;
-  compact?: boolean;
+  fixture: Fixture;
+  onUpdate: (update: ScoreUpdate) => void;
+}
+
+interface ScoreUpdate {
+  team_a_score: number;
+  team_b_score: number;
+  status: string;
+  note?: string;
 }
 ```
 
@@ -278,29 +308,27 @@ Key features:
 - Score adjustment buttons (+/-)
 - Status dropdown
 - Note input
-- Incident posting
-- Undo functionality
 - Real-time updates
+- Undo functionality
 
-#### EnhancedCricketScorecard
+#### Enhanced Cricket Scorecard
 
-Specialized component for cricket fixtures:
+Specialized component for cricket matches:
 
 ```tsx
-interface EnhancedCricketScorecardProps {
-  fixtureId: string;
-  teamAName: string;
-  teamBName: string;
-  teamAScore: number;
-  teamBScore: number;
-  status: string;
-  onUpdate?: (data: any) => Promise<void>;
-  initialData?: {
-    cricket?: {
-      team_a?: CricketTeamData;
-      team_b?: CricketTeamData;
-    }
-  };
+interface CricketScorecardProps {
+  fixture: Fixture;
+  teamAData: CricketTeamData;
+  teamBData: CricketTeamData;
+  onUpdate: (update: CricketUpdate) => void;
+}
+
+interface CricketUpdate {
+  team: 'a' | 'b';
+  runs: number;
+  wickets: number;
+  overs: number;
+  // ... other cricket-specific fields
 }
 ```
 
@@ -311,213 +339,247 @@ Key features:
 - Run rate calculation
 - Boundary tracking
 - Extras management
-- Wicket tracking
 
 ### State Management
 
-The frontend uses React state hooks for local state management:
+The frontend uses React Context for state management:
 
 ```tsx
-const [teamAScore, setTeamAScore] = useState(fixture.team_a_score || 0);
-const [teamBScore, setTeamBScore] = useState(fixture.team_b_score || 0);
-const [status, setStatus] = useState(fixture.status);
-const [note, setNote] = useState("");
-```
-
-### Real-time Updates
-
-The system uses Supabase Realtime for immediate updates:
-
-```tsx
-useEffect(() => {
-  const channel = supabase
-    .channel('fixture-updates')
-    .on(
-      'postgres_changes',
-      {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'fixtures',
-        filter: `id=eq.${fixtureId}`
-      },
-      (payload) => {
-        // Update local state with new data
-        setTeamAScore(payload.new.team_a_score);
-        setTeamBScore(payload.new.team_b_score);
-        setStatus(payload.new.status);
-      }
-    )
-    .subscribe();
-  
-  return () => {
-    supabase.removeChannel(channel);
-  };
-}, [fixtureId]);
-```
-
-## Error Handling
-
-### Error Types
-
-1. **Authentication Errors** (401, 403)
-2. **Validation Errors** (400)
-3. **Conflict Errors** (409)
-4. **Rate Limiting** (429)
-5. **Server Errors** (500)
-
-### Error Response Format
-
-```typescript
-{
-  error: string,             // User-friendly error message
-  errorCode: string,         // Machine-readable error code
-  errorType: string,         // Category of error
-  details?: object          // Additional technical details
+interface ModeratorContextType {
+  fixtures: Fixture[];
+  loading: boolean;
+  updateFixture: (id: string, update: any) => Promise<void>;
+  createIncident: (fixtureId: string, incident: any) => Promise<void>;
 }
 ```
 
-### Client-side Error Handling
+## Database Design
 
-```tsx
-try {
-  const response = await fetch('/api/moderator/fixtures/update-score', {
-    method: 'POST',
-    // ... options
-  });
-  
-  const data = await response.json();
-  
-  if (!response.ok) {
-    // Handle specific error types
-    switch (data.errorCode) {
-      case 'UNAUTHORIZED':
-        // Redirect to login
-        break;
-      case 'VERSION_MISMATCH':
-        // Refresh data and retry
-        break;
-      // ... other cases
-    }
-  }
-} catch (error) {
-  // Handle network errors
-}
-```
+### Extended Tables
 
-## Performance Optimization
-
-### Database Indexes
-
-Critical indexes for performance:
+#### Profiles Table Structure
 
 ```sql
--- For quick fixture lookups
-CREATE INDEX IF NOT EXISTS idx_fixtures_sport ON public.fixtures(sport_id);
-CREATE INDEX IF NOT EXISTS idx_fixtures_status ON public.fixtures(status);
-CREATE INDEX IF NOT EXISTS idx_fixtures_updated_by ON public.fixtures(updated_by);
-
--- For audit trail queries
-CREATE INDEX IF NOT EXISTS idx_match_updates_fixture_created_at
-  ON public.match_updates(fixture_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_match_updates_created_by
-  ON public.match_updates(created_by);
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  email TEXT UNIQUE NOT NULL,
+  full_name TEXT,
+  role TEXT NOT NULL DEFAULT 'viewer' CHECK (role IN ('admin', 'moderator', 'viewer')),
+  avatar_url TEXT,
+  assigned_sports TEXT[],
+  assigned_venues TEXT[],
+  moderator_notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 ```
 
-### API Optimization
+#### Fixtures Table Structure
 
-1. **Batch Updates**: Combine multiple operations when possible
-2. **Selective Queries**: Only fetch required data
-3. **Caching**: Cache frequently accessed data
-4. **Connection Pooling**: Efficient database connection management
+```sql
+CREATE TABLE IF NOT EXISTS public.fixtures (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sport_id UUID REFERENCES public.sports(id),
+  team_a_id UUID REFERENCES public.teams(id),
+  team_b_id UUID REFERENCES public.teams(id),
+  team_a_score INTEGER DEFAULT 0,
+  team_b_score INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'live', 'completed', 'postponed', 'cancelled')),
+  scheduled_time TIMESTAMPTZ,
+  venue TEXT,
+  updated_by UUID REFERENCES public.profiles(id),
+  version INTEGER DEFAULT 1,
+  extra JSONB, -- Sport-specific data
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
 
-### Frontend Optimization
+### Indexes and Performance
 
-1. **Debounced Updates**: Prevent excessive API calls
-2. **Local State First**: Immediate UI updates with server sync
-3. **Virtual Scrolling**: For long incident feeds
-4. **Memoization**: Cache expensive calculations
+Key indexes for performance:
+
+```sql
+-- Indexes for moderator queries
+CREATE INDEX IF NOT EXISTS idx_fixtures_updated_by ON public.fixtures(updated_by);
+CREATE INDEX IF NOT EXISTS idx_fixtures_status ON public.fixtures(status);
+CREATE INDEX IF NOT EXISTS idx_match_updates_fixture_id ON public.match_updates(fixture_id);
+CREATE INDEX IF NOT EXISTS idx_match_updates_created_at ON public.match_updates(created_at);
+```
+
+## Error Handling and Validation
+
+### Client-Side Validation
+
+- Input sanitization
+- Type checking
+- Required field validation
+- Range validation for scores
+
+### Server-Side Validation
+
+```typescript
+const validateUpdate = (update: ScoreUpdate, fixture: Fixture) => {
+  // Check version
+  if (update.expected_version !== fixture.version) {
+    throw new Error('Version mismatch');
+  }
+  
+  // Validate scores
+  if (update.team_a_score < 0 || update.team_b_score < 0) {
+    throw new Error('Scores must be non-negative');
+  }
+  
+  // Validate status
+  const validStatuses = ['scheduled', 'live', 'completed', 'postponed', 'cancelled'];
+  if (!validStatuses.includes(update.status)) {
+    throw new Error('Invalid status');
+  }
+};
+```
+
+### Rate Limiting
+
+Implementation of rate limiting to prevent abuse:
+
+```sql
+-- Track moderator activity
+CREATE TABLE IF NOT EXISTS public.moderator_activity (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  moderator_id UUID REFERENCES public.profiles(id),
+  fixture_id UUID REFERENCES public.fixtures(id),
+  action TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Check rate limit function
+CREATE OR REPLACE FUNCTION public.check_moderator_rate_limit(
+  p_moderator_id UUID,
+  p_fixture_id UUID
+) RETURNS BOOLEAN AS $$
+DECLARE
+  update_count INTEGER;
+BEGIN
+  SELECT COUNT(*) INTO update_count
+  FROM public.moderator_activity
+  WHERE moderator_id = p_moderator_id
+    AND fixture_id = p_fixture_id
+    AND created_at > NOW() - INTERVAL '5 minutes';
+    
+  RETURN update_count < 20; -- Max 20 updates per 5 minutes
+END;
+$$ LANGUAGE plpgsql;
+```
+
+## Real-time Features
+
+### Supabase Realtime Integration
+
+The system leverages Supabase Realtime for live updates:
+
+```typescript
+// Subscribe to fixture updates
+const subscription = supabase
+  .channel('fixture-updates')
+  .on(
+    'postgres_changes',
+    {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'fixtures'
+    },
+    (payload) => {
+      // Update local state
+      updateFixtureInState(payload.new);
+    }
+  )
+  .subscribe();
+```
+
+### Notification System
+
+Enhanced notifications with moderator attribution:
+
+```typescript
+// Example notification payload
+{
+  type: 'fixture_update',
+  fixture_id: 'uuid',
+  updated_by: {
+    id: 'moderator-uuid',
+    name: 'John Moderator'
+  },
+  changes: {
+    team_a_score: { from: 0, to: 1 },
+    status: { from: 'scheduled', to: 'live' }
+  }
+}
+```
 
 ## Testing Strategy
 
 ### Unit Tests
 
-Key functions to test:
+Key areas for unit testing:
 
-1. **Permission Validation Functions**
-   - `can_moderate_fixture()`
-   - Role checking logic
-   - Assignment validation
-
-2. **Score Update Logic**
-   - Score calculations
-   - Winner determination
-   - Version checking
-
-3. **Run Rate Calculations**
-   - Various overs/balls combinations
-   - Edge cases (0 overs, etc.)
+- Permission validation functions
+- Score calculation logic
+- API route handlers
+- Component rendering
+- Data validation
 
 ### Integration Tests
 
-1. **End-to-End Flows**
-   - Moderator login to score update
-   - Incident posting and display
-   - Undo functionality
+- End-to-end fixture update flow
+- Concurrent update handling
+- Permission boundary testing
+- Real-time update propagation
+- Error scenario handling
 
-2. **Security Tests**
-   - Unauthorized access attempts
-   - Assignment boundary checks
-   - RLS policy enforcement
+### Test Data
 
-3. **Performance Tests**
-   - Concurrent update handling
-   - Large fixture lists
-   - Audit trail growth
+Sample test data for verification:
 
-### API Tests
+```sql
+-- Test moderator
+INSERT INTO public.profiles (id, email, full_name, role, assigned_sports)
+VALUES ('test-moderator-uuid', 'moderator@test.com', 'Test Moderator', 'moderator', ARRAY['Football']);
 
-1. **Endpoint Validation**
-   - Request/response format
-   - Error handling
-   - Rate limiting
-
-2. **Data Integrity**
-   - Score consistency
-   - Audit trail completeness
-   - Version tracking
-
-## Deployment Considerations
-
-### Environment Variables
-
-Required environment variables:
-
-```bash
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-NEXT_PUBLIC_SITE_URL=your-site-url
+-- Test fixture
+INSERT INTO public.fixtures (id, sport_id, team_a_id, team_b_id, status)
+VALUES ('test-fixture-uuid', 'football-sport-uuid', 'team-a-uuid', 'team-b-uuid', 'scheduled');
 ```
 
-### Database Migrations
+## Deployment and Monitoring
 
-Migration order:
+### Deployment Checklist
 
-1. `01-create-tables.sql` - Base schema
-2. `10-moderator-system.sql` - Moderator extensions
-3. `11-moderator-rls-policies.sql` - Basic RLS
-4. `32-moderator-incidents.sql` - Incident tracking
-5. `33-moderator-undo.sql` - Undo functionality
-6. `36-moderator-rls-tightening.sql` - Enhanced security
+1. Database schema migrations
+2. RLS policy updates
+3. API route deployment
+4. Frontend component updates
+5. Environment variable configuration
+6. Rate limiting configuration
 
 ### Monitoring
 
 Key metrics to monitor:
 
-1. **API Response Times**
-2. **Database Query Performance**
-3. **Error Rates**
-4. **Concurrent User Count**
-5. **Audit Trail Growth**
+- Update frequency by moderator
+- Error rates
+- Response times
+- Concurrent user counts
+- Database performance
+
+### Logging
+
+Structured logging for debugging:
+
+```sql
+-- Log moderator actions
+INSERT INTO public.moderator_activity (moderator_id, fixture_id, action)
+VALUES (auth.uid(), 'fixture-uuid', 'score_update');
+```
 
 ## Future Enhancements
 
@@ -526,59 +588,27 @@ Key metrics to monitor:
 1. **Advanced Analytics**
    - Moderator performance metrics
    - Fixture update patterns
-   - Incident analysis
-
-2. **Mobile Application**
-   - Native mobile app for moderators
-   - Offline capability
-   - Push notifications
-
-3. **Approval Workflows**
-   - Multi-level approval for critical updates
-   - Change request system
-   - Audit trail enhancements
-
-4. **Enhanced Security**
-   - Two-factor authentication for moderators
-   - Session management
-   - Activity logging
-
-### Technical Improvements
-
-1. **WebSocket Integration**
-   - Real-time updates using WebSockets
-   - Reduced polling overhead
-   - Better scalability
-
-2. **Microservices Architecture**
-   - Separate services for different functions
-   - Improved scalability
-   - Better fault isolation
-
-3. **Machine Learning**
-   - Automated incident detection
-   - Predictive analytics
    - Anomaly detection
 
 ## Troubleshooting Guide
 
 ### Common Issues
 
-**Permission Denied Errors**
+#### Permission Denied Errors
 
 1. Check user role in `profiles` table
 2. Verify sport/venue assignments
 3. Confirm RLS policies are enabled
 4. Test `can_moderate_fixture()` function directly
 
-**Version Mismatch Errors**
+#### Version Mismatch Errors
 
 1. Refresh fixture data
 2. Check for concurrent updates
 3. Verify version tracking is working
 4. Clear local state and reload
 
-**Rate Limiting**
+#### Rate Limiting Problems
 
 1. Check update frequency
 2. Implement client-side rate limiting
