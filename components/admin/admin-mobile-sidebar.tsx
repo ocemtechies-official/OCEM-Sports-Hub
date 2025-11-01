@@ -20,6 +20,7 @@ import {
   Settings,
   UserCheck,
   UserCog,
+  Target,
   UserPlus,
   Menu,
   LogOut,
@@ -55,13 +56,12 @@ const navigation: NavigationSection[] = [
       { 
         name: "Analytics", 
         href: "/admin/analytics", 
-        icon: BarChart3,
-        badge: "Soon" 
+        icon: BarChart3
       },
     ],
   },
   {
-    title: "Management",
+    title: "User Management",
     items: [
       { 
         name: "Users", 
@@ -74,14 +74,24 @@ const navigation: NavigationSection[] = [
         icon: UserCog 
       },
       { 
+        name: "Team Changes", 
+        href: "/admin/team-change-requests", 
+        icon: UserPlus 
+      },
+    ],
+  },
+  {
+    title: "Event Management",
+    items: [
+      { 
         name: "Registrations", 
         href: "/admin/registrations", 
         icon: UserCheck 
       },
       { 
-        name: "Fixtures", 
-        href: "/admin/fixtures", 
-        icon: Calendar 
+        name: "Reg. Settings", 
+        href: "/admin/registrations/settings", 
+        icon: Settings 
       },
       { 
         name: "Tournaments", 
@@ -89,19 +99,39 @@ const navigation: NavigationSection[] = [
         icon: Trophy 
       },
       { 
-        name: "Quizzes", 
-        href: "/admin/quizzes", 
-        icon: Brain 
+        name: "Fixtures", 
+        href: "/admin/fixtures", 
+        icon: Calendar 
       },
+    ],
+  },
+  {
+    title: "Content Management",
+    items: [
       { 
         name: "Teams", 
         href: "/admin/teams", 
         icon: Shield 
       },
       { 
-        name: "Team Changes", 
-        href: "/admin/team-change-requests", 
-        icon: UserPlus 
+        name: "Sports", 
+        href: "/admin/sports", 
+        icon: Target 
+      },
+      { 
+        name: "Quizzes", 
+        href: "/admin/quizzes", 
+        icon: Brain 
+      },
+    ],
+  },
+  {
+    title: "Communications",
+    items: [
+      { 
+        name: "Messages", 
+        href: "/admin/contact-messages", 
+        icon: FileText 
       },
     ],
   },
@@ -152,9 +182,21 @@ export function AdminMobileSidebar({ user, profile }: AdminMobileSidebarProps) {
 
   const isActive = (href: string, exact?: boolean) => {
     if (exact) {
-      return pathname === href
+      return pathname === href;
     }
-    return pathname.startsWith(href)
+    
+    // Special handling for registration pages to avoid conflicts
+    if (href === "/admin/registrations") {
+      // Only match exact path, not subpaths
+      return pathname === "/admin/registrations";
+    }
+    
+    if (href === "/admin/registrations/settings") {
+      // Match exact path for settings
+      return pathname === "/admin/registrations/settings";
+    }
+    
+    return pathname.startsWith(href);
   }
 
   return (
@@ -190,7 +232,7 @@ export function AdminMobileSidebar({ user, profile }: AdminMobileSidebarProps) {
           </div>
 
           {/* Navigation */}
-          <ScrollArea className="flex-1 px-3">
+          <ScrollArea className="flex-1 px-3 pb-4 h-[calc(100vh-180px)]">
             <div className="space-y-6 py-4">
               {navigation.map((section) => (
                 <div key={section.title}>
@@ -241,16 +283,16 @@ export function AdminMobileSidebar({ user, profile }: AdminMobileSidebarProps) {
           </ScrollArea>
 
           {/* Footer */}
-          <div className="p-4 border-t border-slate-200 space-y-2">
+          <div className="p-4 border-t border-slate-200 space-y-2 mt-auto">
             <Button
               variant="ghost"
-              className="w-full justify-start transition-all duration-300 text-slate-800 hover:text-red-700 hover:bg-red-100 px-4 py-2"
+              className="w-full justify-start transition-all duration-300 text-red-600 hover:text-red-700 hover:bg-red-100 px-4 py-2"
               onClick={() => {
                 setOpen(false)
                 signOut()
               }}
             >
-              <LogOut className="mr-3 h-5 w-5" />
+              <LogOut className="mr-3 h-5 w-5 text-red-600" />
               <span className="font-medium">Sign Out</span>
             </Button>
           </div>
